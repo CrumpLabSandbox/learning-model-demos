@@ -579,3 +579,8 @@ a.btn.primary { color: #fff; }
 /* Safari ignores max-width and overflow on <math> itself, so a long
    equation must scroll inside its container instead of widening the page. */
 div:has(> math), .fx-math, .big-math, .build-math { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+/* Single-column grid lists: pin the column to the available width so a wide
+   item (an equation, in Safari) scrolls inside itself instead of stretching
+   the column and the page. */
+.fx-steps, .eq-list, .unlocks, .read-words, .wr-steps, .howto ol, .reassure, .toc ol, .slide ul, .slide ol:not(.timeline), .fb-cue ul { grid-template-columns: minmax(0, 1fr); }
+.fx-steps > li, .eq-list > *, .read-words > li, .slide ul > li, .slide ol > li { min-width: 0; }
