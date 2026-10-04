@@ -25,4 +25,4 @@ Tests use Node's built-in runner and import the same model files the site uses. 
 
 ## Publish it
 
-Enable GitHub Pages under Settings, Pages, "Deploy from a branch", with `main` and `/ (root)`. The site has a `.nojekyll` file and needs no other setup.
+The site is live at https://crumplabsandbox.github.io/learning-model-demos/. GitHub Pages deploys it from `main` (Settings, Pages, "Deploy from a branch", `main`, `/ (root)`). Every push to `main` updates it.

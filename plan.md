@@ -222,7 +222,7 @@ Jamieson, Crump, and Hannah (2012). Events are feature vectors for cues and outc
 ### 1. Static site skeleton and Rescorla-Wagner
 
 - [x] Repo layout above, a CLAUDE.md, and a README
-- [ ] GitHub Pages serving `index.html` from `main`: needs the Pages setting turned on once the work is merged
+- [x] GitHub Pages serving `index.html` from `main`, at https://crumplabsandbox.github.io/learning-model-demos/
 - [x] Design format and parser, tested in Node on the blocking design
 - [x] Runner and trial record format, with Rescorla-Wagner as the first model and tests for asymptote, blocking, overshadowing, and extinction
 - [x] SVG chart with phases and a trial scrubber
