@@ -277,11 +277,57 @@ class Checker:
         page.close()
         ctx.close()
 
+    # -- attention models ----------------------------------------------------
+    def attention_models(self, browser) -> None:
+        ctx = browser.new_context(viewport=DESKTOP)
+        cases = [
+            # page, preset, option to switch, card whose badge must flip
+            ("models/mackintosh.html", "blocking", "directionRule", "Latent inhibition"),
+            ("models/pearce-hall.html", "latent-inhibition", "inhibition", "Extinction"),
+        ]
+        for path, preset, opt, card in cases:
+            name = path.split("/")[-1].removesuffix(".html")
+            page = self.open(ctx, f"{path}#view=everything&preset={preset}")
+            self.check(f"{name}: shows the preview notice", page.is_visible(".preview-note"))
+            self.check(f"{name}: attention chart draws a line per cue", len(page.query_selector_all("#chart-alpha path.series")) >= 2)
+            page.click('[data-act="fwd"]')
+            # Follow a cue that is on this trial.
+            page.click('#cue-chips [data-focus]:not(:has(.muted))')
+            self.check(f"{name}: equations render for the selected trial", len(page.query_selector_all("#eq-list .eq-card")) >= 4)
+            badge = lambda: page.text_content(f'.card:has(h3:text("{card}")) .badge')
+            before = badge()
+            page.click(f'[data-opt="{opt}"]')
+            page.wait_for_timeout(250)
+            after = badge()
+            self.check(f"{name}: switching '{opt}' flips the {card.lower()} badge", before != after, f"{before} -> {after}")
+            page.click(f'[data-opt="{opt}"]')
+            page.click('[data-act="start"]')
+            page.wait_for_timeout(200)
+            self.check(f"{name}: build stage 1 runs", "Stage 1 of" in page.text_content("#build"))
+            while page.query_selector('#build [data-act="next"]'):
+                page.click('#build [data-act="next"]')
+                page.wait_for_timeout(150)
+            self.check(f"{name}: build reaches the full model", page.query_selector('#build [data-act="done"]') is not None)
+            page.click('#build [data-act="done"]')
+            page.click('[data-act="reset"]')
+            page.click('[data-act="fwd"]')
+            page.click(f'.card:has(h3:text("{card}")) [data-predict="1"]')
+            page.wait_for_timeout(1500)
+            self.check(f"{name}: predicting hides the attention chart", page.is_hidden("#panel-alpha"))
+            page.click('[data-pact="skip"]')
+            self.shot(page, f"{name}-page")
+            self.clean(page, name)
+            page.close()
+        ctx.close()
+
     # -- primer, warm-up, glossary, landing -----------------------------------
     def learning_pages(self, browser) -> None:
         ctx = browser.new_context(viewport=DESKTOP)
         page = self.open(ctx, "primer.html")
-        self.check("primer: 13 sections with widgets", len(page.query_selector_all("article section")) == 13 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
+        self.check("primer: 16 sections with widgets", len(page.query_selector_all("article section")) == 16 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
+        self.check("primer: attention section draws three models", len(page.query_selector_all("#changing .ch-chart path")) == 3)
+        page.click("#bar [data-check] [data-opt='0']")
+        self.check("primer: bar question answered", "Yes" in page.text_content("#bar .check-why"))
         page.click('[data-role="modeller"]')
         self.check("primer: role button lights α and β", len(page.query_selector_all("#start .sym.linked")) == 2)
         page.click("#delta [data-check] [data-opt='0']")
@@ -320,7 +366,7 @@ class Checker:
         # on <math>. Make every equation far too wide and check that each one
         # scrolls inside its own box instead of widening the page.
         phone = browser.new_context(viewport=PHONE)
-        for path in ("primer.html", "models/rescorla-wagner.html#view=everything", "decks/reading-equations.html#5"):
+        for path in ("primer.html", "models/rescorla-wagner.html#view=everything", "models/mackintosh.html#view=everything&cue=B", "models/pearce-hall.html#view=everything&preset=extinction&t=25&cue=A", "decks/reading-equations.html#5"):
             pg = self.open(phone, path)
             pg.add_style_tag(content="math { font-size: 2.4rem !important; max-width: none !important; overflow: visible !important; }")
             pg.wait_for_timeout(200)
@@ -333,7 +379,7 @@ class Checker:
         if self.built:
             page.wait_for_timeout(300)
             self.check("landing: shows the build version", "Site version" in page.text_content("#build-info"))
-        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8)
+        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8 and page.query_selector('.units a[href="models/pearce-hall.html#view=essentials"]') is not None)
         page.close()
         ctx.close()
 
@@ -348,7 +394,7 @@ def run_checks(directory: Path, browsers: list[str]) -> bool:
                 print(f"\n== {name} ({'built site' if built else 'source'}, {base}) ==")
                 browser = getattr(pw, name).launch()
                 c = Checker(base, name, built)
-                for section in (c.pages, c.decks, c.model, c.learning_pages):
+                for section in (c.pages, c.decks, c.model, c.attention_models, c.learning_pages):
                     print(f"- {section.__name__}")
                     c.run(section.__name__, section, browser)
                 browser.close()

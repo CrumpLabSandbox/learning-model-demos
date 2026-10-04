@@ -8,6 +8,8 @@ import { slider, wireSliders, numberLine, whenResized, renderCheck } from './wid
 import { parseDesign } from '../core/design.js';
 import { runModel, final } from '../core/runner.js';
 import * as rw from '../models/rescorla-wagner.js';
+import * as mackintosh from '../models/mackintosh.js';
+import * as pearceHall from '../models/pearce-hall.js';
 import { cases } from '../../content/primer/fixed-points.js';
 import { checks } from '../../content/primer/checks.js';
 import { notation } from '../../content/primer/notation.js';
@@ -349,9 +351,102 @@ const widgets = {
     render();
   },
 
+  absolute(el) {
+    el.innerHTML =
+      slider({ id: 'ab-x', label: 'A number', min: -1, max: 1, step: 0.05, value: -0.6 }) +
+      `<div class="ab-math"></div><div class="ab-line"></div><p class="ab-say"></p>`;
+    let last;
+    const draw = (v) => {
+      last = v;
+      const x = v['ab-x'];
+      el.querySelector('.ab-math').innerHTML = math(mo('|'), x < 0 ? mn(fmtExact(x)) : mn(fmtExact(x)), mo('|'), mo('='), mn(fmtExact(Math.abs(x))));
+      numberLine(el.querySelector('.ab-line'), {
+        lo: -1, hi: 1, rows: 2,
+        marks: [{ v: x, label: se(x), cls: 'mark-ink', row: 0 }],
+        arrows: [{ from: 0, to: x, label: `distance from 0 = ${fmtExact(Math.abs(x))}`, row: 1 }],
+      });
+      el.querySelector('.ab-say').textContent =
+        x === 0 ? 'Zero is zero either way.' : `${se(x)} and ${se(-x)} are the same distance from zero, so both have absolute value ${fmtExact(Math.abs(x))}.`;
+    };
+    wireSliders(el, ['ab-x'], draw);
+    whenResized(el, () => draw(last));
+  },
+
+  changing(el) {
+    // The same blocking experiment through three models: attention to the
+    // added cue B, trial by trial.
+    const design = parseDesign('Pretraining: 20 A+\nCompound: 20 AB+');
+    const runs = [
+      { name: 'Rescorla-Wagner', run: runModel(rw, { design }), key: null, note: 'α is a parameter: it never changes.' },
+      { name: 'Mackintosh', run: runModel(mackintosh, { design }), key: 'alpha', note: 'B is a worse predictor than A, so attention to B falls.' },
+      { name: 'Pearce-Hall', run: runModel(pearceHall, { design }), key: 'alpha', note: 'The outcome is already predicted, so there is no surprise and attention to B fades.' },
+    ];
+    const seriesOf = (r) => (r.key ? r.run.stateSeries.alpha.B : r.run.series.B.map(() => r.run.params.alpha_B));
+    el.innerHTML = `<div class="ch-chart"></div><ul class="ch-notes small">${runs
+      .map((r, i) => `<li><span class="swatch" style="background:var(--cue-${i + 1})"></span> <strong>${r.name}</strong>: ${r.note}</li>`)
+      .join('')}</ul>`;
+    const draw = () => {
+      const box = el.querySelector('.ch-chart');
+      const W = Math.max(280, box.clientWidth || 480);
+      const H = 210;
+      const m = { l: 40, r: 120, t: 22, b: 30 };
+      const n = 40;
+      const x = (i) => m.l + (i / n) * (W - m.l - m.r);
+      const y = (v) => m.t + (1 - v) * (H - m.t - m.b);
+      const grid = [0, 0.5, 1].map((g) => `<line x1="${m.l}" x2="${W - m.r}" y1="${y(g)}" y2="${y(g)}" stroke="var(--grid)"/><text class="tick" x="${m.l - 5}" y="${y(g) + 4}" text-anchor="end">${g}</text>`).join('');
+      const band = `<rect x="${x(20)}" y="${m.t}" width="${x(40) - x(20)}" height="${H - m.t - m.b}" fill="var(--surface-2)"/>`;
+      const labels = `<text class="tick" x="${x(0)}" y="${m.t - 8}">A alone</text><text class="tick" x="${x(20) + 4}" y="${m.t - 8}">A and B together</text>`;
+      const ends = [];
+      const lines = runs
+        .map((r, i) => {
+          const s = seriesOf(r);
+          ends.push({ y: y(s[n]), t: r.name, i });
+          return `<path d="${s.map((v, k) => `${k ? 'L' : 'M'}${x(k).toFixed(1)},${y(v).toFixed(1)}`).join('')}" fill="none" stroke="var(--cue-${i + 1})" stroke-width="2.5"/>`;
+        })
+        .join('');
+      ends.sort((a, b) => a.y - b.y);
+      let prev = -Infinity;
+      const endLabels = ends
+        .map((e) => {
+          const ly = Math.max(e.y, prev + 14);
+          prev = ly;
+          return `<text class="value-label" x="${W - m.r + 6}" y="${ly + 4}">${e.t}</text>`;
+        })
+        .join('');
+      box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="mini-chart">${band}${grid}${labels}${lines}${endLabels}<text class="axis-title" x="${m.l}" y="${H - 6}">attention to B (α<tspan dy="4" font-size="0.75em">B</tspan><tspan dy="-4">)</tspan>, trial by trial →</text></svg>`;
+    };
+    draw();
+    whenResized(el, draw);
+  },
+
+  bar(el) {
+    el.innerHTML =
+      `<div class="widget-grid"><div>` +
+      slider({ id: 'br-v', label: 'V, excitatory strength', min: 0, max: 1.5, step: 0.05, value: 0.9 }) +
+      slider({ id: 'br-vb', label: 'V̄, inhibitory strength', min: 0, max: 1.5, step: 0.05, value: 0.3 }) +
+      `</div><div><div class="br-math"></div><div class="br-line"></div><p class="br-say"></p></div></div>`;
+    let last;
+    const draw = (v) => {
+      last = v;
+      const a = v['br-v'];
+      const b = v['br-vb'];
+      const net = Number((a - b).toFixed(4));
+      el.querySelector('.br-math').innerHTML = math(sym('V', { role: 'computed' }), mo('−'), `<mover accent="true"><mi>V</mi><mo stretchy="false">¯</mo></mover>`, mo('='), mn(fmtExact(a)), mo('−'), mn(fmtExact(b)), mo('='), mn(fmtExact(net)));
+      numberLine(el.querySelector('.br-line'), {
+        lo: -1.5, hi: 1.5, rows: 2,
+        bars: [{ from: 0, to: a, row: 0, color: 'var(--cue-1)' }, { from: a - b, to: a, row: 1, color: 'var(--cue-2)' }],
+        marks: [{ v: net, label: `net ${se(net)}`, cls: 'mark-ink', row: 1 }],
+      });
+      el.querySelector('.br-say').textContent =
+        net > 0 ? 'Overall the cue predicts the outcome will happen.' : net < 0 ? 'Overall the cue predicts the outcome will NOT happen: it is an inhibitor.' : 'The two strengths cancel: overall the cue predicts nothing, though it has learned both.';
+    };
+    wireSliders(el, ['br-v', 'br-vb'], draw);
+    whenResized(el, () => draw(last));
+  },
+
   notation(el) {
     el.innerHTML =
-      `<div class="table-wrap" style="max-height:none"><table class="symbol-guide notation"><thead><tr><th>Idea</th><th>This site</th><th>Rescorla &amp; Wagner (1972)</th><th>Other forms you may meet</th></tr></thead><tbody>` +
+      `<div class="table-wrap" style="max-height:none"><table class="symbol-guide notation"><thead><tr><th>Idea</th><th>This site</th><th>Original paper</th><th>Other forms you may meet</th></tr></thead><tbody>` +
       notation.map((r) => `<tr><td>${r.idea}</td><td class="notation-site">${r.site}</td><td>${r.original}</td><td>${r.other}</td></tr>`).join('') +
       `</tbody></table></div>`;
   },

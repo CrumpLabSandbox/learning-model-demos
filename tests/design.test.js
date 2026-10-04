@@ -47,6 +47,19 @@ test('reports the line number of an error', () => {
   assert.throws(() => parseDesign('3000 A+'), /limit/);
 });
 
+test('a context cue is added to every trial', () => {
+  const d = parseDesign('Pre: 3 A-\nTrain: 2 A+, 2 B+\nContext: Z');
+  assert.equal(d.context, 'Z');
+  assert.deepEqual(d.cues, ['A', 'B', 'Z']);
+  const seq = expandDesign(d, makeRng(1));
+  assert.ok(seq.every((t) => t.cues.includes('Z')));
+  assert.deepEqual(seq[3].cues, ['A', 'Z']);
+  assert.equal(seq[3].type.label, 'A+');
+  assert.deepEqual(parseDesign(formatDesign(d)), d);
+  assert.throws(() => parseDesign('2 AZ+\nContext: Z'), /already on every trial/);
+  assert.throws(() => parseDesign('2 A+\nContext: zz'), /one capital letter/);
+});
+
 test('format and parse round-trip', () => {
   const text = 'Pretraining: 20 A+\nCompound: 20 AB+, 20 CD+, random\nTest: B, D';
   const d = parseDesign(text);

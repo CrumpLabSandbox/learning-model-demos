@@ -7,7 +7,9 @@ import { join, dirname, normalize } from 'node:path';
 import { glossary, glossaryIds } from '../content/glossary.js';
 import { checks as warmupChecks } from '../content/warmup/checks.js';
 import { checks as primerChecks } from '../content/primer/checks.js';
-import * as spec from '../content/equations/rescorla-wagner.js';
+import * as rwSpec from '../content/equations/rescorla-wagner.js';
+import * as mkSpec from '../content/equations/mackintosh.js';
+import * as phSpec from '../content/equations/pearce-hall.js';
 
 const root = new URL('..', import.meta.url).pathname;
 const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'models/rescorla-wagner.html', ...readdirSync(join(root, 'decks')).map((f) => `decks/${f}`)];
@@ -52,9 +54,23 @@ test('glossary entries are complete and their cross-links resolve', () => {
   }
 });
 
-test('every symbol links to a primer section that exists', () => {
+test('every symbol in every model links to a primer section that exists', () => {
   const primerIds = ids(read('primer.html'));
-  for (const [key, def] of Object.entries(spec.symbols)) assert.ok(primerIds.has(def.primer), `${key} -> #${def.primer}`);
+  for (const spec of [rwSpec, mkSpec, phSpec]) {
+    for (const [key, def] of Object.entries(spec.symbols)) {
+      assert.ok(primerIds.has(def.primer), `${key} -> #${def.primer}`);
+      assert.ok(def.render || def.display, `${key} needs a render or a display text`);
+    }
+  }
+});
+
+test('every model page has an overview deck and a row in the units table', () => {
+  const index = read('index.html');
+  for (const f of readdirSync(join(root, 'models'))) {
+    assert.ok(existsSync(join(root, 'decks', f)), `decks/${f}`);
+    assert.ok(index.includes(`models/${f}#view=essentials`), `index links ${f}`);
+    assert.ok(read(`models/${f}`).includes(`overviewUrl: '../decks/${f}'`), `${f} links its deck`);
+  }
 });
 
 test('every check question has exactly one right answer and explains every option', () => {

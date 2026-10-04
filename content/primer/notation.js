@@ -58,4 +58,34 @@ export const notation = [
     original: 'described in words',
     other: 'V<sub>A</sub><sup>n+1</sup> = V<sub>A</sub><sup>n</sup> + ΔV<sub>A</sub><sup>n</sup>; V<sub>new</sub> = V<sub>old</sub> + ΔV',
   },
+  {
+    idea: 'Attention to a cue (attention models)',
+    site: 'α<sub>A</sub>, starting at α<sup>0</sup>',
+    original: 'α<sub>A</sub>, called associability',
+    other: 'α<sub>A</sub><sup>n</sup> (on trial n), "associability", "attention"',
+  },
+  {
+    idea: 'Mackintosh: is A the best predictor?',
+    site: '|λ − V<sub>A</sub>| compared with |λ − ΣV<sub>others</sub>|',
+    original: 'stated in words for A and "all other stimuli present"',
+    other: '|λ − V<sub>X</sub>|, where X stands for all the other stimuli',
+  },
+  {
+    idea: 'Pearce-Hall: attention from surprise',
+    site: 'α<sub>A</sub> ← γ|λ − ΣV| + (1 − γ)α<sub>A</sub>',
+    original: 'without γ in 1980 (attention equals the last surprise); γ added in 1982',
+    other: 'α<sub>A</sub><sup>n</sup> = |λ<sup>n−1</sup> − ΣV<sup>n−1</sup>|',
+  },
+  {
+    idea: 'Inhibitory strength',
+    site: 'V̄<sub>A</sub>',
+    original: 'V̄<sub>A</sub>',
+    other: 'I<sub>A</sub>, V<sup>−</sup>, "inhibitory associative strength"',
+  },
+  {
+    idea: 'Salience of a cue (Pearce-Hall)',
+    site: 'S<sub>A</sub>',
+    original: 'S<sub>A</sub>',
+    other: 'intensity, β<sub>A</sub> in some sources',
+  },
 ];

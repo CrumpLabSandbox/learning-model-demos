@@ -16,6 +16,8 @@
       <a href="warm-up.html">Maths warm-up</a>
       <a href="primer.html" aria-current="page">Reading the equations</a>
       <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
+      <a href="models/mackintosh.html">Mackintosh</a>
+      <a href="models/pearce-hall.html">Pearce-Hall</a>
       <a href="glossary.html">Glossary</a>
     </nav>
   </header>
@@ -36,6 +38,9 @@
           <li><a href="#asymptote">Where the curve levels off</a></li>
           <li><a href="#fixed">Working out where learning stops</a></li>
           <li><a href="#read">Reading a whole equation</a></li>
+          <li><a href="#absolute">Absolute value: size without sign</a></li>
+          <li><a href="#changing">When attention changes</a></li>
+          <li><a href="#bar">A bar over a letter</a></li>
           <li><a href="#notation">Notation map</a></li>
         </ol>
         <p class="small" style="margin:.75rem 0 0"><a href="decks/reading-equations.html">Overview slides for this page</a></p>
@@ -84,8 +89,8 @@
                 <tr><td class="sym-cell"><span class="sym role-experimenter">λ</span></td><td>lambda (LAM-duh)</td><td>The outcome: the most strength it can support. Usually 1 when the outcome happens and 0 when it does not.</td><td><span class="role-badge role-experimenter">experimenter</span></td></tr>
                 <tr><td class="sym-cell"><span class="sym role-computed">Δ</span></td><td>delta (DEL-tuh)</td><td>"Change in". Not a number on its own: ΔV means the change in V.</td><td>a label</td></tr>
                 <tr><td class="sym-cell"><span class="sym role-computed">Σ</span></td><td>sigma (SIG-muh)</td><td>"Add up". ΣV means the strengths of the cues present, added together.</td><td>a label</td></tr>
-                <tr><td class="sym-cell"><span class="sym">θ</span></td><td>theta (THAY-tuh)</td><td>A learning-rate parameter in Mackintosh's model, coming later.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
-                <tr><td class="sym-cell"><span class="sym">γ</span></td><td>gamma (GAM-uh)</td><td>How fast attention changes in the Pearce-Hall model, coming later.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
+                <tr><td class="sym-cell"><span class="sym">θ</span></td><td>theta (THAY-tuh)</td><td>In Mackintosh's model, θ is the learning rate for the outcome and θ<sub>α</sub> sets how fast attention changes.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
+                <tr><td class="sym-cell"><span class="sym">γ</span></td><td>gamma (GAM-uh)</td><td>How fast attention changes in the Pearce-Hall model.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
               </tbody>
             </table>
           </div>
@@ -150,11 +155,38 @@
           <p>Now try it on the model page. Each equation there is shown in words, in symbols, and with the numbers from the trial you pick, so you can check your reading against the real thing. <a href="models/rescorla-wagner.html">Open Rescorla-Wagner</a>.</p>
         </section>
 
+        <section id="absolute">
+          <h2>13. Absolute value: size without sign</h2>
+          <p class="small muted">Sections 13 to 15 are for the attention models, Mackintosh and Pearce-Hall. Skip them until you get there.</p>
+          <p>Two straight bars around something, as in |λ − ΣV|, mean <strong>"how big is this, ignoring whether it is positive or negative"</strong>. This is called the absolute value. |−0.4| is 0.4, and |0.4| is also 0.4.</p>
+          <p>The attention models use it because surprise has a size but, for attention, no direction. An outcome that is 0.4 bigger than expected and one that is 0.4 smaller are equally surprising.</p>
+          <div class="widget" data-widget="absolute"></div>
+          <div data-check="absolute"></div>
+        </section>
+
+        <section id="changing">
+          <h2>14. When attention changes</h2>
+          <p>In Rescorla-Wagner, α (how much attention a cue gets) is a <span class="role-badge role-modeller">parameter</span>: the modeller picks it before training and it never changes. The attention models change exactly that. In Mackintosh's and Pearce and Hall's models, α is <span class="role-badge role-computed">computed</span>: the model updates it after every trial on which the cue appears.</p>
+          <p>The modeller still picks a starting value. It is written with a superscript 0, as in α<sup>0</sup>, read "alpha on trial 0". Remember from section 9 that a superscript here counts trials; it is not a power.</p>
+          <p>Here is the same experiment through all three models. A is trained alone, then B is added. The chart shows attention to B.</p>
+          <div class="widget" data-widget="changing"></div>
+          <p>The two attention models disagree about why attention changes. In Mackintosh's model attention goes to the <strong>best predictor</strong>. In Pearce and Hall's model it goes to cues whose consequences are still <strong>uncertain</strong>. Both lower attention to B here, for different reasons. How fast attention moves is set by θ<sub>α</sub> (theta-alpha) in Mackintosh's model and by γ (gamma) in Pearce and Hall's.</p>
+          <div data-check="changing"></div>
+        </section>
+
+        <section id="bar">
+          <h2>15. A bar over a letter</h2>
+          <p>In the Pearce-Hall model each cue has two strengths. V is <strong>excitatory</strong> strength: how strongly the cue predicts that the outcome will happen. V̄, with a bar over it, is <strong>inhibitory</strong> strength: how strongly the cue predicts it will <em>not</em> happen. Read V̄ as "V-bar".</p>
+          <p>What the cue predicts overall is the difference, V − V̄. Both strengths only ever grow, so extinction in this model does not erase learning: it adds inhibition on top.</p>
+          <div class="widget" data-widget="bar"></div>
+          <div data-check="bar"></div>
+        </section>
+
         <section id="notation">
-          <h2>13. Notation map</h2>
+          <h2>16. Notation map</h2>
           <p>Different papers and textbooks write the same ideas in different ways. If a reading uses symbols you do not recognise, find the idea here.</p>
           <div class="widget" data-widget="notation"></div>
-          <p class="small muted">The middle column follows the original chapter, which writes the compound of cues A and X as V<sub>AX</sub> and numbers the outcome with a subscript. The last column lists forms that are common across sources rather than any one book. When you quote a source, use its own symbols.</p>
+          <p class="small muted">For Rescorla-Wagner, the "original paper" column follows the 1972 chapter, which writes the compound of cues A and X as V<sub>AX</sub> and numbers the outcome with a subscript. The last column lists forms that are common across sources rather than any one book. When you quote a source, use its own symbols.</p>
         </section>
       </article>
     </div>

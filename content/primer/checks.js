@@ -50,4 +50,28 @@ export const checks = {
       { text: 'V plus n plus 1', correct: false, why: 'A superscript is never addition. Here it is a label for which trial the value belongs to.' },
     ],
   },
+  absolute: {
+    q: 'What is |−0.4|?',
+    options: [
+      { text: '0.4', correct: true, why: 'Right. The bars mean "how big, ignoring the sign", so −0.4 becomes 0.4.' },
+      { text: '−0.4', correct: false, why: 'The bars remove the sign. |−0.4| is the size of −0.4, which is 0.4.' },
+      { text: '0', correct: false, why: 'The bars do not round anything to zero; they drop the minus sign. |−0.4| = 0.4.' },
+    ],
+  },
+  changing: {
+    q: 'In Mackintosh\'s model, who sets the value of α<sub>B</sub> on trial 30?',
+    options: [
+      { text: 'The model calculates it', correct: true, why: 'Right. The modeller sets only the starting value, α<sub>B</sub><sup>0</sup>. After that the model changes α<sub>B</sub> on every trial with B, depending on how well B predicts.' },
+      { text: 'The modeller, before training', correct: false, why: 'The modeller sets α<sub>B</sub><sup>0</sup>, the value on trial 0. From then on the model changes α<sub>B</sub> itself, so by trial 30 it is computed.' },
+      { text: 'The experimenter', correct: false, why: 'The experimenter decides which cues appear and when, but not how much attention they get. That is calculated by the model.' },
+    ],
+  },
+  bar: {
+    q: 'A cue has V = 0.9 and V̄ = 0.7. What does it predict overall?',
+    options: [
+      { text: '0.2', correct: true, why: 'Right. Its net strength is V − V̄ = 0.9 − 0.7 = 0.2: a weak prediction that the outcome will happen.' },
+      { text: '1.6', correct: false, why: 'That adds them. V̄ is inhibitory strength, which works against V, so subtract: 0.9 − 0.7 = 0.2.' },
+      { text: '0.9', correct: false, why: 'That ignores the inhibition. The cue has learned both, so its prediction is V − V̄ = 0.2.' },
+    ],
+  },
 };

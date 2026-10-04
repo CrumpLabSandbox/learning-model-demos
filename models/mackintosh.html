@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rescorla-Wagner · Learning Model Demos</title>
-  <meta name="description" content="Run the Rescorla-Wagner model trial by trial and see how each term in its equation produces acquisition, blocking, overshadowing, and conditioned inhibition.">
+  <title>Mackintosh · Learning Model Demos</title>
+  <meta name="description" content="Run Mackintosh's attention model trial by trial: attention rises for the best predictor of the outcome, and each cue learns from its own error.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
 </head>
@@ -15,8 +15,8 @@
       <a href="../index.html#start">Start here</a>
       <a href="../warm-up.html">Maths warm-up</a>
       <a href="../primer.html">Reading the equations</a>
-      <a href="rescorla-wagner.html" aria-current="page">Rescorla-Wagner</a>
-      <a href="mackintosh.html">Mackintosh</a>
+      <a href="rescorla-wagner.html">Rescorla-Wagner</a>
+      <a href="mackintosh.html" aria-current="page">Mackintosh</a>
       <a href="pearce-hall.html">Pearce-Hall</a>
       <a href="../glossary.html">Glossary</a>
     </nav>
@@ -25,8 +25,8 @@
     <noscript><p>This demo needs JavaScript.</p></noscript>
   </main>
   <script type="module">
-    import * as model from '../js/models/rescorla-wagner.js';
-    import * as spec from '../content/equations/rescorla-wagner.js';
+    import * as model from '../js/models/mackintosh.js';
+    import * as spec from '../content/equations/mackintosh.js';
     import { phenomena } from '../content/phenomena/index.js';
     import { mountModelPage } from '../js/ui/page.js';
 
@@ -35,9 +35,9 @@
       model,
       spec,
       phenomena,
-      modelSourceUrl: '../js/models/rescorla-wagner.js',
+      modelSourceUrl: '../js/models/mackintosh.js',
       defaultPreset: 'blocking',
-      overviewUrl: '../decks/rescorla-wagner.html',
+      overviewUrl: '../decks/mackintosh.html',
     });
   </script>
 </body>

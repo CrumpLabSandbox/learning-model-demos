@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pearce-Hall Overview · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for the Pearce-Hall model: attention follows surprise, excitatory and inhibitory strength, and how it differs from Mackintosh.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+</head>
+<body class="deck-page">
+  <main class="deck" data-title="Pearce-Hall overview" data-back="../models/pearce-hall.html#view=essentials" data-back-label="Open the model">
+    <section class="slide" data-title="Pearce-Hall: attention to the uncertain">
+      <div class="kicker">Overview · model 3</div>
+      <h1>Pearce-Hall: attention to the uncertain</h1>
+      <p class="sub">John Pearce and Geoffrey Hall, 1980. A second attention model, built on the opposite idea to Mackintosh's.</p>
+      <aside class="notes">Pearce, J. M., &amp; Hall, G. (1980). Psychological Review, 87, 532–552. The running average of attention used by default on this site is from Pearce, Kaye, &amp; Hall (1982).</aside>
+    </section>
+    <section class="slide" data-title="The opposite idea">
+      <h2>The opposite idea</h2>
+      <p>Mackintosh: pay attention to cues that predict well.</p>
+      <p>Pearce and Hall: once a cue predicts well, there is nothing left to learn about it, so <strong>stop</strong> paying close attention. Keep attending to cues whose consequences are still <strong>uncertain</strong>.</p>
+      <p class="big">Surprise drives attention. Attention drives learning.</p>
+    </section>
+    <section class="slide" data-title="An everyday version">
+      <h2>An everyday version</h2>
+      <p>With a new phone, every buzz grabs your attention. Once you know what each buzz means, you barely notice them.</p>
+      <p>Then one day a buzz means something unexpected, and you are back to noticing every one. Surprise brought your attention back.</p>
+    </section>
+    <section class="slide" data-title="Attention over time">
+      <h2>Attention over time</h2>
+      <div class="two-col">
+        <figure data-mini data-model="pearce-hall" data-series="alpha" data-design="Acquisition: 20 A+|Extinction: 20 A-" data-lines="A" data-caption="Attention to A in the Pearce-Hall model."></figure>
+        <div>
+          <p>Attention starts high: a new cue is uncertain. It fades as A comes to predict the outcome.</p>
+          <p>When extinction starts, the missing outcome is a surprise, and attention jumps back up.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="Two kinds of strength">
+      <h2>Two kinds of strength</h2>
+      <p>Each cue learns an <a href="../glossary.html#excitatory-strength">excitatory strength</a> V (the outcome will happen) and an <a href="../glossary.html#inhibitory-strength">inhibitory strength</a> V̄ (it will not). What it predicts is the difference, V − V̄.</p>
+      <p>Both only ever grow. So extinction does not erase what was learned: it adds inhibition on top. That leaves room for old learning to come back.</p>
+    </section>
+    <section class="slide" data-title="Latent inhibition">
+      <h2>Latent inhibition</h2>
+      <div class="two-col">
+        <figure data-mini data-model="pearce-hall" data-series="alpha" data-design="Pre-exposure: 30 A-|Conditioning: 15 A+, 15 B+|Context: Z" data-lines="A,B" data-caption="Attention: A, shown 30 times with nothing after it, starts conditioning with almost none."></figure>
+        <div>
+          <p>During pre-exposure nothing follows A and nothing is expected, so there is no surprise and attention to A fades to zero.</p>
+          <p>When A is finally paired with the outcome, it starts with little attention and learns slowly. The new cue B starts with full attention.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="Blocking: one trial, then attention collapses">
+      <h2>Blocking: one trial, then attention collapses</h2>
+      <div class="two-col">
+        <figure data-mini data-model="pearce-hall" data-series="alpha" data-design="A first: 20 A+|Then: 20 AB+, 20 CD+" data-lines="B,D" data-caption="Attention to B falls after one compound trial; attention to D stays up while the outcome is still surprising."></figure>
+        <div>
+          <p>B is new, so on the first compound trial it gets full attention and learns.</p>
+          <p>But A already predicts the outcome. No surprise, so attention to B collapses, and B learns little after that.</p>
+        </div>
+      </div>
+      <aside class="notes">Late in training attention to D also fades, and ends a little below B's: C and D together come to predict the outcome almost exactly, while A and B together slightly over-predict it, so a trace of surprise remains on AB trials. What matters for blocking is the first few compound trials, when D still has attention and B does not.</aside>
+    </section>
+    <section class="slide" data-title="Two theories of attention">
+      <h2>Two theories of attention</h2>
+      <table class="sym-table">
+        <tr><td></td><td><strong>Mackintosh</strong></td><td><strong>Pearce-Hall</strong></td></tr>
+        <tr><td style="font-size:1em">Attention goes to</td><td>the best predictor</td><td>cues that are still surprising</td></tr>
+        <tr><td style="font-size:1em">Learning uses</td><td>each cue's own error</td><td>attention × the outcome</td></tr>
+        <tr><td style="font-size:1em">Latent inhibition</td><td>only with the 1975 rule</td><td>✓ shows it</td></tr>
+        <tr><td style="font-size:1em">Conditioned inhibition</td><td>✗ does not</td><td>✓ shows it</td></tr>
+      </table>
+      <p class="sub">Both explain blocking, by different routes. Researchers now think both kinds of attention may exist.</p>
+      <aside class="notes">The last point is a hedge on purpose: hybrid models combining the two (for example Le Pelley, 2004) are an active topic. Results in the table are for this site's default settings and are checked by automated tests.</aside>
+    </section>
+    <section class="slide" data-title="What it gets wrong">
+      <h2>What it gets wrong</h2>
+      <ul>
+        <li><strong><a href="../glossary.html#backward-blocking">Backward blocking</a>.</strong> Absent cues never change.</li>
+        <li><strong><a href="../glossary.html#negative-patterning">Negative patterning</a>.</strong> A compound still predicts the sum of its parts.</li>
+      </ul>
+      <p class="sub">The last model on this site, MINERVA-AL, handles both without any associative strength at all.</p>
+    </section>
+    <section class="slide" data-title="Try these first">
+      <h2>Try these first on the model page</h2>
+      <ol class="path-steps">
+        <li>On the <strong>Latent inhibition</strong> card, press <strong>Predict, then run</strong>, then watch the attention chart.</li>
+        <li>Load <strong>Extinction</strong> and look at V and V̄ in the trial table at the end.</li>
+        <li>Set γ to 1, the 1980 model, and watch latent inhibition shrink.</li>
+      </ol>
+      <p><a class="btn primary" href="../models/pearce-hall.html#view=essentials">Open Pearce-Hall (Essentials view)</a></p>
+      <p class="sub">New notation here: γ (gamma), |x| (absolute value), and V̄ (V-bar). See <a href="../primer.html#absolute">Reading the equations, sections 13 to 15</a>.</p>
+    </section>
+  </main>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 
 import { parseDesign, usesRandomOrder } from '../core/design.js';
 import { runModel, defaultOptions } from '../core/runner.js';
-import { evaluatePhenomenon } from '../core/phenomena.js';
+import { evaluatePhenomenon, presetParams } from '../core/phenomena.js';
 import { encodeState, decodeState } from '../core/url-state.js';
 import { fmt, fmtExact, signed } from '../core/format.js';
 import {
@@ -16,7 +16,7 @@ import {
   symbolsUsed,
   listCues,
 } from './equation.js';
-import { createChart, cueColor } from './chart.js';
+import { createChart, cueColor, stateSource } from './chart.js';
 import { renderArithmetic } from './arithmetic.js';
 import { createTable, tableCSV } from './table.js';
 import { installHighlighting } from './highlight.js';
@@ -94,6 +94,19 @@ export function mountModelPage({
   const $ = (id) => root.querySelector(`#${id}`);
   installHighlighting(root);
 
+  const perCueKeys = new Set(
+    model
+      .parameters([...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'], defaultOptions(model))
+      .filter((p) => p.cue)
+      .map((p) => p.key),
+  );
+  const extraCharts = (spec.charts ?? []).map((c) =>
+    createChart($(`chart-${c.key}`), {
+      onSelect: (t) => select(t),
+      source: stateSource(c.key, c.title, c.ceiling ?? 1),
+      label: c.title,
+    }),
+  );
   const chart = createChart($('chart'), {
     onSelect: (t) => select(t),
     onSketch: (t, v, { start }) => addSketchPoint(t, v, start),
@@ -139,8 +152,10 @@ export function mountModelPage({
     if (!p) return;
     state.presetId = id;
     state.seed = 1;
-    for (const k of Object.keys(state.params)) if (k.startsWith('alpha_')) delete state.params[k];
-    Object.assign(state.params, p.params ?? {});
+    // Per-cue parameters (such as salience) go back to their defaults, then
+    // the preset's own values apply. Shared parameters are kept.
+    for (const k of Object.keys(state.params)) if (perCueKeys.has(k)) delete state.params[k];
+    Object.assign(state.params, presetParams(model, p));
     $('design-text').value = p.design;
     presetSel.value = id;
     setDesign(p.design, { render: false });
@@ -223,7 +238,7 @@ export function mountModelPage({
   });
   $('reset-params').addEventListener('click', () => {
     const p = phenomena.find((x) => x.id === state.presetId);
-    state.params = { ...(p?.params ?? {}) };
+    state.params = p ? presetParams(model, p) : {};
     recompute();
     renderAll();
   });
@@ -285,7 +300,7 @@ export function mountModelPage({
     const i = state.stage;
     const st = spec.stages[i];
     const opts = { ...defaultOptions(model), ...st.options };
-    const eq = spec.equations(opts).find((e) => e.id === 'update');
+    const eq = spec.equations(opts).find((e) => e.id === (st.equation ?? 'update'));
     const cue = state.focusCue ?? state.run.cues[0];
     const now = shownSet(opts);
     const before = i > 0 ? shownSet({ ...defaultOptions(model), ...spec.stages[i - 1].options }) : new Set();
@@ -590,7 +605,7 @@ export function mountModelPage({
           if (state.readings.includes('words')) rows.push(reading('Words', `<div class="words">${equationWords(eq, ctx)}</div>`, 'words'));
           if (state.readings.includes('symbols')) rows.push(reading('Symbols', equationSymbols(eq, ctx), 'symbols'));
           if (state.readings.includes('numbers')) rows.push(reading(`Trial ${rec.index}`, equationNumbers(eq, ctx), 'numbers'));
-          return `<div class="eq-card"><h3><span class="step-no">${i + 1}</span>${esc(eq.title)}</h3>${rows.join('')}</div>`;
+          return `<div class="eq-card"><h3><span class="step-no">${i + 1}</span>${esc(eq.title.replaceAll("$", cue))}</h3>${rows.join('')}</div>`;
         })
         .join('');
     }
@@ -646,7 +661,7 @@ export function mountModelPage({
     const rows = used
       .map((key) => {
         const def = spec.symbols[key];
-        const symbol = def.render ? symbolHTML(spec, key, cue) : `<span class="sym role-${def.role}" data-sym="${key}">${esc(errorText(eqs))}</span>`;
+        const symbol = def.render ? symbolHTML(spec, key, cue) : `<span class="sym role-${def.role}" data-sym="${key}">${esc(def.display ? def.display(state.options) : def.name)}</span>`;
         let value = '–';
         if (rec && rec.present.includes(cue)) {
           const v = def.value(rec, cue);
@@ -667,10 +682,6 @@ export function mountModelPage({
       `<thead><tr><th>Symbol</th><th>Meaning</th><th>Who sets it</th><th class="where">Where to see it</th><th>${rec ? `Trial ${rec.index}` : 'Value'}</th></tr></thead><tbody>${rows}</tbody>`;
   }
 
-  function errorText(eqs) {
-    return state.options.summedError === false ? `λ − V` : 'λ − ΣV';
-  }
-
   function renderArith() {
     const rec = currentRecord();
     renderArithmetic($('arith'), {
@@ -681,6 +692,7 @@ export function mountModelPage({
       cue: state.focusCue,
       present: rec?.present ?? [],
       run: state.run,
+      opts: state.options,
     });
   }
 
@@ -724,10 +736,8 @@ export function mountModelPage({
         const badge = res.shown
           ? `<span class="badge yes" title="${esc(model.name)} shows this effect">✓ Shows it</span>`
           : `<span class="badge no" title="${esc(model.name)} does not show this effect">✗ Does not</span>`;
-        const fixed = p.params
-          ? `<p class="small muted">This design sets ${Object.entries(p.params)
-              .map(([k, v]) => `${k.replace('alpha_', 'α for ')} = ${v}`)
-              .join(', ')}.</p>`
+        const fixed = p.salience
+          ? `<p class="small muted">This design sets the salience of ${listCues(Object.entries(p.salience).map(([c, v]) => `${c} to ${v}`))}.</p>`
           : '';
         const hide = state.predict?.sketching && p.id === state.presetId;
         if (hide) {
@@ -793,7 +803,7 @@ export function mountModelPage({
       const params = {};
       for (const p of defaults) {
         const v = state.run.params[p.key];
-        const base = preset?.params?.[p.key] ?? p.default;
+        const base = (preset ? presetParams(model, preset) : {})[p.key] ?? p.default;
         if (v !== base) params[p.key] = v;
       }
       const options = {};
@@ -820,6 +830,7 @@ export function mountModelPage({
   // ---- Render groups ------------------------------------------------------
   function renderTrialViews({ scrollTable = true } = {}) {
     chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: state.predict });
+    for (const c of extraCharts) c.update({ run: state.run, t: state.t, revealed: state.revealed });
     renderStepper();
     renderEquations();
     renderArith();
@@ -908,6 +919,7 @@ function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
   return `
 <div class="page-intro">
   <h1>${esc(model.name)} <span class="muted">(${model.year})</span></h1>
+  ${model.status === 'preview' ? `<p class="callout preview-note"><strong>Preview.</strong> This model's equations are checked by automated tests, but it has not yet been checked against the simulations published in the original papers. Use it to explore, and treat exact numbers with care until that check is done.</p>` : ''}
   <div class="entry-row">
     <div class="view-switch" role="group" aria-label="How much to show">
       <button class="btn" data-view="essentials" aria-pressed="false">Essentials</button>
@@ -975,6 +987,15 @@ function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
       <div id="chart"></div>
       <div class="predict-feedback" id="predict-feedback" hidden></div>
     </section>
+    ${(spec.charts ?? [])
+      .map(
+        (c) => `<section class="panel spoiler" id="panel-${c.key}">
+      <h2>${esc(c.title)}</h2>
+      <p class="small muted">${c.help}</p>
+      <div id="chart-${c.key}"></div>
+    </section>`,
+      )
+      .join('')}
     <div class="spoiler-cover panel">The equations, arithmetic, and trial table are hidden while you sketch, so they do not give the answer away. Press <strong>Reveal the model</strong> when your sketch is done.</div>
     <div class="eq-arith spoiler">
       <section class="panel" id="eq-panel">

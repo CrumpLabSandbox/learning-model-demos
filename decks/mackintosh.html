@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mackintosh Overview · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for Mackintosh's attention model: attention to the best predictor, learning from each cue's own error, and how writing the rule down changes its predictions.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+</head>
+<body class="deck-page">
+  <main class="deck" data-title="Mackintosh overview" data-back="../models/mackintosh.html#view=essentials" data-back-label="Open the model">
+    <section class="slide" data-title="Mackintosh: attention to the best predictor">
+      <div class="kicker">Overview · model 2</div>
+      <h1>Mackintosh: attention to the best predictor</h1>
+      <p class="sub">Nicholas Mackintosh, 1975. The first of two models on this site in which attention changes with experience.</p>
+      <aside class="notes">Mackintosh, N. J. (1975). A theory of attention: Variations in the associability of stimuli with reinforcement. Psychological Review, 82, 276–298.</aside>
+    </section>
+    <section class="slide" data-title="What Rescorla-Wagner left out">
+      <h2>What Rescorla-Wagner left out</h2>
+      <p>In Rescorla-Wagner, how noticeable a cue is (α) is fixed. Nothing that happens to a cue can change how easily it is learned about.</p>
+      <p>But experience does change it. A tone heard many times with nothing following it is later learned about slowly: <a href="../glossary.html#latent-inhibition">latent inhibition</a>.</p>
+      <p class="big">What if attention itself is learned?</p>
+      <aside class="notes">This is the motivation for both attention models. They keep the idea of learning from error but let α, renamed attention or associability, change.</aside>
+    </section>
+    <section class="slide" data-title="The big idea">
+      <h2>The big idea</h2>
+      <p class="big">Pay attention to the cues that predict best. Tune out the rest.</p>
+      <p>After every trial, each cue present is compared with the other cues present. If it predicted the outcome better, attention to it rises. If it predicted worse, attention falls. A cue with more attention is learned about faster.</p>
+    </section>
+    <section class="slide" data-title="An everyday version">
+      <h2>An everyday version</h2>
+      <p>Your group chat and one friend both tell you when plans change. The friend is always right; the group chat is often late or wrong.</p>
+      <p>Soon you check your friend's messages first and barely glance at the group chat. You have stopped paying attention to the worse predictor, and you learn little from it even when it happens to be right.</p>
+    </section>
+    <section class="slide" data-title="Two rules">
+      <h2>Two rules</h2>
+      <ol class="path-steps">
+        <li><strong>Learning.</strong> Each cue learns from its <em>own</em> error: what happened minus what that cue alone predicted. Unlike Rescorla-Wagner, cues do not share one error.</li>
+        <li><strong>Attention.</strong> Attention to a cue rises if it predicted better than the other cues present, and falls if it predicted worse.</li>
+      </ol>
+      <p class="sub">So cues compete only through attention.</p>
+    </section>
+    <section class="slide" data-title="Blocking, a different way">
+      <h2>Blocking, a different way</h2>
+      <div class="two-col">
+        <figure data-mini data-model="mackintosh" data-series="alpha" data-design="A first: 20 A+|Then: 20 AB+, 20 CD+" data-lines="B,D" data-caption="Mackintosh's model: attention to B (added to the trained A) collapses; attention to D (added to a new C) does not."></figure>
+        <figure data-mini data-model="mackintosh" data-design="A first: 20 A+|Then: 20 AB+, 20 CD+" data-lines="B,D" data-caption="So B learns very little, and D learns well."></figure>
+      </div>
+      <p class="sub">B still learns on the first compound trial, before its attention drops. Rescorla-Wagner says B should learn almost nothing even then.</p>
+    </section>
+    <section class="slide" data-title="Writing the rule down changes the predictions">
+      <h2>Writing the rule down changes the predictions</h2>
+      <p>Mackintosh said which way attention moves, but not by how much. The model page offers two ways to fill that in:</p>
+      <table class="sym-table">
+        <tr><td></td><td><strong>Continuous rule</strong> (default)</td><td><strong>1975 direction rule</strong></td></tr>
+        <tr><td style="font-size:1em">Blocking</td><td>✓ shows it</td><td>✗ does not</td></tr>
+        <tr><td style="font-size:1em">Overshadowing</td><td>✗ does not</td><td>✓ shows it</td></tr>
+        <tr><td style="font-size:1em">Latent inhibition</td><td>✗ does not</td><td>✓ shows it</td></tr>
+      </table>
+      <p class="sub">The difference is how a tie is treated. This is why models are written as equations: words alone hid this choice.</p>
+      <aside class="notes">These results are for this site's settings, with equal saliences, and are checked by automated tests. Under the continuous rule a tie leaves attention unchanged; under the direction rule a tie lowers it. Overshadowing appears under the continuous rule too if one cue is more salient.</aside>
+    </section>
+    <section class="slide" data-title="What it gets wrong">
+      <h2>What it gets wrong</h2>
+      <ul>
+        <li><strong><a href="../glossary.html#conditioned-inhibition">Conditioned inhibition</a>.</strong> A cue's own error on trials without the outcome is zero, so it never goes below zero.</li>
+        <li><strong><a href="../glossary.html#backward-blocking">Backward blocking</a>.</strong> Absent cues never change.</li>
+        <li><strong><a href="../glossary.html#negative-patterning">Negative patterning</a>.</strong> A compound still predicts the sum of its parts.</li>
+      </ul>
+    </section>
+    <section class="slide" data-title="Try these first">
+      <h2>Try these first on the model page</h2>
+      <ol class="path-steps">
+        <li>On the <strong>Blocking</strong> card, press <strong>Predict, then run</strong>. Then watch the attention chart.</li>
+        <li>Switch on the <strong>1975 direction rule</strong> and watch which badges change.</li>
+        <li>Switch off <strong>Attention changes</strong>: what is left of the model?</li>
+      </ol>
+      <p><a class="btn primary" href="../models/mackintosh.html#view=essentials">Open Mackintosh (Essentials view)</a></p>
+      <p class="sub">New notation here: θ (theta), |x| (absolute value), and α<sup>0</sup>. See <a href="../primer.html#absolute">Reading the equations, sections 13 and 14</a>.</p>
+    </section>
+  </main>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

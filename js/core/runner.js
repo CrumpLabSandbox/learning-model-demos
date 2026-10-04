@@ -50,7 +50,7 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
 
   const trials = sequence.map((entry, i) => {
     const rec = learner.trial({
-      cues: entry.type.cues,
+      cues: entry.cues,
       reinforced: entry.type.reinforced,
       magnitude: entry.type.magnitude,
     });
@@ -60,11 +60,20 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
       phaseIndex: entry.phaseIndex,
       phaseName: entry.phaseName,
       label: entry.type.label,
-      present: entry.type.cues,
+      present: entry.cues,
       ...rec,
       state: learner.state(),
     };
   });
+
+  // Per-cue internal values over trials, such as attention, for charts:
+  // stateSeries.alpha.A[t] is A's attention after trial t (t = 0 is the start).
+  const stateSeries = {};
+  for (const [key, val] of Object.entries(initialState)) {
+    if (!val || typeof val !== 'object') continue;
+    stateSeries[key] = Object.fromEntries(cues.map((c) => [c, [val[c]]]));
+    for (const rec of trials) for (const c of cues) stateSeries[key][c].push(rec.state[key][c]);
+  }
 
   const phases = design.phases.map((p, idx) => {
     const idxs = trials.filter((t) => t.phaseIndex === idx).map((t) => t.index);
@@ -81,6 +90,8 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
     series,
     labels,
     displayProbes: design.probes ?? cues,
+    context: design.context ?? null,
+    stateSeries,
     phases,
     initialState,
   };

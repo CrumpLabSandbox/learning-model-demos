@@ -20,6 +20,9 @@ export const year = 1972;
 export const citation =
   'Rescorla, R. A., & Wagner, A. R. (1972). A theory of Pavlovian conditioning: Variations in the effectiveness of reinforcement and nonreinforcement. In A. H. Black & W. F. Prokasy (Eds.), Classical conditioning II: Current research and theory (pp. 64–99). Appleton-Century-Crofts.';
 
+// The parameter that holds a cue's salience, for presets that set it.
+export const salienceKey = (cue) => `alpha_${cue}`;
+
 export const options = [
   {
     key: 'summedError',
