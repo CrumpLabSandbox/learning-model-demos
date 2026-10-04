@@ -1,0 +1,34 @@
+{
+  "slug": "learning-model-demos",
+  "title": "Learning Model Demos",
+  "one_liner": "Interactive demos of classic associative learning models, starting with Rescorla-Wagner and Mackintosh and leading up to MINERVA-AL, so people can run each model and see how it learns.",
+  "status": "planned",
+  "tags": [
+    "teaching",
+    "instance-theory",
+    "research"
+  ],
+  "description": "## What\n\nExample demos that show how learning models work. They begin with classic models such as Rescorla-Wagner and Mackintosh and build toward MINERVA-AL, the instance-based model of associative learning.\n\n## Why\n\nLearning models are much easier to understand when you can run them. Watching associative strength change trial by trial makes each model's assumptions concrete. Running the same training design through several models shows where they agree and where they make different predictions. Ending with MINERVA-AL shows how an instance-based account handles the same phenomena in a different way.\n\n## How\n\nEarly thoughts, to refine in a workshop:\n\n- **A sequence of models.** Rescorla-Wagner first, then Mackintosh's attention model, possibly Pearce-Hall and a configural model, and then MINERVA-AL.\n- **Interactive in the browser.** Each demo lets people set learning parameters, design a sequence of trials, run it, and watch the predictions change over trials on a chart.\n- **Classic phenomena as presets.** Acquisition, extinction, blocking, overshadowing, conditioned inhibition, latent inhibition, backward blocking, and negative patterning. Several of these are exactly where the models part ways, which makes them good teaching cases.\n- **Side by side.** Run one design through two or more models at once to compare their predictions directly.\n- **Show the equations.** Pair each model with its update rule or retrieval equations, with the live values highlighted as trials run.\n- **Simple to host.** Plain HTML and JavaScript, so the demos run anywhere and could be deployed on Coolify or the lab website. Matching R or Quarto versions could support course materials.\n- **Connections.** Useful for teaching and for classroom demos on the Open Psychology Platform. A good example of how computational models make predictions explicit, the theme of the theory-evaluation idea. A lead-in to the instance theory work, including the ITS experiments.",
+  "open_questions": [
+    "Confirm or change the plan's default assumptions: audience, first four models, plain web demos first, a new repo deployed on Coolify, and the instance theory of semantics as a later extension.",
+    "Which course or courses will use the demos first, and when?"
+  ],
+  "notes": "- 2026-10-03: Captured from chat as a seed. The user wants example demos of how learning models work, such as the classic Rescorla-Wagner and Mackintosh models, leading up to MINERVA-AL.\n- 2026-10-03: Transcription notes: \"Rescorla-Wegener\" was recorded as Rescorla-Wagner, \"Macintosh\" as Mackintosh, and \"Minerva AL\" as MINERVA-AL. Correct these if wrong.\n- 2026-10-04: Plan written to plan.md at the user's request without a question round. The open questions were settled with stated defaults: courses first; Rescorla-Wagner, Mackintosh, Pearce-Hall, and MINERVA-AL as the first models; plain HTML and JavaScript demos with no build step; a new repo deployed on Coolify; the instance theory of semantics as a later extension. Each model is verified against published results in automated tests before classroom use.",
+  "links": [
+    {
+      "label": "Related: Practical Experiments to Test ITS",
+      "url": "#/idea/testing-its-experimentally"
+    },
+    {
+      "label": "Related: Evaluating the Logical Structure of Theories",
+      "url": "#/idea/evaluating-theory-structure"
+    },
+    {
+      "label": "Related: Open Psychology Platform",
+      "url": "#/idea/open-psychology-platform"
+    }
+  ],
+  "plan": "plan.md",
+  "created": "2026-10-03T19:41:34.933Z",
+  "updated": "2026-10-04T11:39:25.020Z"
+}
