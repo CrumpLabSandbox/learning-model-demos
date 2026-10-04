@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reading the Equations · Learning Model Demos</title>
+  <meta name="description" content="A hands-on guide to reading the equations in learning models: what Δ, Σ, subscripts, Greek letters, and trial numbers mean, and how to work out what an equation predicts.">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">Learning Model Demos</a>
+    <nav aria-label="Pages">
+      <a href="primer.html" aria-current="page">Reading the equations</a>
+      <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
+    </nav>
+  </header>
+  <main class="page primer" id="primer">
+    <div class="primer-layout">
+      <nav class="toc" aria-label="On this page">
+        <strong>On this page</strong>
+        <ol>
+          <li><a href="#start">What an equation is doing</a></li>
+          <li><a href="#roles">Who sets each number</a></li>
+          <li><a href="#names">Letters are names</a></li>
+          <li><a href="#greek">The Greek letters</a></li>
+          <li><a href="#delta">Δ means change</a></li>
+          <li><a href="#sigma">Σ means add up</a></li>
+          <li><a href="#multiply">Side by side means multiply</a></li>
+          <li><a href="#error">The error: what happened minus what was predicted</a></li>
+          <li><a href="#trials">Trial numbers</a></li>
+          <li><a href="#asymptote">Where the curve levels off</a></li>
+          <li><a href="#fixed">Working out where learning stops</a></li>
+          <li><a href="#read">Reading a whole equation</a></li>
+          <li><a href="#notation">Notation map</a></li>
+        </ol>
+      </nav>
+
+      <article class="prose-wide">
+        <h1>Reading the equations</h1>
+        <p class="lede">Learning models are written as equations. This page shows you how to read them, one piece at a time, with things you can move and try. You do not need any maths beyond adding, subtracting, and multiplying.</p>
+
+        <section id="start">
+          <h2>1. What an equation is doing</h2>
+          <p>An equation in a learning model is a <strong>rule</strong>. It says how to update what the learner knows after one trial. The computer applies the same rule on every trial, over and over. Each time, the numbers that come out of one trial go into the next.</p>
+          <p>So you never have to "solve" the equation to use the model. You only need to know what each piece stands for and what the rule does with it. The rest of this page builds that up using the Rescorla-Wagner rule as the example:</p>
+          <div class="widget" data-widget="roles"></div>
+        </section>
+
+        <section id="roles">
+          <h2>2. Who sets each number</h2>
+          <p>Every symbol in a learning equation is one of three kinds. Knowing which kind you are looking at answers most questions about an equation.</p>
+          <ul>
+            <li><span class="role-badge role-experimenter">experimenter</span> <strong>Set by the experimenter's design.</strong> Which cues are on a trial, and whether the outcome happens.</li>
+            <li><span class="role-badge role-modeller">parameter</span> <strong>Set by the modeller.</strong> Numbers chosen before training that control how the model behaves, such as how fast it learns. They do not change during training.</li>
+            <li><span class="role-badge role-computed">computed</span> <strong>Calculated by the model.</strong> Everything else. These are what the model predicts, and they change from trial to trial.</li>
+          </ul>
+          <p>Every model page on this site colours symbols the same way: green for the experimenter, purple for parameters, and pink for computed values. Use the buttons above to light each kind up.</p>
+        </section>
+
+        <section id="names">
+          <h2>3. Letters are names for numbers</h2>
+          <p>A letter in an equation is a name for a number, the way a column heading in a spreadsheet names the numbers under it. <strong>V</strong> stands for associative strength: how strongly a cue predicts the outcome. Strength can be positive (the cue predicts the outcome), zero (it predicts nothing), or negative (it predicts the outcome will not happen).</p>
+          <p>The small letter written below and to the right is a <strong>subscript</strong>. It says <em>whose</em> number this is. V<sub>A</sub> is the strength of cue A, and V<sub>B</sub> is the strength of cue B. They are separate numbers that can change independently.</p>
+          <div class="widget" data-widget="names"></div>
+          <div data-check="names"></div>
+        </section>
+
+        <section id="greek">
+          <h2>4. The Greek letters</h2>
+          <p>Greek letters are not special maths. They are just more names, used by convention so that parameters and special quantities stand out from the ordinary letters. Here are the ones you will meet, and how to say them.</p>
+          <div class="table-wrap" style="max-height:none">
+            <table class="symbol-guide greek">
+              <thead><tr><th>Symbol</th><th>Say it</th><th>What it means here</th><th>Who sets it</th></tr></thead>
+              <tbody>
+                <tr><td class="sym-cell"><span class="sym role-modeller">α</span></td><td>alpha (AL-fuh)</td><td>Salience: how noticeable a cue is, from 0 to 1. α<sub>A</sub> is the salience of A.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
+                <tr><td class="sym-cell"><span class="sym role-modeller">β</span></td><td>beta (BAY-tuh)</td><td>Learning rate for the outcome, from 0 to 1.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
+                <tr><td class="sym-cell"><span class="sym role-experimenter">λ</span></td><td>lambda (LAM-duh)</td><td>The outcome: the most strength it can support. Usually 1 when the outcome happens and 0 when it does not.</td><td><span class="role-badge role-experimenter">experimenter</span></td></tr>
+                <tr><td class="sym-cell"><span class="sym role-computed">Δ</span></td><td>delta (DEL-tuh)</td><td>"Change in". Not a number on its own: ΔV means the change in V.</td><td>a label</td></tr>
+                <tr><td class="sym-cell"><span class="sym role-computed">Σ</span></td><td>sigma (SIG-muh)</td><td>"Add up". ΣV means the strengths of the cues present, added together.</td><td>a label</td></tr>
+                <tr><td class="sym-cell"><span class="sym">θ</span></td><td>theta (THAY-tuh)</td><td>A learning-rate parameter in Mackintosh's model, coming later.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
+                <tr><td class="sym-cell"><span class="sym">γ</span></td><td>gamma (GAM-uh)</td><td>How fast attention changes in the Pearce-Hall model, coming later.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small muted">Capital Δ and Σ are labels for operations. The lower-case letters α, β, λ, θ, and γ stand for numbers.</p>
+        </section>
+
+        <section id="delta">
+          <h2>5. Δ means "change in"</h2>
+          <p>ΔV is read "delta V" and means <strong>the change in V</strong> on one trial: the value after the trial minus the value before. If V went up, ΔV is positive. If it went down, ΔV is negative.</p>
+          <p>The learning rule calculates ΔV. Then the model applies it with a second, very simple step: the new strength is the old strength plus the change. This site writes that with an arrow, ←, read "becomes".</p>
+          <div class="widget" data-widget="delta"></div>
+          <div data-check="delta"></div>
+        </section>
+
+        <section id="sigma">
+          <h2>6. Σ means "add up"</h2>
+          <p>ΣV is read "sigma V" and means <strong>add up the strengths</strong>. In Rescorla-Wagner it adds up only the cues that are <em>present on this trial</em>. That total is the model's prediction of the outcome. Tick and untick the cues to see which ones go into the sum.</p>
+          <div class="widget" data-widget="sigma"></div>
+          <div data-check="sigma"></div>
+        </section>
+
+        <section id="multiply">
+          <h2>7. Side by side means multiply</h2>
+          <p>When symbols are written next to each other with nothing between them, they are <strong>multiplied</strong>. αβ means α × β. A bracket is worked out first, then multiplied like any other number. So αβ(λ − ΣV) means: work out λ − ΣV, then multiply it by α and by β.</p>
+          <div class="widget" data-widget="multiply"></div>
+          <div data-check="multiply"></div>
+        </section>
+
+        <section id="error">
+          <h2>8. The error: what happened minus what was predicted</h2>
+          <p>The bracket (λ − ΣV) is the heart of Rescorla-Wagner. λ is what happened, and ΣV is what the cues predicted. Subtracting one from the other gives the <strong>prediction error</strong>: how surprising the trial was. Its sign tells you the direction of learning, and its size tells you how much.</p>
+          <div class="widget" data-widget="error"></div>
+          <div data-check="error"></div>
+        </section>
+
+        <section id="trials">
+          <h2>9. Trial numbers</h2>
+          <p>Sometimes an equation needs to say <em>which trial</em> a value belongs to. Papers usually write the trial number as a small <strong>n</strong> above the letter: V<sup>n</sup> is the strength on trial n, and V<sup>n+1</sup> is the strength on the next trial. The update step then reads V<sub>A</sub><sup>n+1</sup> = V<sub>A</sub><sup>n</sup> + ΔV<sub>A</sub><sup>n</sup>: the strength on the next trial is the strength on this trial plus this trial's change.</p>
+          <p class="callout"><strong>Careful:</strong> in most algebra, a raised number is a power, so x<sup>2</sup> means x × x. In learning models a raised n is usually a <strong>trial counter</strong>, not a power. Read the text around an equation to see which one is meant.</p>
+          <p>Run the rule one trial at a time and watch each row's answer become the next row's starting value.</p>
+          <div class="widget" data-widget="trials"></div>
+          <div data-check="trials"></div>
+        </section>
+
+        <section id="asymptote">
+          <h2>10. Where the curve levels off</h2>
+          <p>Because the error shrinks as V gets closer to λ, each step is smaller than the one before. The curve rises quickly at first, then flattens. The value it approaches but never quite reaches is called the <strong>asymptote</strong>. In Rescorla-Wagner the asymptote is λ.</p>
+          <div class="widget" data-widget="asymptote"></div>
+        </section>
+
+        <section id="fixed">
+          <h2>11. Working out where learning stops</h2>
+          <p>You can find where a model ends up without running a single trial. Learning stops when nothing changes, which means every ΔV is zero. So: <strong>set Δ to zero and solve</strong>. This is the most useful trick for seeing what an equation implies. It explains overshadowing and conditioned inhibition in a few lines.</p>
+          <p>Pick an example and reveal the steps one at a time. Try to guess each step before you show it.</p>
+          <div class="widget" data-widget="fixed"></div>
+        </section>
+
+        <section id="read">
+          <h2>12. Reading a whole equation</h2>
+          <p>Put it all together. Read the equation left to right, one piece at a time, and say each piece in words.</p>
+          <div class="widget" data-widget="read"></div>
+          <p>Now try it on the model page. Each equation there is shown in words, in symbols, and with the numbers from the trial you pick, so you can check your reading against the real thing. <a href="models/rescorla-wagner.html">Open Rescorla-Wagner</a>.</p>
+        </section>
+
+        <section id="notation">
+          <h2>13. Notation map</h2>
+          <p>Different papers and textbooks write the same ideas in different ways. If a reading uses symbols you do not recognise, find the idea here.</p>
+          <div class="widget" data-widget="notation"></div>
+          <p class="small muted">The middle column follows the original chapter, which writes the compound of cues A and X as V<sub>AX</sub> and numbers the outcome with a subscript. The last column lists forms that are common across sources rather than any one book. When you quote a source, use its own symbols.</p>
+        </section>
+      </article>
+    </div>
+  </main>
+  <script type="module">
+    import { mountPrimer } from './js/ui/primer.js';
+    mountPrimer(document.getElementById('primer'));
+  </script>
+</body>
+</html>

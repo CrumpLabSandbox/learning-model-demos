@@ -243,9 +243,19 @@ Notes from building it:
 
 ### 2. Reading equations primer and predict-first
 
-- [ ] Primer page with live widgets for Δ, Σ, subscripts, trial superscripts, parameters, asymptotes, and fixed points
-- [ ] Notation map between the papers and common textbooks
-- [ ] Predict-first sketching on the chart, used by the phenomenon cards
+Students who tried the Milestone 1 page liked it but asked for more scaffolding to follow what was going on. This milestone is the answer to that.
+
+- [x] Primer page with live widgets for Δ, Σ, subscripts, trial superscripts, parameters, asymptotes, and fixed points
+- [x] Notation map between the papers and common textbooks
+- [x] Predict-first sketching on the chart, used by the phenomenon cards
+
+Notes from building it:
+
+- The primer (`primer.html`) has thirteen short sections. Most have a widget, and six end with a "check yourself" question whose wrong answers explain the mistake. The order follows how students read an equation: who sets each number, letters as names, Greek letters with pronunciations, Δ, Σ, multiplication, the error term, trial superscripts (with a warning that they are not powers), asymptotes, setting Δ to zero and solving, and a guided read of the whole rule.
+- The "where learning stops" section solves three cases by algebra (one cue, a compound, and conditioned inhibition), then runs the real model to check the answer. Tests confirm each algebraic solution matches the model.
+- The notation map's original-paper column follows the 1972 chapter's V<sub>AX</sub>, β<sub>1</sub>, λ<sub>1</sub> style. Its last column lists forms common across sources rather than citing particular textbooks. Check it against the course readings before class.
+- Predict first: each phenomenon card now has "Predict, then run". The chart hides the model's lines and uses a range that gives nothing away. The student draws the lines named in the card's prompt, and the equations, arithmetic, trial table, and that card's result stay hidden until they press Reveal. The comparison then gives a verdict per line, the values at the end of each phase, and a button that jumps to the trial where the sketch and the model differ most. Any design can be sketched from the chart's "Sketch a prediction first" button.
+- The model page also gained a collapsible "How to use this page" guide, a link from the equation panel to the primer, and a link from each row of the symbol guide to the primer section that explains that symbol.
 
 ### 3. Attention models
 

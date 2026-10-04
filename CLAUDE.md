@@ -22,12 +22,15 @@ ES modules do not load from `file://`, so always open the site through a local s
 
 ```
 index.html                    landing page
+primer.html                   how to read the equations: widgets, checks, notation map
 models/<model>.html           one page per model; each just calls mountModelPage()
-js/core/                      no DOM: design parser, runner, rng, phenomenon checks, URL state, formatting
+js/core/                      no DOM: design parser, runner, rng, phenomenon checks, sketch comparison, URL state, formatting
 js/models/<model>.js          one module per model, common interface (see js/core/runner.js)
-js/ui/                        DOM: page.js wires everything; chart, equation, arithmetic, table, highlight
+js/ui/                        DOM: page.js wires everything; chart, equation, arithmetic, table, highlight, primer
+                              mathml.js has string helpers for hand-written MathML
 content/equations/<model>.js  equation spec per model: symbols, equations, words, table columns, build stages
-content/phenomena/index.js    phenomenon presets: design, empirical result, citation, check, per-model notes
+content/phenomena/index.js    phenomenon presets: design, empirical result, citation, check, predict prompt, per-model notes
+content/primer/               primer content: worked fixed points, check questions, notation map
 tests/                        node:test files
 css/site.css                  one stylesheet; colour tokens on :root with dark-mode overrides
 ```
@@ -46,5 +49,7 @@ css/site.css                  one stylesheet; colour tokens on :root with dark-m
 - Cue colours follow the validated categorical palette in fixed order by the cue's position in the design. Never colour text with a cue colour; put a swatch beside it.
 - Anything that shows a symbol, value, or line for a symbol carries `data-sym` and, where it belongs to a cue, `data-cue`. `js/ui/highlight.js` links them on hover.
 - Phenomenon badges are computed by running the design, never typed by hand.
+- Each phenomenon has a `predict` prompt naming lines that the chart plots. While a student sketches, anything that would give the answer away carries the `spoiler` class and is hidden.
+- Each symbol in an equation spec has a `primer` anchor pointing at the primer section that explains it.
 - Computed numbers show three decimals; parameters show the value as set.
 - Writing on the page is plain: short sentences, no jargon without a definition.

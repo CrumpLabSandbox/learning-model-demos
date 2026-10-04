@@ -20,6 +20,7 @@ import { createChart, cueColor } from './chart.js';
 import { renderArithmetic } from './arithmetic.js';
 import { createTable, tableCSV } from './table.js';
 import { installHighlighting } from './highlight.js';
+import { compareSketch, verdict } from '../core/sketch.js';
 
 const READINGS = [
   { key: 'words', label: 'Words' },
@@ -43,7 +44,7 @@ Add ", random" to a line to shuffle it, or
 The default alternates trial types.
 "Test:" lists the lines to plot.`;
 
-export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, defaultPreset }) {
+export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, defaultPreset, primerUrl = '../primer.html' }) {
   const state = {
     presetId: defaultPreset,
     designText: '',
@@ -60,15 +61,21 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
     playing: false,
     speed: 'medium',
     run: null,
+    // Predict first: null, or { sketching, cues, activeCue, sketches, prompt, history }
+    predict: null,
   };
   let codeText = null;
   let playTimer = null;
 
-  root.innerHTML = layout(model, spec);
+  root.innerHTML = layout(model, spec, primerUrl);
   const $ = (id) => root.querySelector(`#${id}`);
   installHighlighting(root);
 
-  const chart = createChart($('chart'), { onSelect: (t) => select(t) });
+  const chart = createChart($('chart'), {
+    onSelect: (t) => select(t),
+    onSketch: (t, v, { start }) => addSketchPoint(t, v, start),
+    onSketchEnd: () => renderPredictBar(),
+  });
   const table = createTable($('table'), { onSelect: (t) => select(t, { scrollTable: false }) });
 
   // ---- Design -------------------------------------------------------------
@@ -126,6 +133,7 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
 
   function setDesign(text, { render = true } = {}) {
     state.designText = text;
+    state.predict = null;
     try {
       state.design = parseDesign(text);
       state.designError = '';
@@ -284,6 +292,163 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
     else if (act === 'prev') setStage(Math.max(0, state.stage - 1));
     else if (act === 'next') setStage(state.stage + 1);
     else if (act === 'done' || act === 'exit') setStage(null);
+  });
+
+  // ---- Predict first ------------------------------------------------------
+  function startPredict(cues, prompt) {
+    stop();
+    const run = state.run;
+    const valid = cues.filter((c) => run.series[c]);
+    if (!valid.length) return;
+    state.predict = {
+      sketching: true,
+      cues: valid,
+      activeCue: valid[0],
+      sketches: Object.fromEntries(valid.map((c) => [c, { 0: run.series[c][0] }])),
+      prompt: prompt ?? `Sketch how you think ${listCues(valid)} will change, then reveal the model.`,
+      history: [],
+    };
+    renderPredict();
+  }
+
+  function addSketchPoint(t, v, start) {
+    const pr = state.predict;
+    if (!pr?.sketching) return;
+    const sk = pr.sketches[pr.activeCue];
+    if (start) pr.history.push({ cue: pr.activeCue, sketch: { ...sk } });
+    // A drag fills in every trial it passes, so fast strokes leave no gaps.
+    const prevT = pr.lastT;
+    if (!start && prevT !== undefined && Math.abs(t - prevT) > 1) {
+      const prevV = sk[prevT];
+      const dir = t > prevT ? 1 : -1;
+      for (let k = prevT + dir; k !== t; k += dir) sk[k] = prevV + ((v - prevV) * (k - prevT)) / (t - prevT);
+    }
+    sk[t] = v;
+    pr.lastT = t;
+    chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: pr });
+  }
+
+  function revealPrediction() {
+    const pr = state.predict;
+    pr.sketching = false;
+    state.revealed = state.run.trials.length;
+    renderPredict();
+  }
+
+  function renderPredict() {
+    root.classList.toggle('predicting', Boolean(state.predict?.sketching));
+    renderPredictBar();
+    renderTrialViews();
+    renderCards();
+  }
+
+  function renderPredictBar() {
+    const bar = $('predict-bar');
+    const fb = $('predict-feedback');
+    const pr = state.predict;
+    $('stepper').hidden = Boolean(pr?.sketching);
+    $('predict-start').hidden = Boolean(pr?.sketching);
+    if (!pr) {
+      bar.hidden = true;
+      fb.hidden = true;
+      return;
+    }
+    const n = state.run.trials.length;
+    if (pr.sketching) {
+      fb.hidden = true;
+      bar.hidden = false;
+      const status = pr.cues
+        .map((c) => {
+          const ts = Object.keys(pr.sketches[c]).map(Number);
+          const end = Math.max(...ts);
+          return end >= n ? `${c}: done` : `${c}: drawn to trial ${end} of ${n}`;
+        })
+        .join(' · ');
+      bar.innerHTML =
+        `<p class="predict-prompt"><strong>Predict first.</strong> ${esc(pr.prompt)}</p>` +
+        `<div class="btn-row"><span class="small muted">Drawing</span>` +
+        pr.cues
+          .map((c) => `<button class="btn" data-sketch-cue="${c}" aria-pressed="${c === pr.activeCue}"><span class="swatch" style="background:${c.length === 1 ? cueColor(state.run, c) : 'var(--ink-2)'}"></span>${c}</button>`)
+          .join('') +
+        `<button class="btn" data-pact="undo"${pr.history.length ? '' : ' disabled'}>Undo</button>` +
+        `<button class="btn" data-pact="clear">Clear ${pr.activeCue}</button>` +
+        `<button class="btn primary" data-pact="reveal">Reveal the model</button>` +
+        `<button class="btn" data-pact="skip">Skip</button></div>` +
+        `<p class="small muted predict-status">${status}. Every line starts where the model starts, at trial 0. Click to place points or drag to draw.</p>`;
+      return;
+    }
+    bar.hidden = true;
+    fb.hidden = false;
+    const lambda = state.run.params.lambda ?? 1;
+    let worst = null;
+    const rows = pr.cues
+      .map((c) => {
+        const cmp = compareSketch(pr.sketches[c], state.run.series[c], state.run.phases);
+        if (cmp.worst && (!worst || cmp.worst.diff > worst.diff)) worst = { ...cmp.worst, cue: c };
+        const ends = cmp.phaseEnds
+          .map((e) => `<li>End of ${esc(e.phase)}: you ${e.sketch === null ? '–' : signed(fmt(e.sketch))}, model ${signed(fmt(e.model))}</li>`)
+          .join('');
+        return (
+          `<div class="fb-cue"><div><span class="swatch" style="background:${c.length === 1 ? cueColor(state.run, c) : 'var(--ink-2)'}"></span> <strong>${c}</strong>: ${esc(verdict(cmp.meanAbs, lambda))}</div>` +
+          `<ul class="small">${ends}</ul>` +
+          (cmp.complete ? '' : `<p class="small muted">Your line stopped before the last trial, so only the part you drew is compared.</p>`) +
+          `</div>`
+        );
+      })
+      .join('');
+    fb.innerHTML =
+      `<div class="fb-head"><strong>Your prediction and the model.</strong> Your sketch is the dashed line.</div>` +
+      `<div class="fb-grid">${rows}</div>` +
+      `<div class="btn-row">` +
+      (worst
+        ? `<button class="btn primary" data-pact="worst" data-t="${worst.t}" data-cue="${worst.cue}">Go to trial ${worst.t}, where ${worst.cue} differed most</button>`
+        : '') +
+      `<button class="btn" data-pact="again">Sketch again</button><button class="btn" data-pact="hide">Hide my sketch</button></div>` +
+      `<p class="small muted">Where your line and the model's part ways, the equations below show why. Step to that trial and read the error term.</p>`;
+  }
+
+  $('chart-panel').addEventListener('click', (ev) => {
+    const cueBtn = ev.target.closest('[data-sketch-cue]');
+    if (cueBtn && state.predict) {
+      state.predict.activeCue = cueBtn.dataset.sketchCue;
+      state.predict.lastT = undefined;
+      renderPredictBar();
+      chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: state.predict });
+      return;
+    }
+    const btn = ev.target.closest('[data-pact]');
+    if (!btn) return;
+    const pr = state.predict;
+    const act = btn.dataset.pact;
+    if (act === 'start') {
+      const preset = phenomena.find((p) => p.id === state.presetId);
+      if (preset?.predict && preset.design.trim() === state.designText.trim()) startPredict(preset.predict.cues, preset.predict.prompt);
+      else startPredict(state.run.displayProbes);
+      return;
+    }
+    if (!pr) return;
+    if (act === 'undo') {
+      const h = pr.history.pop();
+      if (h) pr.sketches[h.cue] = h.sketch;
+    } else if (act === 'clear') {
+      pr.history.push({ cue: pr.activeCue, sketch: { ...pr.sketches[pr.activeCue] } });
+      pr.sketches[pr.activeCue] = { 0: state.run.series[pr.activeCue][0] };
+    } else if (act === 'reveal') return revealPrediction();
+    else if (act === 'skip' || act === 'hide') {
+      state.predict = null;
+      return renderPredict();
+    } else if (act === 'again') return startPredict(pr.cues, pr.prompt);
+    else if (act === 'worst') {
+      const c = btn.dataset.cue;
+      if (c.length === 1) state.focusCue = c;
+      else state.focusCue = [...c][0];
+      select(Number(btn.dataset.t));
+      $('eq-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    pr.lastT = undefined;
+    renderPredictBar();
+    chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: pr });
   });
 
   // ---- Stepping -----------------------------------------------------------
@@ -466,7 +631,9 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
         }
         return (
           `<tr data-sym="${key}"${def.render?.sub === 'cue' ? ` data-cue="${cue}"` : ''}><td class="sym-cell">${symbol}</td>` +
-          `<td><strong>${esc(def.name)}</strong>. ${esc(def.meaning(cue))}</td>` +
+          `<td><strong>${esc(def.name)}</strong>. ${esc(def.meaning(cue))}` +
+          (def.primer ? ` <a class="small" href="${primerUrl}#${def.primer}">How to read ${def.render ? 'this' : 'it'}</a>` : '') +
+          `</td>` +
           `<td><span class="role-badge role-${def.role}">${spec.roles[def.role].short}</span></td>` +
           `<td class="where small muted">${esc(def.where)}</td>` +
           `<td class="value">${value}</td></tr>`
@@ -513,6 +680,13 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
               .map(([k, v]) => `${k.replace('alpha_', 'α for ')} = ${v}`)
               .join(', ')}.</p>`
           : '';
+        const hide = state.predict?.sketching && p.id === state.presetId;
+        if (hide) {
+          return (
+            `<article class="card active"><h3>${esc(p.title)}</h3><div class="design-text">${esc(p.design)}</div>` +
+            `<p class="small muted">The result and the explanation are hidden until you reveal the model.</p></article>`
+          );
+        }
         return (
           `<article class="card${p.id === state.presetId ? ' active' : ''}">` +
           `<h3>${esc(p.title)} ${badge}</h3>` +
@@ -522,7 +696,8 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
           (m.why ? `<p><span class="label">Why:</span> ${subscripts(m.why)}</p>` : '') +
           (m.tryThis ? `<p><span class="label">Try this:</span> ${subscripts(m.tryThis)}</p>` : '') +
           fixed +
-          `<div><button class="btn" data-load="${p.id}">${p.id === state.presetId ? 'Loaded' : 'Load this design'}</button></div>` +
+          `<div class="btn-row"><button class="btn primary" data-load="${p.id}" data-predict="1">Predict, then run</button>` +
+          `<button class="btn" data-load="${p.id}">${p.id === state.presetId ? 'Loaded' : 'Just load it'}</button></div>` +
           `</article>`
         );
       })
@@ -533,6 +708,8 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
     const id = ev.target.closest('[data-load]')?.dataset.load;
     if (!id) return;
     loadPreset(id);
+    const p = phenomena.find((x) => x.id === id);
+    if (ev.target.closest('[data-load]').dataset.predict === '1' && p.predict) startPredict(p.predict.cues, p.predict.prompt);
     root.querySelector('#chart-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
@@ -592,7 +769,7 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
 
   // ---- Render groups ------------------------------------------------------
   function renderTrialViews({ scrollTable = true } = {}) {
-    chart.update({ run: state.run, t: state.t, revealed: state.revealed });
+    chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: state.predict });
     renderStepper();
     renderEquations();
     renderArith();
@@ -617,6 +794,8 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
 
   function renderAll() {
     $('reshuffle').hidden = !(state.design && usesRandomOrder(state.design));
+    root.classList.toggle('predicting', Boolean(state.predict?.sketching));
+    renderPredictBar();
     renderSliders();
     renderToggles();
     renderBuild();
@@ -672,11 +851,22 @@ function subscripts(text) {
   return esc(text).replace(/([A-Za-z\u0391-\u03c9]+)_([A-Z])/g, '$1<sub>$2</sub>');
 }
 
-function layout(model, spec) {
+function layout(model, spec, primerUrl) {
   return `
 <div class="page-intro">
   <h1>${esc(model.name)} <span class="muted">(${model.year})</span></h1>
   ${spec.intro}
+  <details class="howto">
+    <summary>New here? How to use this page</summary>
+    <ol>
+      <li><strong>Pick an experiment</strong> in the Design box, or press <em>Predict, then run</em> on any card at the bottom. Predicting first is the best way to learn: sketch what you expect before you see the model.</li>
+      <li><strong>Step through the trials</strong> with the Step button or by clicking the chart. Each trial is one row of the trial table.</li>
+      <li><strong>Read the equations</strong> for the trial you picked. Each one is shown in words, in symbols, and with that trial's numbers. Pick the cue you want to follow.</li>
+      <li><strong>Hover anything</strong> to see where else it appears: a symbol lights up its slider, its chart line, and its table column.</li>
+      <li><strong>Change one thing</strong>: a slider, or one of the assumptions. Watch which phenomenon badges flip.</li>
+    </ol>
+    <p>Not sure what Δ, Σ, or the Greek letters mean? Start with <a href="${primerUrl}">Reading the equations</a>.</p>
+  </details>
 </div>
 <div class="layout">
   <aside class="sidebar" aria-label="Design and parameters">
@@ -704,7 +894,8 @@ function layout(model, spec) {
   </aside>
   <div class="main">
     <section class="panel" id="chart-panel">
-      <div class="panel-head"><h2>Predictions</h2><button class="btn" id="share">Copy link</button></div>
+      <div class="panel-head"><h2>Predictions</h2><div class="btn-row"><button class="btn" id="predict-start" data-pact="start">Sketch a prediction first</button><button class="btn" id="share">Copy link</button></div></div>
+      <div class="predict-bar" id="predict-bar" hidden></div>
       <div class="stepper" id="stepper">
         <button class="btn" data-act="reset" aria-label="Go to the start">⏮</button>
         <button class="btn" data-act="back" aria-label="Step back one trial">◀</button>
@@ -716,11 +907,14 @@ function layout(model, spec) {
         <label class="small">Speed <select id="speed"><option value="slow">slow</option><option value="medium" selected>medium</option><option value="fast">fast</option></select></label>
       </div>
       <div id="chart"></div>
+      <div class="predict-feedback" id="predict-feedback" hidden></div>
     </section>
-    <div class="eq-arith">
+    <div class="spoiler-cover panel">The equations, arithmetic, and trial table are hidden while you sketch, so they do not give the answer away. Press <strong>Reveal the model</strong> when your sketch is done.</div>
+    <div class="eq-arith spoiler">
       <section class="panel" id="eq-panel">
         <div class="panel-head">
           <h2>Equations <span class="muted" id="eq-context"></span></h2>
+          <a class="small" href="${primerUrl}">How to read these equations</a>
           <div class="readings" role="group" aria-label="Ways to read the equations">
             ${READINGS.map((r) => `<button class="btn" data-reading="${r.key}" aria-pressed="false">${r.label}</button>`).join('')}
           </div>
@@ -734,7 +928,7 @@ function layout(model, spec) {
         <div class="arith" id="arith"></div>
       </section>
     </div>
-    <section class="panel">
+    <section class="panel spoiler">
       <h2>What each symbol means</h2>
       <div class="role-key" style="margin:.25rem 0 .5rem">
         <span><span class="role-badge role-experimenter">experimenter</span> set by the experimenter's design</span>
@@ -743,7 +937,7 @@ function layout(model, spec) {
       </div>
       <table class="symbol-guide" id="guide"></table>
     </section>
-    <section class="panel">
+    <section class="panel spoiler">
       <div class="panel-head"><h2>Trial table</h2><button class="btn" id="csv">Download CSV</button></div>
       <p class="small muted">Every number the model computed, one row per trial. Click a row to select that trial.</p>
       <div class="table-wrap" id="table"></div>

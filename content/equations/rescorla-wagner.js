@@ -10,6 +10,7 @@ import { fmt } from '../../js/core/format.js';
 
 export const symbols = {
   sumV: {
+    primer: 'sigma',
     render: { pre: 'Σ', base: 'V' },
     role: 'computed',
     name: 'total prediction',
@@ -18,6 +19,7 @@ export const symbols = {
     value: (r) => r.sumV,
   },
   V: {
+    primer: 'names',
     render: { base: 'V', sub: 'cue' },
     role: 'computed',
     name: 'associative strength',
@@ -26,6 +28,7 @@ export const symbols = {
     value: (r, c) => r.Vbefore[c],
   },
   lambda: {
+    primer: 'greek',
     render: { base: 'λ' },
     role: 'experimenter',
     name: 'outcome',
@@ -36,6 +39,7 @@ export const symbols = {
     exact: true,
   },
   beta: {
+    primer: 'greek',
     render: { base: 'β' },
     role: 'modeller',
     name: 'learning rate for the outcome',
@@ -46,6 +50,7 @@ export const symbols = {
     exact: true,
   },
   alpha: {
+    primer: 'greek',
     render: { base: 'α', sub: 'cue' },
     role: 'modeller',
     name: 'salience',
@@ -56,6 +61,7 @@ export const symbols = {
     exact: true,
   },
   error: {
+    primer: 'error',
     render: null,
     role: 'computed',
     name: 'prediction error',
@@ -65,6 +71,7 @@ export const symbols = {
     value: (r, c) => r.perCue[c]?.error,
   },
   dV: {
+    primer: 'delta',
     render: { pre: 'Δ', base: 'V', sub: 'cue' },
     role: 'computed',
     name: 'change in strength',

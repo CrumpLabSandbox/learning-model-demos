@@ -5,6 +5,7 @@
 
 import { fmt, signed } from '../core/format.js';
 import { esc } from './equation.js';
+import { sketchPoints } from '../core/sketch.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 
@@ -32,7 +33,7 @@ function intTicks(n, width) {
   return out;
 }
 
-export function createChart(container, { onSelect }) {
+export function createChart(container, { onSelect, onSketch = () => {}, onSketchEnd = () => {} }) {
   container.innerHTML = '';
   const wrap = document.createElement('div');
   wrap.className = 'chart-wrap';
@@ -57,6 +58,12 @@ export function createChart(container, { onSelect }) {
     const t = Math.round(geom.xInv(px));
     return Math.max(0, Math.min(geom.n, t));
   }
+  function vFromEvent(ev) {
+    const rect = svg.getBoundingClientRect();
+    const py = ((ev.clientY - rect.top) / rect.height) * geom.height;
+    return Math.max(geom.lo, Math.min(geom.hi, Math.round(geom.yInv(py) * 100) / 100));
+  }
+  const sketching = () => Boolean(model?.predict?.sketching);
 
   let dragging = false;
   svg.addEventListener('pointerdown', (ev) => {
@@ -64,17 +71,24 @@ export function createChart(container, { onSelect }) {
     if (t === null) return;
     dragging = true;
     svg.setPointerCapture(ev.pointerId);
-    onSelect(t);
+    if (sketching()) {
+      ev.preventDefault();
+      onSketch(t, vFromEvent(ev), { start: true });
+    } else onSelect(t);
   });
   svg.addEventListener('pointermove', (ev) => {
     const t = tFromEvent(ev);
-    if (dragging && t !== null) onSelect(t);
+    if (dragging && t !== null && sketching()) onSketch(t, vFromEvent(ev), { start: false });
+    else if (dragging && t !== null) onSelect(t);
     else if (t !== hoverT) {
       hoverT = t;
       draw();
     }
   });
-  svg.addEventListener('pointerup', () => (dragging = false));
+  svg.addEventListener('pointerup', () => {
+    if (dragging && sketching()) onSketchEnd();
+    dragging = false;
+  });
   svg.addEventListener('pointerleave', () => {
     if (hoverT !== null) {
       hoverT = null;
@@ -82,7 +96,7 @@ export function createChart(container, { onSelect }) {
     }
   });
   svg.addEventListener('keydown', (ev) => {
-    if (!model) return;
+    if (!model || sketching()) return;
     const n = model.run.trials.length;
     const step = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 10, PageDown: -10 }[ev.key];
     if (step) onSelect(Math.max(0, Math.min(n, model.t + step)));
@@ -102,7 +116,12 @@ export function createChart(container, { onSelect }) {
   function draw() {
     if (!model) return;
     const { run, t, revealed } = model;
+    const pr = model.predict ?? null;
+    const isSketching = Boolean(pr?.sketching);
+    const sketchCues = pr ? pr.cues : [];
     const probes = run.displayProbes;
+    svg.style.touchAction = isSketching ? 'none' : '';
+    svg.classList.toggle('sketching', isSketching);
     const n = run.trials.length;
     const width = Math.max(300, container.clientWidth || 600);
     const height = Math.round(Math.max(240, Math.min(360, width * 0.42)));
@@ -110,10 +129,17 @@ export function createChart(container, { onSelect }) {
     const iw = width - m.left - m.right;
     const ih = height - m.top - m.bottom;
 
-    const shown = probes.flatMap((p) => run.series[p]);
+    const shown = isSketching ? [] : probes.flatMap((p) => run.series[p]);
+    const sketched = sketchCues.flatMap((c) => Object.values(pr.sketches[c] ?? {}));
     const lambda = run.params.lambda ?? 1;
-    let lo = Math.min(0, ...shown);
-    let hi = Math.max(lambda, 0.2, ...shown);
+    let lo = Math.min(0, ...shown, ...sketched);
+    let hi = Math.max(lambda, 0.2, ...shown, ...sketched);
+    // While sketching, use a range that gives nothing away: room above λ and
+    // the same distance below zero, whatever the model will do.
+    if (isSketching) {
+      lo = Math.min(lo, -lambda);
+      hi = Math.max(hi, lambda * 1.1);
+    }
     const pad = (hi - lo) * 0.06;
     lo = lo < 0 ? lo - pad : 0;
     hi += pad;
@@ -123,7 +149,15 @@ export function createChart(container, { onSelect }) {
 
     const x = (i) => m.left + (n ? (i / n) * iw : 0);
     const y = (v) => m.top + (1 - (v - lo) / (hi - lo)) * ih;
-    geom = { width, n, xInv: (px) => ((px - m.left) / iw) * n };
+    geom = {
+      width,
+      height,
+      n,
+      lo,
+      hi,
+      xInv: (px) => ((px - m.left) / iw) * n,
+      yInv: (py) => lo + (1 - (py - m.top) / ih) * (hi - lo),
+    };
 
     const parts = [];
     // Phase bands, boundaries, and names.
@@ -152,7 +186,31 @@ export function createChart(container, { onSelect }) {
     // Series, up to the revealed trial.
     const upTo = Math.max(0, Math.min(revealed, n));
     const ends = [];
-    probes.forEach((p) => {
+    const colorOf = (p) => (p.length === 1 ? cueColor(run, p) : 'var(--ink-2)');
+    const sketchEnds = [];
+    for (const c of sketchCues) {
+      const pts = sketchPoints(pr.sketches[c] ?? {});
+      if (!pts.length) continue;
+      const d = pts.map(([tt, v], i) => `${i ? 'L' : 'M'}${x(tt).toFixed(1)},${y(v).toFixed(1)}`).join('');
+      const active = isSketching && pr.activeCue === c;
+      parts.push(`<path class="sketch${active ? ' active' : ''}" d="${d}" style="stroke:${colorOf(c)}"${c.length === 1 ? ` data-cue="${c}"` : ''}><title>Your sketch for ${c}</title></path>`);
+      if (isSketching && pts.length <= 40) {
+        for (const [tt, v] of pts) parts.push(`<circle class="sketch-dot" cx="${x(tt)}" cy="${y(v)}" r="${active ? 3.5 : 2.5}" style="fill:${colorOf(c)}"/>`);
+      }
+      if (isSketching) {
+        const [lt, lv] = pts[pts.length - 1];
+        sketchEnds.push({ c, x: x(lt), y: y(lv) });
+      }
+    }
+    // Sketch end labels, nudged apart when two lines end close together.
+    sketchEnds.sort((a, b) => a.y - b.y);
+    let prevY = -Infinity;
+    for (const e of sketchEnds) {
+      const ly = Math.max(e.y, prevY + 13);
+      prevY = ly;
+      parts.push(`<text class="end-label" x="${e.x + 6}" y="${ly + 4}">${e.c}</text>`);
+    }
+    if (!isSketching) probes.forEach((p) => {
       const s = run.series[p];
       const d = s.slice(0, upTo + 1).map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
       const single = p.length === 1;
@@ -173,16 +231,19 @@ export function createChart(container, { onSelect }) {
       placed.push({ ...e, ly });
     }
     const ex = x(upTo);
-    for (const e of placed) {
+    if (!isSketching) for (const e of placed) {
       if (Math.abs(e.ly - e.y) > 2) parts.push(`<line class="leader" x1="${ex + 2}" x2="${ex + 8}" y1="${e.y}" y2="${e.ly - 4}"/>`);
       parts.push(`<text class="end-label" x="${ex + 10}" y="${e.ly + 4}"${e.p.length === 1 ? ` data-cue="${e.p}"` : ''}>${e.p}</text>`);
     }
 
     // Hover line and selected-trial cursor with dots.
-    if (hoverT !== null && hoverT !== t) {
+    if (isSketching && hoverT !== null) {
       parts.push(`<line class="hover-line" x1="${x(hoverT)}" x2="${x(hoverT)}" y1="${m.top}" y2="${m.top + ih}"/>`);
     }
-    if (t !== null && t !== undefined) {
+    if (!isSketching && hoverT !== null && hoverT !== t) {
+      parts.push(`<line class="hover-line" x1="${x(hoverT)}" x2="${x(hoverT)}" y1="${m.top}" y2="${m.top + ih}"/>`);
+    }
+    if (!isSketching && t !== null && t !== undefined) {
       parts.push(`<line class="cursor" x1="${x(t)}" x2="${x(t)}" y1="${m.top}" y2="${m.top + ih}"/>`);
       const rec = t > 0 ? run.trials[t - 1] : null;
       for (const p of probes) {
@@ -211,6 +272,13 @@ export function createChart(container, { onSelect }) {
     svg.setAttribute('aria-valuetext', rec ? `Trial ${t} of ${n}, ${rec.phaseName}, ${rec.label}` : 'Before training');
 
     // Readout: legend plus values at the hovered or selected trial.
+    if (isSketching) {
+      const keys = sketchCues
+        .map((c) => `<span class="key"><span class="swatch sketch-swatch" style="--sw:${colorOf(c)}"></span>${c}${c === pr.activeCue ? ' <strong>(drawing)</strong>' : ''}</span>`)
+        .join('');
+      readout.innerHTML = `<span>${hoverT !== null ? `<strong>Trial ${hoverT}</strong> ` : ''}<span class="muted">Click or drag on the chart to draw your line for ${pr.activeCue}.</span></span>${keys}`;
+      return;
+    }
     const rt = hoverT ?? t;
     const rrec = rt > 0 ? run.trials[rt - 1] : null;
     const head = rrec
@@ -223,7 +291,8 @@ export function createChart(container, { onSelect }) {
         return `<span class="key"${single ? ` data-cue="${p}"` : ''}><span class="swatch${single ? '' : ' compound'}" style="background:${single ? cueColor(run, p) : 'var(--ink-2)'}"></span>${p} <span class="muted">${v}</span></span>`;
       })
       .join('');
-    readout.innerHTML = `<span>${head}</span>${keys}`;
+    const sketchKey = sketchCues.length ? `<span class="key"><span class="swatch sketch-swatch" style="--sw:var(--ink-2)"></span><span class="muted">your sketch</span></span>` : '';
+    readout.innerHTML = `<span>${head}</span>${keys}${sketchKey}`;
   }
 
   return { update };

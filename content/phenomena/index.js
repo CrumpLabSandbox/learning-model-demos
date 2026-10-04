@@ -9,6 +9,7 @@
 //   check     (run, h) -> { shown, measure }   h has at(), final(), phaseEnd(), phaseValues(), margin
 //   params    optional parameter values this design needs, applied when it is loaded
 //   focus     the trial and cue to show first: { t } or { phase }, and { cue }
+//   predict   the lines a student sketches before running it, and the prompt
 //   models    per model: why the model does or does not show it (naming the
 //             responsible term) and something to try
 
@@ -20,6 +21,7 @@ export const phenomena = [
   {
     id: 'acquisition',
     title: 'Acquisition',
+    predict: { cues: ['A'], prompt: 'A is followed by the outcome on every trial. Sketch how strongly you think A will predict the outcome over the 30 trials.' },
     focus: { t: 1, cue: 'A' },
     design: 'Training: 30 A+',
     empirical:
@@ -46,6 +48,7 @@ export const phenomena = [
   {
     id: 'extinction',
     title: 'Extinction',
+    predict: { cues: ['A'], prompt: 'A is paired with the outcome, then shown alone. Sketch A through both phases.' },
     focus: { phase: 1, cue: 'A' },
     design: 'Acquisition: 20 A+\nExtinction: 30 A-',
     empirical: 'After training, presenting the cue without the outcome makes the response fade.',
@@ -66,6 +69,7 @@ export const phenomena = [
   {
     id: 'salience',
     title: 'Salience',
+    predict: { cues: ['A', 'B'], prompt: 'A is much more noticeable than B. Both are always followed by the outcome. Sketch A and B.' },
     focus: { t: 1, cue: 'A' },
     design: 'Training: 20 A+, 20 B+',
     params: { alpha_A: 0.5, alpha_B: 0.1 },
@@ -91,6 +95,7 @@ export const phenomena = [
   {
     id: 'blocking',
     title: 'Blocking',
+    predict: { cues: ['B', 'D'], prompt: 'A is trained alone first. Then B is added to A, while D is trained with a new cue, C. Sketch B and D.' },
     focus: { phase: 1, cue: 'B' },
     design: 'Pretraining: 20 A+\nCompound: 20 AB+, 20 CD+',
     empirical:
@@ -112,6 +117,7 @@ export const phenomena = [
   {
     id: 'overshadowing',
     title: 'Overshadowing',
+    predict: { cues: ['B', 'C'], prompt: 'B is always trained together with A. C is trained on its own. Sketch B and C.' },
     focus: { t: 1, cue: 'B' },
     design: 'Training: 30 AB+, 30 C+',
     empirical:
@@ -133,6 +139,7 @@ export const phenomena = [
   {
     id: 'conditioned-inhibition',
     title: 'Conditioned inhibition',
+    predict: { cues: ['A', 'X'], prompt: 'A on its own is followed by the outcome. A with X is not. Sketch A and X. Can a line go below zero?' },
     focus: { t: 4, cue: 'X' },
     design: 'Training: 40 A+, 40 AX-',
     empirical:
@@ -153,6 +160,7 @@ export const phenomena = [
   {
     id: 'latent-inhibition',
     title: 'Latent inhibition',
+    predict: { cues: ['A', 'B'], prompt: 'A is shown 30 times with nothing after it. Then A and a new cue, B, are both trained with the outcome. Sketch A and B.' },
     focus: { t: 1, cue: 'A' },
     design: 'Pre-exposure: 30 A-\nConditioning: 15 A+, 15 B+',
     empirical:
@@ -181,6 +189,7 @@ export const phenomena = [
   {
     id: 'backward-blocking',
     title: 'Backward blocking',
+    predict: { cues: ['B', 'D'], prompt: 'AB and CD are both trained first. Then A alone is trained. B never appears again. Sketch B and D.' },
     focus: { phase: 1, cue: 'B' },
     design: 'Compound: 20 AB+, 20 CD+\nElement: 20 A+',
     empirical:
@@ -202,6 +211,7 @@ export const phenomena = [
   {
     id: 'negative-patterning',
     title: 'Negative patterning',
+    predict: { cues: ['A', 'AB'], prompt: 'A alone and B alone are followed by the outcome, but A and B together are not. Sketch A and the compound AB.' },
     focus: { t: 6, cue: 'A' },
     design: 'Training: 40 A+, 40 B+, 40 AB-\nTest: A, B, AB',
     empirical:
