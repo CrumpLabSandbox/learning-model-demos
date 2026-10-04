@@ -285,7 +285,7 @@ After the scaffolding went live, the slide decks broke for some visitors. The ca
 - [x] `tools/check_site.py` (Playwright): every page at desktop and phone size, with no console errors, failed requests, unstamped assets, or sideways scrolling, plus the decks, model page, predict-first, primer, warm-up, and glossary; screenshots to `_check/`
 - [x] A load guard on every page: if a page's script never finishes starting, a reload message appears instead of a broken page
 - [x] CI runs the browser checks in Chromium, Firefox, and WebKit on every push; deploys from `main` go through GitHub Actions and only happen when the checks pass
-- [ ] Switch Settings > Pages > Source to GitHub Actions so the built, version-stamped site is what gets published
+- [x] Switch Settings > Pages > Source to GitHub Actions so the built, version-stamped site is what gets published
 
 ### 3. Attention models
 
