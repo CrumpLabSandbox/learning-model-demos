@@ -14,12 +14,27 @@ function attrs(key, def, cue) {
 
 // ---- Symbols as HTML (for the guide, table, sliders) ----------------------
 
+// A symbol's render spec: { pre, base, sub, sup, bar }. sub 'cue' means the
+// focus cue; other subscripts are written as given (a word such as "others"
+// is set upright). bar draws a line over the base letter, as in V̄ for
+// inhibitory strength. Symbols with no render (a bracketed group such as the
+// prediction error) give `display(opts)` text for the guide instead.
 export function symbolHTML(spec, key, cue, extra = '') {
   const def = spec.symbols[key];
   const r = def.render;
   if (!r) return `<span ${attrs(key, def, null)}>${extra}</span>`;
   const sub = r.sub === 'cue' ? cue : r.sub;
-  return `<span ${attrs(key, def, cue)}>${r.pre ?? ''}<i>${r.base}</i>${sub ? `<sub>${sub}</sub>` : ''}${extra}</span>`;
+  const base = r.bar ? `<i class="overbar">${r.base}</i>` : `<i>${r.base}</i>`;
+  return `<span ${attrs(key, def, cue)}>${r.pre ?? ''}${base}${sub ? `<sub>${sub}</sub>` : ''}${r.sup ? `<sup>${r.sup}</sup>` : ''}${extra}</span>`;
+}
+
+// Plain text for a symbol, for places where markup is not allowed.
+export function symbolText(spec, key, cue, opts = {}) {
+  const def = spec.symbols[key];
+  const r = def.render;
+  if (!r) return def.display ? def.display(opts) : def.name;
+  const sub = r.sub === 'cue' ? cue : r.sub;
+  return `${r.pre ?? ''}${r.base}${r.bar ? '\u0305' : ''}${sub ? `_${sub}` : ''}`;
 }
 
 // ---- MathML ---------------------------------------------------------------
@@ -28,12 +43,22 @@ function mi(t) {
   return /^[A-Za-zα-ω]$/.test(t) ? `<mi>${t}</mi>` : `<mi mathvariant="normal">${t}</mi>`;
 }
 
+function scriptMathML(t) {
+  if (/^[A-Za-z]$/.test(t)) return `<mi>${t}</mi>`;
+  if (/^[0-9.]+$/.test(t)) return `<mn>${t}</mn>`;
+  return `<mtext>${esc(t)}</mtext>`;
+}
+
 export function symbolMathML(spec, key, cue) {
   const def = spec.symbols[key];
   const r = def.render;
   const pre = r.pre ? mi(r.pre) : '';
   const sub = r.sub === 'cue' ? cue : r.sub;
-  const core = sub ? `<msub>${mi(r.base)}<mi>${sub}</mi></msub>` : mi(r.base);
+  const base = r.bar ? `<mover accent="true">${mi(r.base)}<mo stretchy="false">¯</mo></mover>` : mi(r.base);
+  let core = base;
+  if (sub && r.sup) core = `<msubsup>${base}${scriptMathML(sub)}${scriptMathML(r.sup)}</msubsup>`;
+  else if (sub) core = `<msub>${base}${scriptMathML(sub)}</msub>`;
+  else if (r.sup) core = `<msup>${base}${scriptMathML(r.sup)}</msup>`;
   return `<mrow ${attrs(key, def, cue)}>${pre}${core}</mrow>`;
 }
 
@@ -69,6 +94,31 @@ function nodeMathML(node, ctx, mode, first = true) {
         ctx.present.map((c) => ({ sym: node.of, cue: c })),
         '+',
       );
+    case 'sumEach':
+      return join(ctx.present.map((c) => node.each(c)), '+');
+    case 'sumOthers': {
+      const others = ctx.present.filter((c) => c !== ctx.cue);
+      if (!others.length) return mode === 'symbols' ? `<mn>0</mn><mtext class="case-cond"> (no other cues)</mtext>` : '<mn>0</mn>';
+      return join(
+        others.map((c) => ({ sym: node.of, cue: c })),
+        '+',
+      );
+    }
+    case 'neg':
+      return `<mo>−</mo>${nodeMathML(node.arg, ctx, mode, true)}`;
+    case 'clamp':
+      return `${nodeMathML(node.arg, ctx, mode, true)}${mode === 'symbols' ? `<mtext class="case-cond">  ${esc(node.note)}</mtext>` : ''}`;
+    case 'abs':
+      return `<mrow${node.group ? ` data-sym="${node.group}" class="group role-${spec.symbols[node.group].role}"` : ''}><mo>|</mo>${nodeMathML(node.arg, ctx, mode, true)}<mo>|</mo></mrow>`;
+    case 'cases': {
+      if (mode === 'numbers') return nodeMathML(activeCase(node, ctx).rhs, ctx, mode, true);
+      const rows = node.cases
+        .map((c) => `<mtr><mtd columnalign="left">${nodeMathML(c.rhs, ctx, mode, true)}</mtd><mtd columnalign="left"><mtext class="case-cond">${esc(c.cond)}</mtext></mtd></mtr>`)
+        .join('');
+      return `<mrow><mo stretchy="true" fence="true">{</mo><mtable columnalign="left" columnspacing="1em">${rows}</mtable></mrow>`;
+    }
+    case 'const':
+      return `<mn>${signed(fmtExact(node.value))}</mn>`;
     case 'paren': {
       const inner = `<mrow${node.group ? ` data-sym="${node.group}" class="group role-${spec.symbols[node.group].role}"` : ''}><mo>(</mo>${nodeMathML(node.arg, ctx, mode, true)}<mo>)</mo></mrow>`;
       if (!node.label) return inner;
@@ -92,13 +142,19 @@ export function equationSymbols(eq, ctx) {
   return `<math>${lhs}${relMathML(eq.rel)}${nodeMathML(eq.rhs, ctx, 'symbols')}</math>`;
 }
 
+// The case of a cases node that applies on this trial.
+export function activeCase(node, ctx) {
+  return node.cases.find((c) => !c.when || c.when(ctx.rec, ctx.cue)) ?? node.cases[node.cases.length - 1];
+}
+
 export function equationNumbers(eq, ctx) {
   const lhs = nodeMathML(eq.lhs, ctx, 'symbols');
   const result = evaluate(eq.rhs, ctx);
   const def = ctx.spec.symbols[eq.lhs.sym];
+  const note = eq.rhs.op === 'cases' ? `<div class="case-note small muted">This trial uses the line "${esc(activeCase(eq.rhs, ctx).cond)}".</div>` : '';
   return (
     `<math>${lhs}${relMathML(eq.rel)}${nodeMathML(eq.rhs, ctx, 'numbers')}` +
-    `<mo>=</mo><mrow ${attrs(eq.lhs.sym, def, ctx.cue)}><mn class="result">${signed(fmt(result))}</mn></mrow></math>`
+    `<mo>=</mo><mrow ${attrs(eq.lhs.sym, def, ctx.cue)}><mn class="result">${signed(fmt(result))}</mn></mrow></math>${note}`
   );
 }
 
@@ -140,6 +196,20 @@ export function evaluate(node, ctx) {
       return ctx.present.reduce((s, c) => s + ctx.spec.symbols[node.of].value(ctx.rec, c), 0);
     case 'paren':
       return evaluate(node.arg, ctx);
+    case 'abs':
+      return Math.abs(evaluate(node.arg, ctx));
+    case 'sumEach':
+      return ctx.present.reduce((s, c) => s + evaluate(node.each(c), ctx), 0);
+    case 'sumOthers':
+      return ctx.present.filter((c) => c !== ctx.cue).reduce((s, c) => s + ctx.spec.symbols[node.of].value(ctx.rec, c), 0);
+    case 'neg':
+      return -evaluate(node.arg, ctx);
+    case 'clamp':
+      return Math.min(evaluate(node.hi, ctx), Math.max(evaluate(node.lo, ctx), evaluate(node.arg, ctx)));
+    case 'cases':
+      return evaluate(activeCase(node, ctx).rhs, ctx);
+    case 'const':
+      return node.value;
     default:
       throw new Error(`Unknown node ${node.op}`);
   }
@@ -150,8 +220,11 @@ export function symbolsUsed(eqs) {
   const out = [];
   const visit = (n) => {
     for (const key of [n.sym, n.of, n.group]) if (key && !out.includes(key)) out.push(key);
+    if (n.op === 'clamp') [n.lo, n.hi].forEach(visit);
+    if (n.op === 'sumEach') visit(n.each('A'));
     if (n.arg) visit(n.arg);
     if (n.args) n.args.forEach(visit);
+    if (n.cases) n.cases.forEach((c) => visit(c.rhs));
   };
   for (const eq of eqs) {
     visit(eq.lhs);

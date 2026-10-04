@@ -289,12 +289,22 @@ After the scaffolding went live, the slide decks broke for some visitors. The ca
 
 ### 3. Attention models
 
-- [ ] Mackintosh, with the explicit associability rule documented on the page
-- [ ] Pearce-Hall with separate excitatory and inhibitory strengths
-- [ ] Associability chart beside the strength chart, and the freeze-α toggles
-- [ ] Phenomenon cards for latent inhibition and the different accounts of blocking
-- [ ] Tests against the worked examples in the papers
-- [ ] Overview decks for Mackintosh and Pearce-Hall, and glossary entries for their new terms
+- [x] Mackintosh, with the explicit associability rule documented on the page
+- [x] Pearce-Hall with separate excitatory and inhibitory strengths
+- [x] Associability chart beside the strength chart, and the freeze-α toggles
+- [x] Phenomenon cards for latent inhibition and the different accounts of blocking, plus a new unblocking card
+- [x] Tests: hand-worked single trials of every rule, analytic results, and the check that every displayed equation evaluates to the number the model used
+- [ ] Tests against the simulations published in the original papers. Not done: the papers were not available while building. Both pages carry a "Preview" notice until this is done.
+- [x] Overview decks for Mackintosh and Pearce-Hall, and glossary entries for their new terms
+- [x] Primer sections on absolute value, attention that changes (a parameter that becomes computed), and the bar in V̄
+- [x] The experimental context as a cue (`Context: Z` in a design), used in the latent inhibition card
+
+Notes from building it:
+
+- Mackintosh (1975) gives only the direction of the attention change. The page uses a continuous rule of the kind in Le Pelley (2004), Δα = θ<sub>α</sub>(|λ − ΣV<sub>others</sub>| − |λ − V<sub>A</sub>|), and offers the 1975 direction rule (a fixed step, with ties counting as "worse") as an assumption. They predict different things: with equal saliences the continuous rule gives blocking but not overshadowing or latent inhibition, and the direction rule gives the reverse. Tests pin this down, and the Mackintosh deck makes it a teaching point. Check the continuous rule's exact form and bounds against Le Pelley (2004).
+- Pearce-Hall: excitatory learning ΔV = Sαλ happens when the outcome is bigger than predicted, and inhibitory learning ΔV̄ = Sα(ΣV − λ) when it is smaller. Letting excitation also happen on every reinforced trial makes the prediction settle at 2λ, so this is the choice made; it is stated in the code and should be checked against the 1980 paper. Attention uses the 1982 running average with γ = 0.8 by default; γ = 1 gives the 1980 model, in which latent inhibition lasts only one trial. Defaults (salience 0.15, starting attention 0.8) were chosen so that learning does not overshoot during pretraining, which keeps blocking an effect of attention.
+- With these settings, each card's result per model is fixed by tests (`tests/phenomena.test.js`). Rescorla-Wagner gains unblocking; Mackintosh shows acquisition, extinction, salience, blocking, and unblocking; Pearce-Hall adds overshadowing, conditioned inhibition, and latent inhibition.
+- The framework now supports per-cue internal values over trials (for the attention chart), two-case rules, absolute values, V̄, word subscripts, an arithmetic view with several calculations, presets that set salience whatever a model calls it, and build stages that name the equation to show.
 
 ### 4. SOP
 

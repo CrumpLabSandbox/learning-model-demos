@@ -63,6 +63,7 @@ export const symbols = {
   error: {
     primer: 'error',
     render: null,
+    display: (opts) => (opts.summedError === false ? 'λ − V' : 'λ − ΣV'),
     role: 'computed',
     name: 'prediction error',
     meaning: () =>
@@ -139,14 +140,9 @@ export function equations(opts) {
 // What the arithmetic view draws for one cue on one trial.
 export function arithmetic(opts) {
   return {
-    target: 'lambda',
-    prediction: opts.summedError ? 'sumV' : 'V',
-    predictionParts: opts.summedError ? 'V' : null,
-    error: 'error',
-    factors: [...(opts.useAlpha ? ['alpha'] : []), 'beta'],
-    result: 'dV',
-    state: 'V',
-    after: (r, c) => r.perCue[c]?.Vafter,
+    line: { target: 'lambda', prediction: opts.summedError ? 'sumV' : 'V', parts: opts.summedError ? 'V' : null, error: 'error' },
+    chains: [{ factors: [...(opts.useAlpha ? ['alpha'] : []), 'beta', 'error'], signed: ['error'], result: 'dV' }],
+    states: [{ sym: 'V', after: (r, c) => r.perCue[c]?.Vafter }],
   };
 }
 

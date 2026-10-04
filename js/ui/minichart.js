@@ -3,25 +3,32 @@
 //
 // Markup: <figure data-mini data-design="Phase 1: 20 A+|Phase 2: 20 AB+"
 //                 data-lines="A,B" data-caption="..."></figure>
-// "|" separates phase lines inside the attribute.
+// "|" separates phase lines inside the attribute. Optional:
+//   data-model="mackintosh"   which model to run (default rescorla-wagner)
+//   data-series="alpha"       plot a per-cue internal value, such as
+//                             attention, instead of the prediction
+//   data-labels="A=noise"     rename lines at their ends
 
 import { parseDesign } from '../core/design.js';
 import { runModel } from '../core/runner.js';
 import * as rw from '../models/rescorla-wagner.js';
+import * as mackintosh from '../models/mackintosh.js';
+import * as pearceHall from '../models/pearce-hall.js';
 import { esc } from './equation.js';
 import { whenResized } from './widget-kit.js';
 
-const MODELS = { 'rescorla-wagner': rw };
+const MODELS = { 'rescorla-wagner': rw, mackintosh, 'pearce-hall': pearceHall };
 
-export function drawMini(el, { design, lines, params = {}, model = 'rescorla-wagner', labels = {} }) {
+export function drawMini(el, { design, lines, params = {}, model = 'rescorla-wagner', labels = {}, seriesKey = null }) {
   const d = parseDesign(design);
   const run = runModel(MODELS[model], { design: d, params });
   const show = lines ?? d.probes ?? d.cues;
+  const series = seriesKey ? run.stateSeries[seriesKey] : run.series;
   const n = run.trials.length;
   const W = Math.max(260, Math.round(el.clientWidth || 480));
   const H = Math.round(Math.max(160, Math.min(260, W * 0.45)));
   const m = { l: 34, r: 70, t: 22, b: 24 };
-  const vals = show.flatMap((p) => run.series[p]);
+  const vals = show.flatMap((p) => series[p]);
   const lo = Math.min(0, ...vals) < -0.05 ? Math.floor(Math.min(...vals) * 2) / 2 : 0;
   const hi = Math.max(1, Math.ceil(Math.max(...vals) * 2) / 2);
   const x = (i) => m.l + (i / n) * (W - m.l - m.r);
@@ -39,7 +46,7 @@ export function drawMini(el, { design, lines, params = {}, model = 'rescorla-wag
   }
   const ends = [];
   show.forEach((p) => {
-    const s = run.series[p];
+    const s = series[p];
     const color = p.length === 1 ? `var(--cue-${(run.cues.indexOf(p) % 8) + 1})` : 'var(--ink-2)';
     const path = s.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
     out.push(`<path d="${path}" class="mini-line${p.length > 1 ? ' compound' : ''}" style="stroke:${color}"/>`);
@@ -67,6 +74,8 @@ export function mountMinis(root) {
       design: el.dataset.design.split('|').join('\n'),
       lines: el.dataset.lines ? el.dataset.lines.split(',') : undefined,
       labels,
+      model: el.dataset.model ?? 'rescorla-wagner',
+      seriesKey: el.dataset.series ?? null,
     });
   };
   for (const el of figs) {

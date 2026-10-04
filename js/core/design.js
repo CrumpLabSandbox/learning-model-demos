@@ -18,6 +18,9 @@
 //   `blocked` runs all of the first type, then all of the next.
 // - A line starting with `Test:` lists the cues and compounds to plot.
 //   Without one, every single cue is plotted.
+// - A line `Context: Z` names a cue for the experimental context. It is
+//   added to every trial, so the context can gain or lose strength like any
+//   other cue.
 // - Blank lines and lines starting with `#` are ignored.
 
 export const ORDERS = ['alternate', 'random', 'blocked'];
@@ -72,6 +75,7 @@ export function parseCueSet(text, line) {
 export function parseDesign(text) {
   const phases = [];
   let probes = null;
+  let context = null;
   const lines = String(text).split(/\r?\n/);
   lines.forEach((raw, i) => {
     const lineNo = i + 1;
@@ -80,6 +84,11 @@ export function parseDesign(text) {
     const colon = s.indexOf(':');
     const name = colon >= 0 ? s.slice(0, colon).trim() : '';
     const body = colon >= 0 ? s.slice(colon + 1).trim() : s;
+    if (/^context$/i.test(name)) {
+      if (!/^[A-Z]$/.test(body)) throw new DesignError('The context is one capital letter, such as "Context: Z".', lineNo);
+      context = body;
+      return;
+    }
     if (/^test$/i.test(name)) {
       probes = body.split(/[,\s]+/).filter(Boolean).map((p) => parseCueSet(p, lineNo));
       if (!probes.length) throw new DesignError('The Test line lists no cues.', lineNo);
@@ -109,8 +118,13 @@ export function parseDesign(text) {
   const cueSet = new Set();
   for (const p of phases) for (const t of p.trials) t.type.cues.forEach((c) => cueSet.add(c));
   for (const pr of probes ?? []) [...pr].forEach((c) => cueSet.add(c));
+  if (context) {
+    const inTrials = phases.some((p) => p.trials.some((t) => t.type.cues.includes(context)));
+    if (inTrials) throw new DesignError(`${context} is the context, so it is already on every trial. Remove it from the trial types.`);
+    cueSet.add(context);
+  }
   const cues = [...cueSet].sort();
-  return { phases, probes, cues, totalTrials: total };
+  return { phases, probes, cues, context, totalTrials: total };
 }
 
 // Turn a parsed design back into text. parseDesign(formatDesign(d)) gives d.
@@ -120,12 +134,14 @@ export function formatDesign(design) {
     if (p.order !== 'alternate') items.push(p.order);
     return `${p.name}: ${items.join(', ')}`;
   });
+  if (design.context) lines.push(`Context: ${design.context}`);
   if (design.probes) lines.push(`Test: ${design.probes.join(', ')}`);
   return lines.join('\n');
 }
 
 // The sequence of trials the design produces, in order.
-// Each entry: { phaseIndex, phaseName, type }.
+// Each entry: { phaseIndex, phaseName, type, cues }, where cues includes the
+// context, if the design has one.
 export function expandDesign(design, rng) {
   const out = [];
   design.phases.forEach((phase, phaseIndex) => {
@@ -147,7 +163,10 @@ export function expandDesign(design, rng) {
         seq = rng.shuffle(seq);
       }
     }
-    for (const type of seq) out.push({ phaseIndex, phaseName: phase.name, type });
+    for (const type of seq) {
+      const cues = design.context ? [...type.cues, design.context].sort() : type.cues;
+      out.push({ phaseIndex, phaseName: phase.name, type, cues });
+    }
   });
   return out;
 }

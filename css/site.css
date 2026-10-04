@@ -584,3 +584,8 @@ div:has(> math), .fx-math, .big-math, .build-math { overflow-x: auto; overflow-y
    the column and the page. */
 .fx-steps, .eq-list, .unlocks, .read-words, .wr-steps, .howto ol, .reassure, .toc ol, .slide ul, .slide ol:not(.timeline), .fb-cue ul { grid-template-columns: minmax(0, 1fr); }
 .fx-steps > li, .eq-list > *, .read-words > li, .slide ul > li, .slide ol > li { min-width: 0; }
+.overbar { text-decoration: overline; }
+.case-note { margin-top: 0.15rem; }
+math .case-cond { font-size: 0.8em; color: var(--muted); }
+.chain-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 0.4rem 0 0.25rem; font-weight: 600; }
+.chain-off { margin: 0; }

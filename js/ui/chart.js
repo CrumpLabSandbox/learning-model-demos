@@ -34,7 +34,18 @@ function intTicks(n, width) {
   return out;
 }
 
-export function createChart(container, { onSelect, onSketch = () => {}, onSketchEnd = () => {} }) {
+// What a chart plots. The default is the model's prediction for each probe.
+// A model page can add charts of other per-cue values, such as attention,
+// with source = (run) => ({ series, probes, title, floor, ceiling }).
+export function predictionSource(run) {
+  return { series: run.series, probes: run.displayProbes, title: 'Prediction', floor: run.params.lambda ?? 1 };
+}
+
+export function stateSource(key, title, ceiling = 1) {
+  return (run) => ({ series: run.stateSeries[key] ?? {}, probes: run.cues, title, floor: 0, ceiling });
+}
+
+export function createChart(container, { onSelect, onSketch = () => {}, onSketchEnd = () => {}, source = predictionSource, label = 'Predictions' }) {
   container.innerHTML = '';
   const wrap = document.createElement('div');
   wrap.className = 'chart-wrap';
@@ -120,7 +131,9 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
     const pr = model.predict ?? null;
     const isSketching = Boolean(pr?.sketching);
     const sketchCues = pr ? pr.cues : [];
-    const probes = run.displayProbes;
+    const src = source(run);
+    const series = src.series;
+    const probes = src.probes.filter((p) => series[p]);
     svg.style.touchAction = isSketching ? 'none' : '';
     svg.classList.toggle('sketching', isSketching);
     const n = run.trials.length;
@@ -130,11 +143,11 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
     const iw = width - m.left - m.right;
     const ih = height - m.top - m.bottom;
 
-    const shown = isSketching ? [] : probes.flatMap((p) => run.series[p]);
+    const shown = isSketching ? [] : probes.flatMap((p) => series[p]);
     const sketched = sketchCues.flatMap((c) => Object.values(pr.sketches[c] ?? {}));
-    const lambda = run.params.lambda ?? 1;
+    const lambda = src.floor ?? 1;
     let lo = Math.min(0, ...shown, ...sketched);
-    let hi = Math.max(lambda, 0.2, ...shown, ...sketched);
+    let hi = Math.max(lambda, src.ceiling ?? 0.2, ...shown, ...sketched);
     // While sketching, use a range that gives nothing away: room above λ and
     // the same distance below zero, whatever the model will do.
     if (isSketching) {
@@ -182,7 +195,7 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
       parts.push(`<text class="tick" x="${x(v)}" y="${m.top + ih + 16}" text-anchor="middle">${v}</text>`);
     }
     parts.push(`<text class="axis-title" x="${m.left + iw}" y="${height - 4}" text-anchor="end">Trial</text>`);
-    parts.push(`<text class="axis-title" transform="translate(13 ${m.top + ih / 2}) rotate(-90)" text-anchor="middle">Prediction</text>`);
+    parts.push(`<text class="axis-title" transform="translate(13 ${m.top + ih / 2}) rotate(-90)" text-anchor="middle">${esc(src.title)}</text>`);
 
     // Series, up to the revealed trial.
     const upTo = Math.max(0, Math.min(revealed, n));
@@ -212,7 +225,7 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
       parts.push(`<text class="end-label" x="${e.x + 6}" y="${ly + 4}">${e.c}</text>`);
     }
     if (!isSketching) probes.forEach((p) => {
-      const s = run.series[p];
+      const s = series[p];
       const d = s.slice(0, upTo + 1).map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
       const single = p.length === 1;
       const color = single ? cueColor(run, p) : null;
@@ -249,7 +262,7 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
       const rec = t > 0 ? run.trials[t - 1] : null;
       for (const p of probes) {
         if (t > upTo) continue;
-        const v = run.series[p][t];
+        const v = series[p][t];
         const single = p.length === 1;
         const present = rec && [...p].every((c) => rec.present.includes(c));
         const fill = single ? cueColor(run, p) : 'var(--ink-2)';
@@ -266,7 +279,7 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
 
     // Accessible slider semantics.
     const rec = t > 0 ? run.trials[t - 1] : null;
-    svg.setAttribute('aria-label', 'Predictions across trials. Use the arrow keys to select a trial.');
+    svg.setAttribute('aria-label', `${label} across trials. Use the arrow keys to select a trial.`);
     svg.setAttribute('aria-valuemin', '0');
     svg.setAttribute('aria-valuemax', String(n));
     svg.setAttribute('aria-valuenow', String(t));
@@ -288,8 +301,8 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
     const keys = probes
       .map((p) => {
         const single = p.length === 1;
-        const v = rt <= upTo ? signed(fmt(run.series[p][rt])) : '–';
-        return `<span class="key"${single ? ` data-cue="${p}"` : ''}><span class="swatch${single ? '' : ' compound'}" style="background:${single ? cueColor(run, p) : 'var(--ink-2)'}"></span>${p} <span class="muted">${v}</span></span>`;
+        const v = rt <= upTo ? signed(fmt(series[p][rt])) : '–';
+        return `<span class="key"${single ? ` data-cue="${p}"` : ''}><span class="swatch${single ? '' : ' compound'}" style="background:${single ? cueColor(run, p) : 'var(--ink-2)'}"></span>${p}${p === run.context ? ' <span class="muted small">(context)</span>' : ''} <span class="muted">${v}</span></span>`;
       })
       .join('');
     const sketchKey = sketchCues.length ? `<span class="key"><span class="swatch sketch-swatch" style="--sw:var(--ink-2)"></span><span class="muted">your sketch</span></span>` : '';
