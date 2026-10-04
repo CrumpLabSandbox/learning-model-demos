@@ -2,6 +2,8 @@
 
 Interactive demos of associative learning models, built so students can see how each equation produces the model's behaviour. Run a classic experiment one trial at a time and read every equation four ways: in words, in symbols, with the numbers from the selected trial, and as the code that ran.
 
+**Ways in:** short overview slides for every unit, a maths warm-up for students who need it, a guide to reading the equations, a plain-language glossary, and an Essentials view on each model page. The landing page suggests a starting point by background.
+
 **Models:** Rescorla-Wagner is available. Mackintosh, Pearce-Hall, Wagner's SOP, and MINERVA-AL are planned. See [plan.md](plan.md).
 
 ## Run it

@@ -4,56 +4,88 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Learning Model Demos</title>
-  <meta name="description" content="Interactive demos of associative learning models, from Rescorla-Wagner to MINERVA-AL, built to connect each equation to how the model behaves.">
+  <meta name="description" content="Interactive demos of associative learning models, from Rescorla-Wagner to MINERVA-AL, with overview slides, a maths warm-up, and a guide to reading the equations for students new to the area.">
   <link rel="stylesheet" href="css/site.css">
 </head>
 <body>
   <header class="site-header">
     <a class="brand" href="index.html">Learning Model Demos</a>
     <nav aria-label="Pages">
+      <a href="#start">Start here</a>
+      <a href="warm-up.html">Maths warm-up</a>
       <a href="primer.html">Reading the equations</a>
       <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
+      <a href="glossary.html">Glossary</a>
     </nav>
   </header>
   <main class="page">
     <div class="prose">
       <h1>Learning Model Demos</h1>
-      <p>Models of associative learning are written as equations. These demos let you run each model one trial at a time and see exactly what each equation does: which numbers go in, which come out, and which term is responsible for each thing the model predicts.</p>
-      <p>Every model page works the same way. Pick a classic experiment, step through its trials, and read each equation four ways: in words, in symbols, with the numbers from the trial you selected, and as the code that ran. Then switch off one assumption at a time and see what breaks.</p>
+      <p class="lede">How do people and animals learn what predicts what? Psychologists answer with models: exact rules that a computer can run. This site lets you run those models one step at a time and see why they behave as they do.</p>
+      <p>You do not need any background in learning theory, and you do not need to like maths. Start wherever you are comfortable, and go back a level whenever you need to.</p>
     </div>
 
-    <div class="start-here">
-      <h2>New to equations? Start here</h2>
-      <p><a href="primer.html">Reading the equations</a> walks through Δ, Σ, subscripts, the Greek letters, and the prediction error, with something to try at every step. It makes every model page easier to follow.</p>
-    </div>
+    <section id="start" class="start-section">
+      <h2>Where to start</h2>
+      <div class="entry-cards">
+        <article class="entry-card">
+          <div class="kicker">New to all of this</div>
+          <h3>Start from the very beginning</h3>
+          <ol class="path-steps small">
+            <li><a href="decks/big-picture.html">The big picture</a>: short slides on what learning theory is about. No maths.</li>
+            <li><a href="warm-up.html">Maths warm-up</a>: decimals, gaps, and graphs, slowly and with pictures.</li>
+            <li><a href="primer.html">Reading the equations</a>: one symbol at a time.</li>
+            <li><a href="models/rescorla-wagner.html#view=essentials">Your first model</a>, in Essentials view.</li>
+          </ol>
+          <a class="btn primary" href="decks/big-picture.html">Start with the big picture</a>
+        </article>
+        <article class="entry-card">
+          <div class="kicker">Know some psychology</div>
+          <h3>Learn to read the equations</h3>
+          <p class="small">You know what conditioning is, but equations make you uneasy. Start with the overview slides, then the guide to reading equations. Use the warm-up if a section feels hard.</p>
+          <a class="btn primary" href="decks/reading-equations.html">Overview of reading equations</a>
+          <p class="small" style="margin-top:.5rem"><a href="primer.html">Or go straight to the guide</a></p>
+        </article>
+        <article class="entry-card">
+          <div class="kicker">Comfortable with equations</div>
+          <h3>Go straight to a model</h3>
+          <p class="small">Open the model page and switch to <em>Everything</em> for the full trial table, the code, custom designs, and every setting.</p>
+          <a class="btn primary" href="models/rescorla-wagner.html#view=everything">Open Rescorla-Wagner</a>
+          <p class="small" style="margin-top:.5rem"><a href="decks/rescorla-wagner.html">Or see its overview slides first</a></p>
+        </article>
+      </div>
+    </section>
 
-    <h2 style="margin-top:1.5rem">Models</h2>
-    <ul class="model-list">
-      <li>
-        <h3><a href="models/rescorla-wagner.html">Rescorla-Wagner</a> <span class="muted">(1972)</span></h3>
-        <p class="small">Learning driven by a shared prediction error. Explains blocking, overshadowing, and conditioned inhibition, and fails on latent inhibition, backward blocking, and negative patterning.</p>
-      </li>
-      <li class="soon">
-        <h3>Mackintosh <span class="muted">(1975)</span></h3>
-        <p class="small">Attention rises for the best predictor of the outcome. Coming next.</p>
-      </li>
-      <li class="soon">
-        <h3>Pearce-Hall <span class="muted">(1980)</span></h3>
-        <p class="small">Attention follows recent surprise. Planned.</p>
-      </li>
-      <li class="soon">
-        <h3>SOP <span class="muted">(Wagner, 1981)</span></h3>
-        <p class="small">Learning moment by moment, from what is active in memory. Planned.</p>
-      </li>
-      <li class="soon">
-        <h3>MINERVA-AL <span class="muted">(Jamieson, Crump, &amp; Hannah, 2012)</span></h3>
-        <p class="small">Learning without associations: store instances, retrieve an echo. Planned.</p>
-      </li>
-    </ul>
+    <section class="units-section">
+      <h2>All units</h2>
+      <p class="small muted">Every unit has short overview slides, so you know what you are getting into before you start.</p>
+      <div class="table-wrap" style="max-height:none">
+        <table class="symbol-guide units">
+          <thead><tr><th>Unit</th><th>What it is</th><th>Overview</th><th>Go to it</th></tr></thead>
+          <tbody>
+            <tr><td><strong>The big picture</strong></td><td>What associative learning is, the classic findings, and why researchers build models.</td><td><a href="decks/big-picture.html">Slides</a></td><td class="muted">slides only</td></tr>
+            <tr><td><strong>Maths warm-up</strong></td><td>The small amount of maths the models use, practised slowly with pictures and hints.</td><td><a href="decks/warm-up.html">Slides</a></td><td><a href="warm-up.html">Warm-up</a></td></tr>
+            <tr><td><strong>Reading the equations</strong></td><td>What Δ, Σ, subscripts, and the Greek letters mean, and how to work out what an equation predicts.</td><td><a href="decks/reading-equations.html">Slides</a></td><td><a href="primer.html">Guide</a></td></tr>
+            <tr><td><strong>Rescorla-Wagner</strong> <span class="muted">(1972)</span></td><td>Learning from surprise. Explains blocking and overshadowing; fails on latent inhibition and negative patterning.</td><td><a href="decks/rescorla-wagner.html">Slides</a></td><td><a href="models/rescorla-wagner.html#view=essentials">Essentials</a> · <a href="models/rescorla-wagner.html#view=everything">Everything</a></td></tr>
+            <tr class="soon"><td>Mackintosh <span class="muted">(1975)</span></td><td>Attention rises for the best predictor.</td><td colspan="2">coming next</td></tr>
+            <tr class="soon"><td>Pearce-Hall <span class="muted">(1980)</span></td><td>Attention follows recent surprise.</td><td colspan="2">planned</td></tr>
+            <tr class="soon"><td>SOP <span class="muted">(Wagner, 1981)</span></td><td>Learning moment by moment, from what is active in memory.</td><td colspan="2">planned</td></tr>
+            <tr class="soon"><td>MINERVA-AL <span class="muted">(Jamieson, Crump, &amp; Hannah, 2012)</span></td><td>Learning without associations: store experiences, recall similar ones.</td><td colspan="2">planned</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small">Stuck on a word? Every technical term is in the <a href="glossary.html">glossary</a>.</p>
+    </section>
 
-    <div class="prose small muted" style="margin-top:2rem">
-      <p>Built as a static site with no build step. Each model is tested against published results before it is used in class. Source and plan on <a href="https://github.com/CrumpLabSandbox/learning-model-demos">GitHub</a>.</p>
-    </div>
+    <section class="prose instructors">
+      <h2>For instructors</h2>
+      <ul class="small">
+        <li>Every slide deck has speaker notes: press <kbd>N</kbd> in a deck. Press <kbd>F</kbd> for full screen and <kbd>O</kbd> for a list of slides.</li>
+        <li>Printing a deck gives one slide per page with its notes, for handouts.</li>
+        <li>The <em>Copy link</em> button on a model page saves the experiment, settings, and selected trial, so a link in your slides opens exactly that view.</li>
+        <li>Each model is tested against published results before it is used in class. Source and plan are on <a href="https://github.com/CrumpLabSandbox/learning-model-demos">GitHub</a>.</li>
+      </ul>
+    </section>
   </main>
 </body>
 </html>

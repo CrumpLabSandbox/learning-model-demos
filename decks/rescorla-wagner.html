@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rescorla-Wagner Overview · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for the Rescorla-Wagner model: the puzzle it solved, learning from surprise, what it explains, and what it gets wrong.">
+  <link rel="stylesheet" href="../css/site.css">
+</head>
+<body class="deck-page">
+  <main class="deck" data-title="Rescorla-Wagner overview" data-back="../models/rescorla-wagner.html#view=essentials" data-back-label="Open the model">
+    <section class="slide" data-title="Rescorla-Wagner: learning from surprise">
+      <div class="kicker">Overview · model 1</div>
+      <h1>Rescorla-Wagner: learning from surprise</h1>
+      <p class="sub">Robert Rescorla and Allan Wagner, 1972. The most influential model of associative learning, and the first on this site.</p>
+      <aside class="notes">Rescorla, R. A., &amp; Wagner, A. R. (1972). A theory of Pavlovian conditioning. In Black &amp; Prokasy (Eds.), Classical Conditioning II.</aside>
+    </section>
+    <section class="slide" data-title="The puzzle it solved">
+      <h2>The puzzle it solved</h2>
+      <div class="two-col">
+        <div>
+          <p>If A already predicts the outcome, adding B alongside it teaches almost nothing about B. This is <a href="../glossary.html#blocking">blocking</a>.</p>
+          <p>So simply pairing a cue with an outcome is not enough. Something else matters.</p>
+        </div>
+        <figure data-mini data-design="A first: 20 A+|A and B: 20 AB+" data-lines="A,B" data-caption="The model's own prediction: B (added later) barely learns."></figure>
+      </div>
+    </section>
+    <section class="slide" data-title="The big idea">
+      <h2>The big idea</h2>
+      <p class="big">You learn only when you are surprised.</p>
+      <p>On every trial, the learner predicts the outcome. If the outcome is bigger than predicted, the cues present gain strength. If it is smaller, they lose strength. If it is exactly as predicted, nothing changes.</p>
+      <aside class="notes">The amount of surprise is called the prediction error. The same idea later became central in neuroscience, in work on dopamine signals.</aside>
+    </section>
+    <section class="slide" data-title="An everyday version">
+      <h2>An everyday version</h2>
+      <p>Your phone buzzes and there is a message. The first few times, you learn "buzz means message".</p>
+      <p>Once you expect it, another buzz-then-message teaches you nothing new. There is no surprise left.</p>
+      <p>Now suppose your phone also lights up whenever it buzzes. You never learn much about the light, because the buzz already told you a message was coming. That is blocking.</p>
+    </section>
+    <section class="slide" data-title="Cues share one prediction">
+      <h2>Cues share one prediction</h2>
+      <p>All the cues present add their strengths into <strong>one total prediction</strong>. They then share one surprise.</p>
+      <ul>
+        <li>If A already predicts the outcome, the total is already right, so B gets nothing. That is blocking.</li>
+        <li>If A and B start together, they split the outcome between them. That is <a href="../glossary.html#overshadowing">overshadowing</a>.</li>
+      </ul>
+      <aside class="notes">On the model page, the "Summed error" switch turns this sharing off. Blocking and overshadowing disappear, which shows that this one assumption produces them.</aside>
+    </section>
+    <section class="slide" data-title="Learning slows as it succeeds">
+      <h2>Learning slows as it succeeds</h2>
+      <div class="two-col">
+        <div>
+          <p>Each trial closes <em>part</em> of the gap between what happened and what was predicted, like a pour filling part of the empty space in a glass.</p>
+          <p>Big gap, big step. Small gap, small step. So the curve rises fast, then levels off.</p>
+        </div>
+        <figure data-mini data-design="Training: 30 A+" data-lines="A" data-caption="One cue, always followed by the outcome."></figure>
+      </div>
+    </section>
+    <section class="slide" data-title="What it explains">
+      <h2>What it explains</h2>
+      <div class="cards-row">
+        <div class="mini-card"><h3>Acquisition</h3><p>Learning grows, fast then slow.</p></div>
+        <div class="mini-card"><h3>Extinction</h3><p>Without the outcome, strength falls.</p></div>
+        <div class="mini-card"><h3>Blocking</h3><p>A known cue stops a new one being learned.</p></div>
+        <div class="mini-card"><h3>Overshadowing</h3><p>Cues trained together split the learning.</p></div>
+        <div class="mini-card"><h3>Conditioned inhibition</h3><p>A cue can predict that the outcome will <em>not</em> happen.</p></div>
+      </div>
+    </section>
+    <section class="slide" data-title="What it gets wrong">
+      <h2>What it gets wrong</h2>
+      <ul>
+        <li><strong><a href="../glossary.html#latent-inhibition">Latent inhibition</a>.</strong> Pre-exposure to a cue slows later learning, but in the model nothing changes when nothing is surprising.</li>
+        <li><strong><a href="../glossary.html#backward-blocking">Backward blocking</a>.</strong> The model never changes a cue that is absent.</li>
+        <li><strong><a href="../glossary.html#negative-patterning">Negative patterning</a>.</strong> The model's prediction for A and B together is always their sum.</li>
+        <li><strong><a href="../glossary.html#spontaneous-recovery">Spontaneous recovery</a>.</strong> Extinction erases learning in the model, so nothing can come back.</li>
+      </ul>
+      <p class="sub">The later models on this site each try to fix one of these.</p>
+      <aside class="notes">The failures are as instructive as the successes. On the model page these appear as cards marked "Does not", each explaining which part of the rule is responsible.</aside>
+    </section>
+    <section class="slide" data-title="The rule, in words and symbols">
+      <h2>The rule, in words and symbols</h2>
+      <p>The change in a cue's strength = how noticeable the cue is × how fast the outcome teaches × the surprise.</p>
+      <p style="font-size:1.4em"><span class="sym role-computed">ΔV<sub>A</sub></span> = <span class="sym role-modeller">α<sub>A</sub></span> <span class="sym role-modeller">β</span> ( <span class="sym role-experimenter">λ</span> − <span class="sym role-computed">ΣV</span> )</p>
+      <p class="sub">You do not need to read this yet. The model page shows it step by step, in words first. <a href="../primer.html">Reading the equations</a> explains each symbol.</p>
+    </section>
+    <section class="slide" data-title="Try these first">
+      <h2>Try these first on the model page</h2>
+      <ol class="path-steps">
+        <li>On the <strong>Blocking</strong> card, press <strong>Predict, then run</strong>. Sketch what you expect for B and D, then reveal.</li>
+        <li>Press <strong>Step</strong> through a few trials and read the equations in words.</li>
+        <li>Untick <strong>Summed error</strong> and watch which badges change.</li>
+      </ol>
+      <p><a class="btn primary" href="../models/rescorla-wagner.html#view=essentials">Open Rescorla-Wagner (Essentials view)</a></p>
+      <p class="sub">Essentials view shows the main parts first. Switch to Everything any time for the full trial table, code, and all settings.</p>
+    </section>
+  </main>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

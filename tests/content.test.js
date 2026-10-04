@@ -1,0 +1,82 @@
+// Checks that hold the scaffolding together: every link into the glossary,
+// the primer, the warm-up, or a deck points at something that exists.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { join, dirname, normalize } from 'node:path';
+import { glossary, glossaryIds } from '../content/glossary.js';
+import { checks as warmupChecks } from '../content/warmup/checks.js';
+import { checks as primerChecks } from '../content/primer/checks.js';
+import * as spec from '../content/equations/rescorla-wagner.js';
+
+const root = new URL('..', import.meta.url).pathname;
+const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'models/rescorla-wagner.html', ...readdirSync(join(root, 'decks')).map((f) => `decks/${f}`)];
+const read = (p) => readFileSync(join(root, p), 'utf8');
+const ids = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
+
+test('every page links only to files that exist', () => {
+  for (const page of pages) {
+    for (const m of read(page).matchAll(/href="([^"#:]+\.html)(#[^"]*)?"/g)) {
+      const target = normalize(join(dirname(page), m[1]));
+      assert.ok(existsSync(join(root, target)), `${page} links to missing ${m[1]}`);
+    }
+  }
+});
+
+test('links to page sections point at sections that exist', () => {
+  const sectionPages = ['primer.html', 'warm-up.html', 'index.html'];
+  for (const page of pages) {
+    for (const m of read(page).matchAll(/href="([^"#:]*?)(primer|warm-up|index)\.html#([a-z-]+)"/g)) {
+      const target = `${m[2]}.html`;
+      assert.ok(sectionPages.includes(target));
+      assert.ok(ids(read(target)).has(m[3]), `${page} links to ${target}#${m[3]}, which does not exist`);
+    }
+  }
+});
+
+test('links into the glossary name real entries', () => {
+  for (const page of pages) {
+    for (const m of read(page).matchAll(/glossary\.html#([a-z-]+)/g)) assert.ok(glossaryIds.has(m[1]), `${page} links to missing glossary entry ${m[1]}`);
+  }
+});
+
+test('glossary entries are complete and their cross-links resolve', () => {
+  for (const g of glossary) {
+    assert.ok(g.term && g.plain && g.plain.length > 20, g.id);
+    for (const r of g.related ?? []) assert.ok(glossaryIds.has(r), `${g.id} relates to missing ${r}`);
+    if (g.learnMore) {
+      const [file, hash] = g.learnMore.href.split('#');
+      assert.ok(existsSync(join(root, file)), `${g.id}: ${file}`);
+      if (hash && !hash.includes('=')) assert.ok(ids(read(file)).has(hash), `${g.id}: ${g.learnMore.href}`);
+    }
+  }
+});
+
+test('every symbol links to a primer section that exists', () => {
+  const primerIds = ids(read('primer.html'));
+  for (const [key, def] of Object.entries(spec.symbols)) assert.ok(primerIds.has(def.primer), `${key} -> #${def.primer}`);
+});
+
+test('every check question has exactly one right answer and explains every option', () => {
+  for (const [name, c] of Object.entries({ ...warmupChecks, ...primerChecks })) {
+    assert.equal(c.options.filter((o) => o.correct).length, 1, name);
+    for (const o of c.options) assert.ok(o.why.length > 15, `${name}: ${o.text}`);
+  }
+  for (const [name, c] of Object.entries(warmupChecks)) assert.ok(c.hint, `warm-up ${name} has a hint`);
+});
+
+test('every check and widget used on a page is defined', () => {
+  const warm = read('warm-up.html');
+  for (const m of warm.matchAll(/data-check="(\w+)"/g)) assert.ok(warmupChecks[m[1]], m[1]);
+  const primer = read('primer.html');
+  for (const m of primer.matchAll(/data-check="(\w+)"/g)) assert.ok(primerChecks[m[1]], m[1]);
+});
+
+test('every deck has slides, titles, and a way back', () => {
+  for (const page of pages.filter((p) => p.startsWith('decks/'))) {
+    const html = read(page);
+    const slides = [...html.matchAll(/<section class="slide" data-title="([^"]+)"/g)];
+    assert.ok(slides.length >= 5, `${page} has ${slides.length} slides`);
+    assert.match(html, /data-back="[^"]+"/);
+  }
+});

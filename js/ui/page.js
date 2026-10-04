@@ -29,6 +29,18 @@ const READINGS = [
   { key: 'code', label: 'Code' },
 ];
 const DEFAULT_READINGS = ['words', 'symbols', 'numbers'];
+// Essentials view starts with the gentlest reading; students add more.
+const ESSENTIAL_READINGS = ['words'];
+const VIEWS = ['essentials', 'everything'];
+
+function storedView() {
+  try {
+    const v = localStorage.getItem('lmd-view');
+    return VIEWS.includes(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
 const SPEEDS = { slow: 700, medium: 280, fast: 90 };
 
 const DESIGN_HELP = `Pretraining: 20 A+
@@ -44,7 +56,17 @@ Add ", random" to a line to shuffle it, or
 The default alternates trial types.
 "Test:" lists the lines to plot.`;
 
-export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, defaultPreset, primerUrl = '../primer.html' }) {
+export function mountModelPage({
+  root,
+  model,
+  spec,
+  phenomena,
+  modelSourceUrl,
+  defaultPreset,
+  primerUrl = '../primer.html',
+  overviewUrl = null,
+  glossaryUrl = '../glossary.html',
+}) {
   const state = {
     presetId: defaultPreset,
     designText: '',
@@ -63,11 +85,12 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
     run: null,
     // Predict first: null, or { sketching, cues, activeCue, sketches, prompt, history }
     predict: null,
+    view: 'everything',
   };
   let codeText = null;
   let playTimer = null;
 
-  root.innerHTML = layout(model, spec, primerUrl);
+  root.innerHTML = layout(model, spec, { primerUrl, overviewUrl, glossaryUrl });
   const $ = (id) => root.querySelector(`#${id}`);
   installHighlighting(root);
 
@@ -661,6 +684,32 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
     });
   }
 
+  // ---- Essentials or everything -------------------------------------------
+  function setView(view, { remember = true } = {}) {
+    state.view = VIEWS.includes(view) ? view : 'everything';
+    root.classList.toggle('view-essentials', state.view === 'essentials');
+    for (const b of root.querySelectorAll('[data-view]')) b.setAttribute('aria-pressed', String(b.dataset.view === state.view));
+    root.querySelector('.view-help').textContent =
+      state.view === 'essentials'
+        ? 'Showing the main parts. Everything adds the trial table, the code, and custom designs.'
+        : 'Showing everything. Essentials hides the advanced parts.';
+    if (remember) {
+      try {
+        localStorage.setItem('lmd-view', state.view);
+      } catch {
+        // Storage can be blocked; the view still works for this visit.
+      }
+    }
+  }
+  root.querySelector('.view-switch').addEventListener('click', (ev) => {
+    const v = ev.target.closest('[data-view]')?.dataset.view;
+    if (!v) return;
+    setView(v);
+    if (v === 'essentials' && state.readings.includes('code')) state.readings = state.readings.filter((r) => r !== 'code');
+    renderEquations();
+    saveUrl();
+  });
+
   // ---- Phenomenon cards ---------------------------------------------------
   function renderCards() {
     const html = phenomena
@@ -760,8 +809,9 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
         seed: state.seed,
         t: state.t,
         cue: state.focusCue,
-        readings: state.readings.join() === DEFAULT_READINGS.join() ? undefined : state.readings,
+        readings: state.readings.join() === (state.view === 'essentials' ? ESSENTIAL_READINGS : DEFAULT_READINGS).join() ? undefined : state.readings,
         stage: state.stage,
+        view: state.view === 'essentials' ? 'essentials' : undefined,
       };
       history.replaceState(null, '', `#${encodeState(s)}`);
     }, 200);
@@ -804,6 +854,8 @@ export function mountModelPage({ root, model, spec, phenomena, modelSourceUrl, d
 
   // ---- Start --------------------------------------------------------------
   const initial = decodeState(location.hash);
+  setView(initial.view ?? storedView() ?? 'everything', { remember: Boolean(initial.view) });
+  if (state.view === 'essentials') state.readings = [...ESSENTIAL_READINGS];
   loadPreset(initial.preset && phenomena.some((p) => p.id === initial.preset) ? initial.preset : defaultPreset, {});
   let changed = false;
   if (initial.design !== undefined) {
@@ -851,10 +903,22 @@ function subscripts(text) {
   return esc(text).replace(/([A-Za-z\u0391-\u03c9]+)_([A-Z])/g, '$1<sub>$2</sub>');
 }
 
-function layout(model, spec, primerUrl) {
+function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
   return `
 <div class="page-intro">
   <h1>${esc(model.name)} <span class="muted">(${model.year})</span></h1>
+  <div class="entry-row">
+    <div class="view-switch" role="group" aria-label="How much to show">
+      <button class="btn" data-view="essentials" aria-pressed="false">Essentials</button>
+      <button class="btn" data-view="everything" aria-pressed="false">Everything</button>
+    </div>
+    <span class="small muted view-help"></span>
+    <span class="entry-links small">
+      ${overviewUrl ? `<a href="${overviewUrl}">Overview slides</a>` : ''}
+      <a href="${primerUrl}">Reading the equations</a>
+      <a href="${glossaryUrl}">Glossary</a>
+    </span>
+  </div>
   ${spec.intro}
   <details class="howto">
     <summary>New here? How to use this page</summary>
@@ -873,10 +937,11 @@ function layout(model, spec, primerUrl) {
     <section class="panel">
       <h2>Design</h2>
       <label class="field">Phenomenon <select id="preset"></select></label>
-      <label class="field">Trials <textarea id="design-text" spellcheck="false" autocomplete="off" aria-describedby="design-error"></textarea></label>
+      <label class="field advanced">Trials <textarea id="design-text" spellcheck="false" autocomplete="off" aria-describedby="design-error"></textarea></label>
       <div class="error-msg" id="design-error" role="alert"></div>
-      <div class="btn-row"><button class="btn" id="reshuffle" hidden>Shuffle again</button></div>
-      <details class="help"><summary>How to write a design</summary><pre>${esc(DESIGN_HELP)}</pre></details>
+      <div class="btn-row advanced"><button class="btn" id="reshuffle" hidden>Shuffle again</button></div>
+      <p class="small muted essentials-only">Pick an experiment above. Switch to <em>Everything</em> to write your own.</p>
+      <details class="help advanced"><summary>How to write a design</summary><pre>${esc(DESIGN_HELP)}</pre></details>
     </section>
     <section class="panel">
       <div class="panel-head"><h2>Parameters</h2><button class="btn" id="reset-params">Reset</button></div>
@@ -916,7 +981,7 @@ function layout(model, spec, primerUrl) {
           <h2>Equations <span class="muted" id="eq-context"></span></h2>
           <a class="small" href="${primerUrl}">How to read these equations</a>
           <div class="readings" role="group" aria-label="Ways to read the equations">
-            ${READINGS.map((r) => `<button class="btn" data-reading="${r.key}" aria-pressed="false">${r.label}</button>`).join('')}
+            ${READINGS.map((r) => `<button class="btn${r.key === 'code' ? ' advanced' : ''}" data-reading="${r.key}" aria-pressed="false">${r.label}</button>`).join('')}
           </div>
         </div>
         <div class="cue-chips" id="cue-chips"></div>
@@ -935,9 +1000,10 @@ function layout(model, spec, primerUrl) {
         <span><span class="role-badge role-modeller">parameter</span> set by the modeller</span>
         <span><span class="role-badge role-computed">computed</span> calculated by the model</span>
       </div>
-      <table class="symbol-guide" id="guide"></table>
+      <div class="table-scroll"><table class="symbol-guide" id="guide"></table></div>
+      <p class="small muted">Words still unclear? Every term is in the <a href="${glossaryUrl}">glossary</a>.</p>
     </section>
-    <section class="panel spoiler">
+    <section class="panel spoiler advanced">
       <div class="panel-head"><h2>Trial table</h2><button class="btn" id="csv">Download CSV</button></div>
       <p class="small muted">Every number the model computed, one row per trial. Click a row to select that trial.</p>
       <div class="table-wrap" id="table"></div>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reading the Equations Overview · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for the reading-the-equations primer: equations as recipes, the three kinds of number, the five symbols, and the prediction error.">
+  <link rel="stylesheet" href="../css/site.css">
+</head>
+<body class="deck-page">
+  <main class="deck" data-title="Reading the equations overview" data-back="../primer.html" data-back-label="Go to the primer">
+    <section class="slide" data-title="Reading the equations: what to expect">
+      <div class="kicker">Overview · reading the equations</div>
+      <h1>Reading the equations: what to expect</h1>
+      <p class="sub">How to read the rules that learning models are written in, one symbol at a time.</p>
+    </section>
+    <section class="slide" data-title="An equation is a recipe">
+      <h2>An equation is a recipe</h2>
+      <p>In a learning model, an equation is an instruction: <em>after each trial, change each cue's strength by this much</em>.</p>
+      <p>The computer follows the same instruction on every trial. Each trial's result is the next trial's starting point.</p>
+      <p class="big">You never have to solve it. You only need to know what each piece stands for.</p>
+      <aside class="notes">This reframing helps anxious students: an equation is a procedure, not a puzzle.</aside>
+    </section>
+    <section class="slide" data-title="Three kinds of number">
+      <h2>Three kinds of number</h2>
+      <div class="cards-row">
+        <div class="mini-card"><h3><span class="role-badge role-experimenter">experimenter</span></h3><p>Set by the experiment: which cues appear and whether the outcome happens. Shown in green.</p></div>
+        <div class="mini-card"><h3><span class="role-badge role-modeller">parameter</span></h3><p>Chosen by the modeller before training, such as how fast learning is. Shown in purple.</p></div>
+        <div class="mini-card"><h3><span class="role-badge role-computed">computed</span></h3><p>Worked out by the model on every trial: the predictions and the changes. Shown in pink.</p></div>
+      </div>
+      <p class="sub">Asking "who sets this number?" answers most questions about an equation.</p>
+    </section>
+    <section class="slide" data-title="Five symbols cover almost everything">
+      <h2>Five symbols cover almost everything</h2>
+      <table class="sym-table">
+        <tr><td>Δ</td><td><strong>delta</strong>: "change in". ΔV is how much V changes on a trial.</td></tr>
+        <tr><td>Σ</td><td><strong>sigma</strong>: "add up". ΣV is the strengths of the cues present, added together.</td></tr>
+        <tr><td><span class="sym role-modeller">α</span></td><td><strong>alpha</strong>: how noticeable a cue is.</td></tr>
+        <tr><td><span class="sym role-modeller">β</span></td><td><strong>beta</strong>: how fast the outcome teaches.</td></tr>
+        <tr><td><span class="sym role-experimenter">λ</span></td><td><strong>lambda</strong>: the outcome. 1 if it happens, 0 if not.</td></tr>
+      </table>
+      <aside class="notes">V itself is just "strength". The primer has a pronunciation table; saying the names aloud helps.</aside>
+    </section>
+    <section class="slide" data-title="The heart of it: the error">
+      <h2>The heart of it: the error</h2>
+      <p>What happened (λ) minus what was predicted (ΣV). Move the sliders:</p>
+      <div class="widget" data-widget="error"></div>
+      <aside class="notes">Live widget from the primer. Show the three cases: positive error (strengths go up), negative (go down), zero (no learning).</aside>
+    </section>
+    <section class="slide" data-title="From words to symbols">
+      <h2>From words to symbols</h2>
+      <p>The same rule, three ways. The colours match.</p>
+      <div class="widget" data-widget="letters"></div>
+      <p class="sub">The primer takes this apart one piece at a time.</p>
+    </section>
+    <section class="slide" data-title="How the primer works">
+      <h2>How the primer works</h2>
+      <ul>
+        <li>Thirteen short sections, each with something to move or click.</li>
+        <li>Check-yourself questions. Nothing is graded.</li>
+        <li>A table that translates the symbols in your readings into the ones used here.</li>
+        <li>Skip anything you already know.</li>
+      </ul>
+      <p class="sub">Stuck on decimals or negative numbers? The <a href="../warm-up.html">maths warm-up</a> covers them. Stuck on a word? See the <a href="../glossary.html">glossary</a>.</p>
+    </section>
+    <section class="slide" data-title="Ready?">
+      <h2>Ready?</h2>
+      <p><a class="btn primary" href="../primer.html">Open Reading the equations</a></p>
+      <p class="sub">Then see the <a href="rescorla-wagner.html">Rescorla-Wagner overview</a>.</p>
+    </section>
+  </main>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

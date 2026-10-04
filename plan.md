@@ -93,8 +93,11 @@ Every symbol is coloured by who sets it: the experimenter (λ, which cues are pr
 ## Architecture
 
 ```
-index.html                 landing: models, phenomena, primer, compare
+index.html                 landing: entry points by background, all units
+warm-up.html               maths warm-up for students who need it
 primer.html                how to read these equations
+glossary.html              every technical term in plain language
+decks/<unit>.html          overview slides for each unit
 compare.html               one design, several models
 models/
   rescorla-wagner.html     one page per model, same layout
@@ -257,6 +260,23 @@ Notes from building it:
 - Predict first: each phenomenon card now has "Predict, then run". The chart hides the model's lines and uses a range that gives nothing away. The student draws the lines named in the card's prompt, and the equations, arithmetic, trial table, and that card's result stay hidden until they press Reveal. The comparison then gives a verdict per line, the values at the end of each phase, and a button that jumps to the trial where the sketch and the model differ most. Any design can be sketched from the chart's "Sketch a prediction first" button.
 - The model page also gained a collapsible "How to use this page" guide, a link from the equation panel to the primer, and a link from each row of the symbol guide to the primer section that explains that symbol.
 
+### 2b. Entry points for students with no background
+
+Students range from comfortable with equations to new to the area and anxious about maths, and some need help with basic arithmetic. So the site needs several ways in, and short overviews that say what each unit is about before a student commits to it.
+
+- [x] Landing page organised around three starting points: new to all of this, know some psychology, comfortable with equations
+- [x] Overview slide decks: the big picture (no maths), the maths warm-up, reading the equations, and Rescorla-Wagner
+- [x] Maths warm-up page: decimals, numbers below zero, gaps, taking part of a number, adding up, reading a graph, a rule repeated (the glass-filling picture of learning), and letters as nicknames, each with a widget and a question with a hint
+- [x] Glossary of every technical term, in plain language with an example, searchable and linked from every page
+- [x] Essentials view on model pages, remembered between visits and settable by link, that hides the trial table, the code, and custom designs and starts with the words reading
+- [x] Consistent navigation on every page: Start here, Maths warm-up, Reading the equations, the models, Glossary
+
+Notes from building it:
+
+- Decks are plain HTML in `decks/`, with no build step. They have keyboard, swipe, and button navigation, a link to each slide, speaker notes (N), an outline (O), full screen (F), and print-as-handout. Charts on slides are drawn by running the real model, and slides can embed any primer or warm-up widget.
+- Tests check that every link between pages, into page sections, and into the glossary resolves; that every check question has exactly one right answer with an explanation for every option; and that every deck has slides and a way back.
+- From here on, every new model ships with an overview deck, glossary entries for its new terms, and the same Essentials view.
+
 ### 3. Attention models
 
 - [ ] Mackintosh, with the explicit associability rule documented on the page
@@ -264,6 +284,7 @@ Notes from building it:
 - [ ] Associability chart beside the strength chart, and the freeze-α toggles
 - [ ] Phenomenon cards for latent inhibition and the different accounts of blocking
 - [ ] Tests against the worked examples in the papers
+- [ ] Overview decks for Mackintosh and Pearce-Hall, and glossary entries for their new terms
 
 ### 4. SOP
 
@@ -273,6 +294,7 @@ Notes from building it:
 - [ ] Three-state diagram, within-trial timeline with shaded excitatory and inhibitory overlap, and timeline scrubber
 - [ ] Phenomenon cards: intertrial interval, CS-US interval, backward conditioning, US pre-exposure, latent inhibition by priming, and blocking as cancelling excitation and inhibition
 - [ ] Tests reproducing the published state trajectories and figures
+- [ ] Overview deck and glossary entries for SOP
 
 ### 5. MINERVA-AL
 
@@ -280,6 +302,7 @@ Notes from building it:
 - [ ] Seeded generator, many learners, mean and spread on the chart
 - [ ] Trace matrix, echo, and similarity views
 - [ ] Tests reproducing the key figures with fixed seeds
+- [ ] Overview deck and glossary entries for MINERVA-AL
 
 ### 6. Comparison and teaching
 

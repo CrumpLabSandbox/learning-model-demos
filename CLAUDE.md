@@ -21,16 +21,23 @@ ES modules do not load from `file://`, so always open the site through a local s
 ## Layout
 
 ```
-index.html                    landing page
+index.html                    landing page: three entry points by background, and every unit
+warm-up.html                  maths warm-up for students who need basic maths support
 primer.html                   how to read the equations: widgets, checks, notation map
+glossary.html                 plain-language glossary, rendered from content/glossary.js
+decks/<unit>.html             overview slides for each unit (js/ui/deck.js)
 models/<model>.html           one page per model; each just calls mountModelPage()
 js/core/                      no DOM: design parser, runner, rng, phenomenon checks, sketch comparison, URL state, formatting
 js/models/<model>.js          one module per model, common interface (see js/core/runner.js)
-js/ui/                        DOM: page.js wires everything; chart, equation, arithmetic, table, highlight, primer
+js/ui/                        DOM: page.js wires everything; chart, equation, arithmetic, table, highlight, primer,
+                              warmup, glossary, deck, minichart (model-drawn charts for slides),
+                              widget-kit (sliders, number lines, check questions)
                               mathml.js has string helpers for hand-written MathML
 content/equations/<model>.js  equation spec per model: symbols, equations, words, table columns, build stages
 content/phenomena/index.js    phenomenon presets: design, empirical result, citation, check, predict prompt, per-model notes
 content/primer/               primer content: worked fixed points, check questions, notation map
+content/warmup/               warm-up check questions (each with a hint)
+content/glossary.js           every technical term: plain definition, example, links
 tests/                        node:test files
 css/site.css                  one stylesheet; colour tokens on :root with dark-mode overrides
 ```
@@ -42,6 +49,17 @@ css/site.css                  one stylesheet; colour tokens on :root with dark-m
 3. Add a `models['<id>']` entry with `why` and `tryThis` to each phenomenon in `content/phenomena/index.js`.
 4. `models/<id>.html`: copy `models/rescorla-wagner.html` and change the imports.
 5. Tests: analytic results, published results, and the check that every displayed equation evaluates to the number the model used (see `tests/rescorla-wagner.test.js`).
+
+## Scaffolding for every unit
+
+The audience runs from students new to the area who find maths stressful to students comfortable with equations. Every unit offers more than one way in.
+
+- Every unit has an overview deck in `decks/` that says what it is about and what to expect, in plain words, before any equations. Link it from the unit's page and from the landing page's units table.
+- Every technical term used anywhere goes in `content/glossary.js`. Link the first use on a page to `glossary.html#<id>`.
+- On model pages, mark anything beyond the essentials with the class `advanced`; Essentials view hides it.
+- Check questions have exactly one right answer, an explanation for every option, and, on the warm-up, a hint. Wrong answers are never scolded.
+- Every page uses the same navigation: Start here, Maths warm-up, Reading the equations, the model pages, Glossary.
+- `tests/content.test.js` fails on any broken link between pages, sections, or glossary entries.
 
 ## Conventions
 

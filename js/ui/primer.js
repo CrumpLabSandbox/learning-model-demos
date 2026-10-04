@@ -4,6 +4,7 @@
 import { math, mo, mn, row, paren, sym, RW } from './mathml.js';
 import { fmt, fmtExact, signed } from '../core/format.js';
 import { installHighlighting } from './highlight.js';
+import { slider, wireSliders, numberLine, whenResized, renderCheck } from './widget-kit.js';
 import { parseDesign } from '../core/design.js';
 import { runModel, final } from '../core/runner.js';
 import * as rw from '../models/rescorla-wagner.js';
@@ -18,95 +19,6 @@ const se = (x) => signed(fmtExact(x));
 const ex = (x) => fmtExact(Number(x.toFixed(4)));
 
 // ---- Shared bits ----------------------------------------------------------
-
-function slider({ id, label, min, max, step, value, role }) {
-  return (
-    `<div class="slider${role ? ` role-${role}` : ''}"><label class="slider-label" for="${id}">${label}</label>` +
-    `<output id="${id}-out" for="${id}">${se(value)}</output>` +
-    `<input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${value}"></div>`
-  );
-}
-
-function wireSliders(el, ids, onChange) {
-  const read = () => Object.fromEntries(ids.map((id) => [id, Number(el.querySelector(`#${id}`).value)]));
-  el.addEventListener('input', (ev) => {
-    const id = ev.target.id;
-    if (!ids.includes(id)) return;
-    el.querySelector(`#${id}-out`).textContent = se(Number(ev.target.value));
-    onChange(read());
-  });
-  onChange(read());
-}
-
-// A horizontal number line drawn at the element's real width.
-// marks: [{ v, label, cls, row }]; arrows: [{ from, to, label, row }]
-function numberLine(el, { lo, hi, marks = [], arrows = [], bars = [], rows = 2 }) {
-  const W = Math.max(280, el.clientWidth || 600);
-  const rowH = 30;
-  const H = rows * rowH + 34;
-  const L = 12;
-  const R = 12;
-  const x = (v) => L + ((v - lo) / (hi - lo)) * (W - L - R);
-  const out = [];
-  const step = (hi - lo) / 6 > 0.3 ? 0.5 : 0.25;
-  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) {
-    const vv = Number(v.toFixed(6));
-    out.push(`<line x1="${x(vv)}" x2="${x(vv)}" y1="4" y2="${H - 24}" stroke="var(--grid)"/>`);
-    out.push(`<text class="tick" x="${x(vv)}" y="${H - 8}" text-anchor="middle">${signed(String(vv))}</text>`);
-  }
-  out.push(`<line x1="${x(0)}" x2="${x(0)}" y1="4" y2="${H - 24}" stroke="var(--axis)"/>`);
-  for (const b of bars) {
-    const y = 8 + b.row * rowH;
-    const x0 = Math.min(x(b.from), x(b.to));
-    out.push(`<rect x="${x0 + 1}" y="${y}" width="${Math.max(1, Math.abs(x(b.to) - x(b.from)) - 2)}" height="14" rx="3" style="fill:${b.color}"/>`);
-  }
-  for (const m of marks) {
-    const y = 4 + m.row * rowH;
-    const flip = x(m.v) + 90 > W;
-    out.push(`<line x1="${x(m.v)}" x2="${x(m.v)}" y1="${y}" y2="${y + 22}" class="${m.cls}" stroke-width="2.5"/>`);
-    out.push(`<text class="value-label" x="${flip ? x(m.v) - 5 : x(m.v) + 5}" y="${y + 15}"${flip ? ' text-anchor="end"' : ''}>${m.label}</text>`);
-  }
-  for (const a of arrows) {
-    const y = 15 + a.row * rowH;
-    if (Math.abs(x(a.to) - x(a.from)) > 4) {
-      const dir = a.to > a.from ? 1 : -1;
-      out.push(`<line class="gap" x1="${x(a.from)}" x2="${x(a.to) - dir * 7}" y1="${y}" y2="${y}"/>`);
-      out.push(`<path class="gap-head" d="M${x(a.to)},${y} l${-dir * 8},-5 v10 z"/>`);
-    }
-    if (a.label) {
-      const lx = Math.min(W - 120, Math.max(L, Math.min(x(a.from), x(a.to))));
-      out.push(`<text class="value-label" x="${lx}" y="${y + 18}">${a.label}</text>`);
-    }
-  }
-  el.innerHTML = `<svg class="numline" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${out.join('')}</svg>`;
-}
-
-function whenResized(el, fn) {
-  let w = el.clientWidth;
-  new ResizeObserver(() => {
-    if (el.clientWidth !== w) {
-      w = el.clientWidth;
-      fn();
-    }
-  }).observe(el);
-}
-
-function renderCheck(el, key) {
-  const c = checks[key];
-  el.innerHTML =
-    `<div class="check"><div class="check-q"><strong>Check yourself.</strong> ${c.q}</div>` +
-    `<div class="btn-row">${c.options.map((o, i) => `<button class="btn" data-opt="${i}">${o.text}</button>`).join('')}</div>` +
-    `<p class="check-why" aria-live="polite"></p></div>`;
-  el.addEventListener('click', (ev) => {
-    const b = ev.target.closest('[data-opt]');
-    if (!b) return;
-    const o = c.options[Number(b.dataset.opt)];
-    for (const x of el.querySelectorAll('[data-opt]')) x.removeAttribute('aria-pressed');
-    b.setAttribute('aria-pressed', 'true');
-    const why = el.querySelector('.check-why');
-    why.innerHTML = `<span class="badge ${o.correct ? 'yes' : 'no'}">${o.correct ? '✓ Yes' : '✗ Not quite'}</span> ${o.why}`;
-  });
-}
 
 // ---- Widgets --------------------------------------------------------------
 
@@ -449,11 +361,19 @@ function subs(text) {
   return text.replace(/([A-Za-zΑ-ω]+)_([A-Z])/g, '$1<sub>$2</sub>');
 }
 
+// Mount any primer widgets found inside root. Decks reuse this.
+export function mountWidgets(root) {
+  for (const el of root.querySelectorAll('[data-widget]')) {
+    const w = widgets[el.dataset.widget];
+    if (w) w.call({}, el);
+  }
+}
+
 export function mountPrimer(root) {
   for (const el of root.querySelectorAll('[data-widget]')) {
     const w = widgets[el.dataset.widget];
     if (w) w.call({}, el);
   }
-  for (const el of root.querySelectorAll('[data-check]')) renderCheck(el, el.dataset.check);
+  for (const el of root.querySelectorAll('[data-check]')) renderCheck(el, checks[el.dataset.check]);
   installHighlighting(root);
 }

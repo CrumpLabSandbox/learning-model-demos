@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Big Picture · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for people new to learning theory: what associative learning is, the classic findings, and why researchers build models. No maths needed.">
+  <link rel="stylesheet" href="../css/site.css">
+</head>
+<body class="deck-page">
+  <main class="deck" data-title="The big picture" data-back="../index.html#start" data-back-label="Back to Start here">
+
+    <section class="slide" data-title="How do we learn what predicts what?">
+      <div class="kicker">Overview · the big picture</div>
+      <h1>How do we learn what predicts what?</h1>
+      <p class="sub">An introduction for people new to learning theory. No maths needed. Use the arrow keys or the buttons below to move through the slides.</p>
+      <aside class="notes">This deck sets the scene before any equations. Aim: students leave knowing the vocabulary (cue, outcome, trial), two or three classic findings, and why anyone would turn an idea about learning into a model.</aside>
+    </section>
+
+    <section class="slide" data-title="You do this all day">
+      <h2>You do this all day</h2>
+      <ul>
+        <li>Your phone buzzes, and you expect a message.</li>
+        <li>You smell coffee, and you expect the café is open.</li>
+        <li>Dark clouds roll in, and you expect rain.</li>
+        <li>A song comes on, and you remember a summer.</li>
+      </ul>
+      <p class="big">One thing happens first and tells you something about what comes next. Learning these links is called <a href="../glossary.html#associative-learning">associative learning</a>.</p>
+      <aside class="notes">Ask the class for their own examples before showing the list. Most people can list ten in a minute.</aside>
+    </section>
+
+    <section class="slide" data-title="Pavlov's discovery">
+      <h2>Pavlov's discovery</h2>
+      <div class="two-col">
+        <div>
+          <p>Around 1900, Ivan Pavlov was studying digestion in dogs. He noticed the dogs began to salivate <em>before</em> the food arrived, at signals that usually came before food.</p>
+          <p>He then paired a neutral sound with food many times. Soon the sound alone made the dogs salivate. They had learned that the sound predicts food.</p>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 420 250" role="img" aria-label="Before learning, food causes salivation. After pairing, the sound alone causes salivation.">
+            <defs><marker id="dg-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="dg-head"/></marker></defs>
+            <text class="dg-small" x="0" y="20">Before learning</text>
+            <rect class="dg-box outcome" x="0" y="32" width="110" height="46" rx="8"/><text class="dg-text" x="55" y="61" text-anchor="middle">food</text>
+            <path class="dg-arrow" d="M115,55 H185"/>
+            <rect class="dg-box response" x="190" y="32" width="150" height="46" rx="8"/><text class="dg-text" x="265" y="61" text-anchor="middle">salivation</text>
+            <text class="dg-small" x="0" y="130">After many sound → food pairings</text>
+            <rect class="dg-box cue" x="0" y="142" width="110" height="46" rx="8"/><text class="dg-text" x="55" y="171" text-anchor="middle">sound</text>
+            <path class="dg-arrow" d="M115,165 H185"/>
+            <rect class="dg-box response" x="190" y="142" width="150" height="46" rx="8"/><text class="dg-text" x="265" y="171" text-anchor="middle">salivation</text>
+            <text class="dg-small" x="190" y="215">no food needed</text>
+          </svg>
+        </div>
+      </div>
+      <aside class="notes">Pavlov's main English-language account is his 1927 book, Conditioned Reflexes. The popular story says he used a bell; his lab used several signals, including a metronome. The point is the same either way.</aside>
+    </section>
+
+    <section class="slide" data-title="The words researchers use">
+      <h2>The words researchers use</h2>
+      <table class="sym-table">
+        <tr><td>cue</td><td>The signal that comes first, such as the sound. Also called the conditioned stimulus, or CS. On this site cues are letters: A, B, C.</td></tr>
+        <tr><td>outcome</td><td>The thing that matters, such as the food. Also called the unconditioned stimulus, or US.</td></tr>
+        <tr><td>trial</td><td>One go: the cue appears, and the outcome happens or it does not. A+ means cue A with the outcome; A− means A without it.</td></tr>
+        <tr><td>strength</td><td>How strongly a cue predicts the outcome. Models give it a number.</td></tr>
+      </table>
+      <p class="sub">Every one of these is in the <a href="../glossary.html">glossary</a>.</p>
+      <aside class="notes">These four words carry most of the course. CS and US are worth knowing because the readings use them.</aside>
+    </section>
+
+    <section class="slide" data-title="Learning has a shape">
+      <h2>Learning has a shape</h2>
+      <div class="two-col">
+        <div>
+          <p><strong>Acquisition.</strong> Pair a cue with the outcome and the response grows: quickly at first, then more slowly, until it levels off.</p>
+          <p><strong>Extinction.</strong> Then present the cue without the outcome, and the response fades.</p>
+        </div>
+        <figure data-mini data-design="Acquisition: 20 A+|Extinction: 20 A-" data-lines="A" data-labels="A=cue" data-caption="Drawn by the Rescorla-Wagner model: a cue's strength over 40 trials."></figure>
+      </div>
+      <aside class="notes">This chart is the real model's output, not a drawing. The negatively accelerated shape (fast, then slow) is one of the most reliable facts in learning.</aside>
+    </section>
+
+    <section class="slide" data-title="A puzzle: pairing is not enough">
+      <h2>A puzzle: pairing is not enough</h2>
+      <div class="two-col">
+        <div>
+          <p>In the late 1960s Leon Kamin trained rats that a noise predicted a mild shock. Then he played the noise and a light together, followed by the same shock.</p>
+          <p>The light was paired with the shock many times, yet the rats learned almost nothing about it. The noise already predicted the shock. This is <a href="../glossary.html#blocking">blocking</a>.</p>
+        </div>
+        <figure data-mini data-design="Noise first: 20 A+|Noise and light: 20 AB+" data-lines="A,B" data-labels="A=noise,B=light" data-caption="Drawn by the Rescorla-Wagner model: the light (B) barely learns."></figure>
+      </div>
+      <p class="big">So learning is not just about things happening together. It is about <em>surprise</em>.</p>
+      <aside class="notes">Kamin's experiments used conditioned suppression in rats. Blocking is the finding that motivated the Rescorla-Wagner model, the first model on this site.</aside>
+    </section>
+
+    <section class="slide" data-title="Why build a model?">
+      <h2>Why build a model?</h2>
+      <div class="cards-row">
+        <div class="mini-card"><h3>Words are vague</h3><p>"Learning depends on surprise" sounds right, but how much surprise, and how much learning?</p></div>
+        <div class="mini-card"><h3>A model is exact</h3><p>A <a href="../glossary.html#model">model</a> turns the idea into a rule precise enough for a computer to follow, trial by trial.</p></div>
+        <div class="mini-card"><h3>Exact means testable</h3><p>The model predicts what should happen in any experiment, including new ones. Then we can check.</p></div>
+        <div class="mini-card"><h3>Being wrong is useful</h3><p>When a model fails, we learn which part of the idea was wrong. That is how the next model is built.</p></div>
+      </div>
+      <aside class="notes">The theme of the course: models make predictions explicit. A model that fails in a clear way teaches us more than a vague idea that can never fail.</aside>
+    </section>
+
+    <section class="slide" data-title="The models on this site">
+      <h2>The models on this site</h2>
+      <ul class="timeline">
+        <li><span class="yr">1972</span><span><strong>Rescorla-Wagner.</strong> Learn from surprise. <span class="muted">Available now.</span></span></li>
+        <li><span class="yr">1975</span><span><strong>Mackintosh.</strong> Pay more attention to the best predictor. <span class="muted">Coming.</span></span></li>
+        <li><span class="yr">1980</span><span><strong>Pearce-Hall.</strong> Pay more attention to what is surprising. <span class="muted">Coming.</span></span></li>
+        <li><span class="yr">1981</span><span><strong>SOP (Wagner).</strong> Learning depends on what is active in memory, moment by moment. <span class="muted">Coming.</span></span></li>
+        <li><span class="yr">2012</span><span><strong>MINERVA-AL.</strong> Remember every experience, and predict by recalling similar ones. <span class="muted">Coming.</span></span></li>
+      </ul>
+      <p class="sub">Each model keeps what worked before and fixes something that did not.</p>
+      <aside class="notes">Each later model is a response to a failure of an earlier one. Students will see those failures on the Rescorla-Wagner page as phenomenon cards marked "Does not".</aside>
+    </section>
+
+    <section class="slide" data-title="Pick your starting point">
+      <h2>Pick your starting point</h2>
+      <ol class="path-steps">
+        <li><strong>Maths feels rusty or scary?</strong> Start with the <a href="../warm-up.html">maths warm-up</a>. Decimals, gaps, and graphs, slowly, with pictures.</li>
+        <li><strong>Comfortable with basic maths?</strong> Go to <a href="../primer.html">Reading the equations</a>. It explains every symbol the models use.</li>
+        <li><strong>Ready for a model?</strong> Watch the <a href="rescorla-wagner.html">Rescorla-Wagner overview</a>, then open the <a href="../models/rescorla-wagner.html#view=essentials">model page in Essentials view</a>.</li>
+      </ol>
+      <p class="sub">Every page has an overview deck like this one, and you can go back a level at any time.</p>
+      <aside class="notes">There is no single right path. Students who already know the maths can skip straight to the model page; nothing later depends on finishing earlier pages.</aside>
+    </section>
+  </main>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

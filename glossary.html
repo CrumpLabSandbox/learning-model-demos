@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Glossary · Learning Model Demos</title>
+  <meta name="description" content="Plain-language definitions of every technical word used on the learning model demos site.">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">Learning Model Demos</a>
+    <nav aria-label="Pages">
+      <a href="index.html#start">Start here</a>
+      <a href="warm-up.html">Maths warm-up</a>
+      <a href="primer.html">Reading the equations</a>
+      <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
+      <a href="glossary.html" aria-current="page">Glossary</a>
+    </nav>
+  </header>
+  <main class="page">
+    <div class="prose">
+      <h1>Glossary</h1>
+      <p>Every technical word on this site, in plain language, with an example. If a word on another page confuses you, look it up here.</p>
+    </div>
+    <div class="prose" id="glossary"></div>
+  </main>
+  <script type="module">
+    import { mountGlossary } from './js/ui/glossary.js';
+    mountGlossary(document.getElementById('glossary'));
+  </script>
+</body>
+</html>

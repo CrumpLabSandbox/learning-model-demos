@@ -16,6 +16,7 @@ export function encodeState(s) {
   if (s.cue) q.set('cue', s.cue);
   if (s.readings) q.set('r', s.readings.join(','));
   if (s.stage !== undefined && s.stage !== null) q.set('stage', String(s.stage));
+  if (s.view) q.set('view', s.view);
   return q.toString();
 }
 
@@ -48,5 +49,6 @@ export function decodeState(hash) {
   if (q.has('cue')) out.cue = q.get('cue');
   if (q.has('r')) out.readings = q.get('r').split(',').filter(Boolean);
   if (q.has('stage')) out.stage = int('stage');
+  if (q.has('view')) out.view = q.get('view');
   return out;
 }

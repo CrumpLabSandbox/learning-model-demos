@@ -13,6 +13,7 @@ test('page state round-trips through the URL hash', () => {
     cue: 'B',
     readings: ['words', 'numbers'],
     stage: 2,
+    view: 'essentials',
   };
   assert.deepEqual(decodeState(`#${encodeState(s)}`), s);
 });

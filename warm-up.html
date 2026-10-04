@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maths Warm-up · Learning Model Demos</title>
+  <meta name="description" content="A gentle warm-up on the small amount of maths learning models use: decimals, numbers below zero, gaps, taking part of a number, adding up, and reading a graph.">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">Learning Model Demos</a>
+    <nav aria-label="Pages">
+      <a href="index.html#start">Start here</a>
+      <a href="warm-up.html" aria-current="page">Maths warm-up</a>
+      <a href="primer.html">Reading the equations</a>
+      <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
+      <a href="glossary.html">Glossary</a>
+    </nav>
+  </header>
+  <main class="page primer" id="warmup">
+    <div class="primer-layout">
+      <nav class="toc" aria-label="On this page">
+        <strong>On this page</strong>
+        <ol>
+          <li><a href="#welcome">Before you start</a></li>
+          <li><a href="#decimals">Numbers between 0 and 1</a></li>
+          <li><a href="#negatives">Below zero</a></li>
+          <li><a href="#gaps">Finding the gap</a></li>
+          <li><a href="#fractions">Taking part of a number</a></li>
+          <li><a href="#adding">Adding up</a></li>
+          <li><a href="#graphs">Reading a graph</a></li>
+          <li><a href="#recipe">A rule, repeated</a></li>
+          <li><a href="#letters">Letters as nicknames</a></li>
+          <li><a href="#next">Where to go next</a></li>
+        </ol>
+        <p class="small" style="margin:.75rem 0 0"><a href="decks/warm-up.html">Overview slides for this page</a></p>
+      </nav>
+
+      <article class="prose-wide">
+        <h1>Maths warm-up</h1>
+        <p class="lede">Learning models use very little maths: adding, taking away, multiplying, and reading a graph. This page practises exactly those pieces, slowly, with pictures.</p>
+
+        <section id="welcome">
+          <h2>Before you start</h2>
+          <ul class="reassure">
+            <li><strong>Nothing here is graded.</strong> Nothing is saved, and nobody sees your answers.</li>
+            <li><strong>You cannot break anything.</strong> Move any slider and move it back.</li>
+            <li><strong>Use a calculator</strong> whenever you like. Understanding what a sum means matters more than doing it in your head.</li>
+            <li><strong>Wrong answers are useful.</strong> Every answer explains itself, and every question has a hint.</li>
+          </ul>
+          <p>If you already feel comfortable with decimals and negative numbers, skip ahead to <a href="#recipe">A rule, repeated</a>. It is the idea the models are built on.</p>
+        </section>
+
+        <section id="decimals">
+          <h2>1. Numbers between 0 and 1</h2>
+          <p>Learning models measure things on a scale that usually runs from 0 to 1. <strong>0</strong> means none, <strong>1</strong> means all, and numbers in between are parts of the way. You already know these from money and percentages: 0.5 is a half, like 50 cents of a dollar or 50%.</p>
+          <div class="widget" data-widget="decimals"></div>
+          <div data-check="decimals"></div>
+        </section>
+
+        <section id="negatives">
+          <h2>2. Below zero</h2>
+          <p>Numbers can go below zero, like temperatures in winter. They are written with a minus sign: −0.4. In learning models, below zero has a meaning: the learner expects the outcome <em>not</em> to happen.</p>
+          <div class="widget" data-widget="negatives"></div>
+          <div data-check="negatives"></div>
+        </section>
+
+        <section id="gaps">
+          <h2>3. Finding the gap</h2>
+          <p>Taking one number away from another tells you <strong>how far apart</strong> they are. Always take where you are away from where you want to be: <em>goal minus now</em>. If the answer is positive you need to go up; if it is negative you need to come down.</p>
+          <p>This gap is the most important number in learning models. There it is called the <a href="glossary.html#prediction-error">prediction error</a>: what happened, minus what was expected.</p>
+          <div class="widget" data-widget="gaps"></div>
+          <div data-check="gaps"></div>
+        </section>
+
+        <section id="fractions">
+          <h2>4. Taking part of a number</h2>
+          <p>Multiplying by a number between 0 and 1 means <strong>taking part of</strong> something. × 0.5 means "take half of". × 0.1 means "take a tenth of". So the answer is always smaller than what you started with. This surprises many people, because with whole numbers multiplying makes things bigger.</p>
+          <div class="widget" data-widget="fractions"></div>
+          <div data-check="fractions"></div>
+        </section>
+
+        <section id="adding">
+          <h2>5. Adding up</h2>
+          <p>Models often add up several numbers to get a total. Adding a negative number is the same as taking away: it pulls the total down.</p>
+          <div class="widget" data-widget="adding"></div>
+          <div data-check="adding"></div>
+        </section>
+
+        <section id="graphs">
+          <h2>6. Reading a graph</h2>
+          <p>Every model page draws a graph called a <a href="glossary.html#learning-curve">learning curve</a>. Time runs <strong>along the bottom</strong>, one step per trial. How much has been learned goes <strong>up the side</strong>. To read any point: go along to the trial, up to the line, then across to the side.</p>
+          <div class="widget" data-widget="graphs"></div>
+          <div data-check="graphs"></div>
+        </section>
+
+        <section id="recipe">
+          <h2>7. A rule, repeated</h2>
+          <p>Here is the big idea behind the first model on this site, with no symbols at all. Imagine filling an empty glass where each pour fills <strong>part of the empty space</strong> that is left.</p>
+          <p>The first pour adds a lot, because the glass is empty. Each later pour adds less, because there is less space left. The glass gets closer and closer to full but never goes over. Learning works the same way: you learn a lot when you are very wrong, and less as you get closer to right.</p>
+          <div class="widget" data-widget="recipe"></div>
+          <div data-check="recipe"></div>
+          <p>Notice what you did on each pour: find the gap (section 3), take part of it (section 4), and add it on (section 5). That is the whole rule.</p>
+        </section>
+
+        <section id="letters">
+          <h2>8. Letters as nicknames</h2>
+          <p>Writing the rule in words every time gets long. So people give each quantity a short nickname, usually a single letter. The letters do not change the rule at all. Switch between the three versions below: each colour is the same quantity in every version.</p>
+          <div class="widget" data-widget="letters"></div>
+          <p>The last version is close to the real Rescorla-Wagner rule. The letters λ (lambda) and β (beta) are Greek. They are just more nicknames: λ is the goal and β is how much of the gap each step closes. The <a href="glossary.html">glossary</a> lists every one.</p>
+        </section>
+
+        <section id="next">
+          <h2>Where to go next</h2>
+          <ul>
+            <li><a href="decks/reading-equations.html">Watch the short overview of reading equations</a>, then try <a href="primer.html">Reading the equations</a>. It takes the rule from section 8 apart one symbol at a time.</li>
+            <li><a href="decks/rescorla-wagner.html">See the Rescorla-Wagner overview</a> to find out what the model explains, before opening the model itself.</li>
+            <li>Come back here any time. The <a href="glossary.html">glossary</a> links back to these sections.</li>
+          </ul>
+        </section>
+      </article>
+    </div>
+  </main>
+  <script type="module">
+    import { mountWarmup } from './js/ui/warmup.js';
+    mountWarmup(document.getElementById('warmup'));
+  </script>
+</body>
+</html>
