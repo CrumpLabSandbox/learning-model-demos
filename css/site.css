@@ -589,3 +589,50 @@ div:has(> math), .fx-math, .big-math, .build-math { overflow-x: auto; overflow-y
 math .case-cond { font-size: 0.8em; color: var(--muted); }
 .chain-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 0.4rem 0 0.25rem; font-weight: 600; }
 .chain-off { margin: 0; }
+
+/* Inside the trial (SOP): the moment-by-moment timeline. */
+.tl-controls { margin: 0.5rem 0 0.3rem; }
+.tl-plot { touch-action: pan-y; }
+.tl-svg { cursor: ew-resize; }
+.tl-line { fill: none; stroke-width: 2.25; stroke-linejoin: round; }
+.tl-line.a2 { stroke-dasharray: 6 4; }
+.tl-line.response { stroke: var(--role-computed); stroke-width: 1.5; stroke-dasharray: 2 3; }
+.tl-line.linked { stroke-width: 4; }
+.tl-gain { fill: var(--good); opacity: 0.55; }
+.tl-loss { fill: var(--bad); opacity: 0.55; }
+.tl-gain.linked, .tl-loss.linked { opacity: 0.85; }
+.tl-gap-band { fill: var(--surface-2); opacity: 0.6; }
+.tl-key { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; margin: 0.2rem 0 0.4rem; }
+.tl-key .key { display: inline-flex; align-items: center; gap: 0.35rem; }
+.swatch.dashed { background: repeating-linear-gradient(90deg, var(--c) 0 5px, transparent 5px 8px) !important; }
+.swatch.block { height: 10px; width: 14px; opacity: 0.7; }
+.swatch.gain { background: var(--good); }
+.swatch.loss { background: var(--bad); }
+.swatch.response { background: repeating-linear-gradient(90deg, var(--role-computed) 0 2px, transparent 2px 5px); }
+.tl-options { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; margin-bottom: 0.6rem; }
+.tl-states { margin: 0.4rem 0 0.8rem; }
+.tl-state-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.15rem 0.6rem; align-items: center; margin: 0.35rem 0; }
+.tl-state-name { font-weight: 600; font-size: 0.9rem; }
+.tl-state-nums { grid-column: 2; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tl-state-bar { display: flex; height: 1.6rem; border-radius: 5px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); }
+.tl-seg { display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; transition: width 0.1s linear; }
+.tl-seg.inactive { color: var(--ink-2); }
+.tl-seg.a1 { background: var(--c); color: #fff; }
+.tl-seg.a2 { background: repeating-linear-gradient(135deg, var(--c) 0 3px, transparent 3px 7px); color: var(--ink); text-shadow: 0 0 3px var(--surface), 0 0 3px var(--surface); }
+.tl-sub { font-size: 1rem; margin: 0.8rem 0 0.3rem; }
+.tl-table td, .tl-table th { padding: 0.25rem 0.5rem; vertical-align: top; }
+.tl-table td { font-variant-numeric: tabular-nums; }
+.tl-empty .tl-controls, .tl-empty .tl-options { display: none; }
+
+/* SOP deck: the three-state cycle and gain/loss pills. */
+.state-cycle { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.6rem; margin: 1rem 0; }
+.state-box { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; min-width: 6.5rem; padding: 0.6rem 0.9rem; border-radius: 10px; border: 2px solid var(--cue-1); }
+.state-box span { font-size: 0.8em; color: var(--ink-2); }
+.state-box.inactive { border-color: var(--axis); background: var(--surface-2); }
+.state-box.a1 { background: var(--cue-1); color: #fff; }
+.state-box.a1 span { color: #fff; }
+.state-box.a2 { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--cue-1) 35%, transparent) 0 4px, transparent 4px 9px); }
+.state-arrow { font-size: 0.75em; color: var(--ink-2); text-align: center; line-height: 1.2; }
+.pill { display: inline-block; padding: 0.05em 0.6em; border-radius: 999px; font-weight: 600; font-size: 0.9em; }
+.pill.gain { background: color-mix(in srgb, var(--good) 22%, transparent); color: var(--good); }
+.pill.loss { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }

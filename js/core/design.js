@@ -11,7 +11,15 @@
 //   defaults to 1.
 // - A trial type is one or more capital letters, one per cue, then `+` when
 //   the outcome occurs or `-` when it does not. `A+(0.5)` sets the outcome
-//   magnitude for that trial type.
+//   magnitude for that trial type. A bare `+` is the outcome on its own, with
+//   no cue (useful with a context).
+// - Timing, for models that run moment by moment (SOP): an item can end with
+//   settings in square brackets, such as `20 A+ [CS 1-10, US 9-10, ITI 100]`.
+//   CS a-b says the cues are on from moment a to moment b of the trial, US
+//   a-b says when the outcome is on, and ITI n is the number of moments
+//   before the next trial. A line `Timing: CS 1-10, US 9-10, ITI 100` sets
+//   the timing for every item that does not set its own. Anything not set
+//   uses DEFAULT_TIMING. Models that work trial by trial ignore timing.
 // - An item that is just `alternate`, `random`, or `blocked` sets the order
 //   of trials within the phase. The default is `alternate`: one of each
 //   trial type in turn. `random` shuffles with the design's seed.
@@ -25,6 +33,11 @@
 
 export const ORDERS = ['alternate', 'random', 'blocked'];
 export const MAX_TRIALS = 2000;
+// In moments. The US arrives in the last two moments of the CS (delay
+// conditioning), and the interval between trials is long enough for the
+// traces of one trial to fade before the next.
+export const DEFAULT_TIMING = { cs: [1, 10], us: [9, 10], iti: 100 };
+const MAX_MOMENTS = 400;
 
 export class DesignError extends Error {
   constructor(message, line) {
@@ -33,7 +46,7 @@ export class DesignError extends Error {
   }
 }
 
-const TYPE_RE = /^([A-Za-z]+)([+-])(?:\(\s*([0-9]*\.?[0-9]+)\s*\))?$/;
+const TYPE_RE = /^([A-Za-z]*)([+-])(?:\(\s*([0-9]*\.?[0-9]+)\s*\))?$/;
 
 export function parseTrialType(text, line) {
   const s = text.trim();
@@ -47,6 +60,9 @@ export function parseTrialType(text, line) {
   const [, letters, sign, mag] = m;
   if (letters !== letters.toUpperCase()) {
     throw new DesignError(`Cues are capital letters: write ${letters.toUpperCase()}${sign} instead of ${s}.`, line);
+  }
+  if (!letters && sign === '-') {
+    throw new DesignError('"-" on its own is a trial with nothing in it. Name a cue, such as A-.', line);
   }
   const cues = [...letters];
   if (new Set(cues).size !== cues.length) {
@@ -72,10 +88,62 @@ export function parseCueSet(text, line) {
   return [...new Set(s)].sort().join('');
 }
 
+// Timing settings: "CS 1-10, US 9-10, ITI 100". Returns the parts given.
+export function parseTiming(text, line) {
+  const out = {};
+  for (const raw of text.split(',')) {
+    const item = raw.trim();
+    if (!item) continue;
+    const m = /^(CS|US|ITI)\s*(\d+)(?:\s*-\s*(\d+))?$/i.exec(item);
+    if (!m) {
+      throw new DesignError(`"${item}" is not a timing setting. Write CS 1-10, US 9-10, or ITI 100.`, line);
+    }
+    const key = m[1].toLowerCase();
+    const a = Number(m[2]);
+    if (key === 'iti') {
+      if (m[3] !== undefined) throw new DesignError(`"${item}": ITI is one number of moments, such as ITI 100.`, line);
+      if (a > MAX_MOMENTS) throw new DesignError(`"${item}": the longest ITI is ${MAX_MOMENTS} moments.`, line);
+      out.iti = a;
+      continue;
+    }
+    const b = m[3] === undefined ? a : Number(m[3]);
+    if (a < 1 || b < a) throw new DesignError(`"${item}": moments count from 1, and the end comes after the start.`, line);
+    if (b > MAX_MOMENTS) throw new DesignError(`"${item}": a trial lasts at most ${MAX_MOMENTS} moments.`, line);
+    out[key] = [a, b];
+  }
+  return out;
+}
+
+export function timingText(t) {
+  const parts = [];
+  if (t.cs) parts.push(`CS ${t.cs[0]}-${t.cs[1]}`);
+  if (t.us) parts.push(`US ${t.us[0]}-${t.us[1]}`);
+  if (t.iti !== undefined) parts.push(`ITI ${t.iti}`);
+  return parts.join(', ');
+}
+
+// Split on commas that are not inside square brackets.
+function splitItems(body) {
+  const out = [];
+  let depth = 0;
+  let cur = '';
+  for (const ch of body) {
+    if (ch === '[') depth += 1;
+    if (ch === ']') depth = Math.max(0, depth - 1);
+    if (ch === ',' && depth === 0) {
+      out.push(cur);
+      cur = '';
+    } else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
 export function parseDesign(text) {
   const phases = [];
   let probes = null;
   let context = null;
+  let timing = null;
   const lines = String(text).split(/\r?\n/);
   lines.forEach((raw, i) => {
     const lineNo = i + 1;
@@ -89,24 +157,38 @@ export function parseDesign(text) {
       context = body;
       return;
     }
+    if (/^timing$/i.test(name)) {
+      timing = parseTiming(body, lineNo);
+      return;
+    }
     if (/^test$/i.test(name)) {
       probes = body.split(/[,\s]+/).filter(Boolean).map((p) => parseCueSet(p, lineNo));
       if (!probes.length) throw new DesignError('The Test line lists no cues.', lineNo);
       return;
     }
     const phase = { name: name || `Phase ${phases.length + 1}`, order: 'alternate', trials: [] };
-    for (const itemRaw of body.split(',')) {
-      const item = itemRaw.trim();
+    for (const itemRaw of splitItems(body)) {
+      let item = itemRaw.trim();
       if (!item) continue;
       if (ORDERS.includes(item.toLowerCase())) {
         phase.order = item.toLowerCase();
         continue;
       }
+      let itemTiming = null;
+      const tm = /^(.*?)\s*\[([^\]]*)\]$/.exec(item);
+      if (tm) {
+        item = tm[1];
+        itemTiming = parseTiming(tm[2], lineNo);
+      } else if (item.includes('[') || item.includes(']')) {
+        throw new DesignError(`"${item}": timing goes in square brackets at the end, such as A+ [US 15-16].`, lineNo);
+      }
       const m = /^(\d+)\s*[x×*]?\s*(\S.*)$/.exec(item);
       const count = m ? Number(m[1]) : 1;
       const typeText = m ? m[2] : item;
       if (count < 1) throw new DesignError(`"${item}": the count must be at least 1.`, lineNo);
-      phase.trials.push({ count, type: parseTrialType(typeText, lineNo) });
+      const type = parseTrialType(typeText, lineNo);
+      if (itemTiming) type.timing = itemTiming;
+      phase.trials.push({ count, type });
     }
     if (!phase.trials.length) throw new DesignError(`"${s}" has no trials.`, lineNo);
     phases.push(phase);
@@ -124,24 +206,33 @@ export function parseDesign(text) {
     cueSet.add(context);
   }
   const cues = [...cueSet].sort();
-  return { phases, probes, cues, context, totalTrials: total };
+  if (!cues.length) throw new DesignError('The design has no cues. Add a cue to a trial type, such as A+, or a context line, such as "Context: Z".');
+  return { phases, probes, cues, context, timing, totalTrials: total };
 }
 
 // Turn a parsed design back into text. parseDesign(formatDesign(d)) gives d.
 export function formatDesign(design) {
   const lines = design.phases.map((p) => {
-    const items = p.trials.map((t) => `${t.count} ${t.type.label}`);
+    const items = p.trials.map((t) => `${t.count} ${t.type.label}${t.type.timing ? ` [${timingText(t.type.timing)}]` : ''}`);
     if (p.order !== 'alternate') items.push(p.order);
     return `${p.name}: ${items.join(', ')}`;
   });
+  if (design.timing) lines.push(`Timing: ${timingText(design.timing)}`);
   if (design.context) lines.push(`Context: ${design.context}`);
   if (design.probes) lines.push(`Test: ${design.probes.join(', ')}`);
   return lines.join('\n');
 }
 
+// The full timing of a trial type: its own settings, then the design's
+// Timing line, then DEFAULT_TIMING. A trial without the outcome has us: null.
+export function resolveTiming(design, type) {
+  const t = { ...DEFAULT_TIMING, ...(design.timing ?? {}), ...(type.timing ?? {}) };
+  return { cs: type.cues.length ? t.cs : null, us: type.reinforced ? t.us : null, iti: t.iti };
+}
+
 // The sequence of trials the design produces, in order.
-// Each entry: { phaseIndex, phaseName, type, cues }, where cues includes the
-// context, if the design has one.
+// Each entry: { phaseIndex, phaseName, type, cues, timing }, where cues
+// includes the context, if the design has one.
 export function expandDesign(design, rng) {
   const out = [];
   design.phases.forEach((phase, phaseIndex) => {
@@ -165,7 +256,7 @@ export function expandDesign(design, rng) {
     }
     for (const type of seq) {
       const cues = design.context ? [...type.cues, design.context].sort() : type.cues;
-      out.push({ phaseIndex, phaseName: phase.name, type, cues });
+      out.push({ phaseIndex, phaseName: phase.name, type, cues, timing: resolveTiming(design, type) });
     }
   });
   return out;

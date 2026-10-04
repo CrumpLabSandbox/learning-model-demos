@@ -88,4 +88,22 @@ export const notation = [
     original: 'S<sub>A</sub>',
     other: 'intensity, β<sub>A</sub> in some sources',
   },
+  {
+    idea: 'How much of a stimulus is active (SOP)',
+    site: 'p<sub>A1,A</sub>, p<sub>A2,US</sub>',
+    original: 'p<sub>A1</sub> and p<sub>A2</sub> for each stimulus',
+    other: 'pA1, pA2; "A1 activity"; sometimes the number of elements rather than the proportion',
+  },
+  {
+    idea: 'Chance an element changes state on one moment (SOP)',
+    site: 'p<sub>1</sub>, p<sub>d1</sub>, p<sub>d2</sub>, and p<sub>2</sub> for calling up',
+    original: 'p<sub>1</sub>, pd<sub>1</sub>, pd<sub>2</sub>, p<sub>2</sub>',
+    other: 'rates rather than chances when time runs continuously',
+  },
+  {
+    idea: 'Learning rates for excitation and inhibition (SOP)',
+    site: 'L<sup>+</sup>, L<sup>−</sup>',
+    original: 'L<sup>+</sup>, L<sup>−</sup>',
+    other: 'separate excitatory and inhibitory strengths V<sup>+</sup> and V<sup>−</sup>',
+  },
 ];

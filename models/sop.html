@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pearce-Hall · Learning Model Demos</title>
-  <meta name="description" content="Run the Pearce-Hall model trial by trial: attention follows recent surprise, and cues gain excitatory or inhibitory strength.">
+  <title>SOP · Learning Model Demos</title>
+  <meta name="description" content="Run Wagner's SOP model moment by moment: elements move between inactive, A1, and A2, and cues learn from what is active at the same moments.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
 </head>
@@ -17,8 +17,8 @@
       <a href="../primer.html">Reading the equations</a>
       <a href="rescorla-wagner.html">Rescorla-Wagner</a>
       <a href="mackintosh.html">Mackintosh</a>
-      <a href="pearce-hall.html" aria-current="page">Pearce-Hall</a>
-      <a href="sop.html">SOP</a>
+      <a href="pearce-hall.html">Pearce-Hall</a>
+      <a href="sop.html" aria-current="page">SOP</a>
       <a href="../glossary.html">Glossary</a>
     </nav>
   </header>
@@ -26,8 +26,8 @@
     <noscript><p>This demo needs JavaScript.</p></noscript>
   </main>
   <script type="module">
-    import * as model from '../js/models/pearce-hall.js';
-    import * as spec from '../content/equations/pearce-hall.js';
+    import * as model from '../js/models/sop.js';
+    import * as spec from '../content/equations/sop.js';
     import { phenomena } from '../content/phenomena/index.js';
     import { mountModelPage } from '../js/ui/page.js';
 
@@ -36,9 +36,9 @@
       model,
       spec,
       phenomena,
-      modelSourceUrl: '../js/models/pearce-hall.js',
-      defaultPreset: 'blocking',
-      overviewUrl: '../decks/pearce-hall.html',
+      modelSourceUrl: '../js/models/sop.js',
+      defaultPreset: 'acquisition',
+      overviewUrl: '../decks/sop.html',
     });
   </script>
 </body>

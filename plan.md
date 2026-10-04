@@ -145,7 +145,7 @@ tests/
 - `predict(cues)` returns the current prediction for a probe without learning. Tests use it.
 - `state()` returns internal values for the model-specific views.
 
-**Real time.** SOP runs moment by moment. The runner feeds it the moments of each trial and the intertrial interval, with the context as an always-present cue when a preset needs it. Its trial record summarizes the trial for the shared chart as the mean and peak US activation during the CS, and keeps the moment records for its own within-trial view and timeline scrubber. This is what lets SOP appear on the same comparison chart as the trial-level models.
+**Real time.** SOP runs moment by moment. The design gives each trial type a timing (when the cue and the US are on, and the gap to the next trial, in moments), and the runner passes it to the model with each trial; trial-level models ignore it. The context is an always-present cue. SOP's trial record keeps every moment (each node's A1 and A2, what was on, what was called up) for its within-trial view and timeline scrubber, and the shared chart shows its link strengths V, so SOP sits on the same comparison chart as the trial-level models. Because V is not what an animal does in SOP (a faint cue needs a bigger V to call up the US as strongly), the model also reports, per cue and trial, how much of the US the cue would call up on a test presentation, and phenomenon checks that compare responses read that series (`responseKey`).
 
 **Stochastic models.** MINERVA-AL runs many simulated learners with a seeded generator and the chart shows the mean and spread. Presets fix the seed so the page is reproducible.
 
@@ -206,7 +206,7 @@ Excitation when CS and US are both in A1, inhibition when the CS is in A1 while 
 - Gets: everything Rescorla-Wagner gets, plus latent inhibition through context priming, the intertrial-interval effect, the CS-US interval function, backward conditioning producing inhibition, the US pre-exposure effect, and habituation within a trial. Blocking is explained differently: the pretrained cue puts US elements into A2, so the added cue earns excitation and inhibition that cancel.
 - Why it is in the sequence: it is the first model where time inside the trial matters, and it is Wagner's own successor to Rescorla-Wagner. Students see the same author change the question from "how much surprise on this trial" to "what is active at this moment".
 - Views: a three-state diagram per node with the proportions animated as the trial plays; a within-trial timeline of $p_{A1}$ and $p_{A2}$ for CS and US with the excitatory and inhibitory overlaps shaded in two colours, so the learning increment is visible as the area of overlap; a timeline scrubber inside the trial; and the shared per-trial chart.
-- Toggles: inhibitory learning off; associative activation into A2 off; the A2 response weight set to zero.
+- Toggles: inhibitory learning off; associative activation into A2 off; cue-to-cue links off. The A2 response weight is a slider in Everything view, and can be set to zero or made negative.
 - Design additions: timing profiles per trial type, intertrial interval, and context as a cue.
 - Tests: reproduce the state trajectories and the simulation figures in Wagner (1981) and Mazur and Wagner (1982), including the CS-US interval function and backward conditioning.
 
@@ -308,13 +308,22 @@ Notes from building it:
 
 ### 4. SOP
 
-- [ ] Timing profiles and intertrial interval in the design format, context as a cue
-- [ ] Moment-by-moment runner path and per-trial summary for the shared chart
-- [ ] SOP module from Wagner (1981) and Mazur and Wagner (1982)
-- [ ] Three-state diagram, within-trial timeline with shaded excitatory and inhibitory overlap, and timeline scrubber
-- [ ] Phenomenon cards: intertrial interval, CS-US interval, backward conditioning, US pre-exposure, latent inhibition by priming, and blocking as cancelling excitation and inhibition
-- [ ] Tests reproducing the published state trajectories and figures
-- [ ] Overview deck and glossary entries for SOP
+- [x] Timing profiles and intertrial interval in the design format (`20 A+ [CS 1-10, US 9-10, ITI 100]`, a `Timing:` line, and `+` for the US alone), context as a cue
+- [x] Moment-by-moment path: trial records keep every moment; the shared chart shows V, and a second chart shows what each cue calls up
+- [x] SOP module from Wagner (1981) and Mazur and Wagner (1982), with every choice stated in the code and on the page
+- [x] Three-state bars, within-trial timeline with the gain (L⁺ × both in A1) and the loss (L⁻ × cue in A1, US in A2) shaded, a moment scrubber with play, and the arithmetic of each moment
+- [x] Phenomenon cards: trial spacing, CS-US interval, backward conditioning, and US pre-exposure (new, on every model page); latent inhibition by priming and blocking as cancelling gain and loss (SOP explanations on the existing cards)
+- [x] Tests: hand-worked moments, the steady state of a stimulus left on, decay, overlap sums, analytic limits, the CS-US interval ordering, backward inhibition, and the check that every displayed equation evaluates to the number the model used
+- [ ] Tests reproducing the published state trajectories and figures. Not done: the papers were not available while building, so the page carries a "Preview" notice.
+- [x] Overview deck with real within-trial figures, glossary entries, and primer sections on moments and states and on adding up over moments
+
+Notes from building it:
+
+- Choices the papers leave open, stated in `js/models/sop.js` and on the page: presentation acts before calling up (p<sub>2</sub> applies to the inactive elements presentation did not take); learning uses each moment's proportions after that moment's changes; a trial's increments, including the gap after it, are added up and V changes once, at the end of the trial; p<sub>2</sub> = ρ ΣV p<sub>A1</sub>, kept between 0 and 1, with ρ a parameter that only sets the scale of V; every cue also links to every other cue by the same rule (needed for latent inhibition by context priming; it can be switched off); the US links to nothing; a bigger US, A+(2), multiplies the US intensity p<sub>1</sub> (up to 1); every node starts inactive; the response is R = w<sub>1</sub>p<sub>A1,US</sub> + w<sub>2</sub>p<sub>A2,US</sub>, averaged while the cue is on before the US.
+- Default values are this site's, chosen with a search so that one set of numbers shows the classic effects: cue salience 0.2 (context 0.05), US intensity 0.5, p<sub>d1</sub> 0.15, p<sub>d2</sub> 0.03, L⁺ 0.3, L⁻ 0.02, ρ 0.55; timing CS 1-10, US 9-10, ITI 100. L⁻ must be much smaller than L⁺ because A2 lasts much longer than A1 (p<sub>d1</sub>/p<sub>d2</sub> = 5); otherwise every cue that outlasts the US, and the context, turns inhibitory. Check all of these against Mazur and Wagner (1982).
+- An earlier version made a bigger US "more elements" by scaling learning. It produced unblocking only through leftover A2 from a big US leaking into the next trial, so it was replaced by Wagner's own treatment of intensity as p<sub>1</sub>.
+- With these settings SOP shows every card except backward blocking and negative patterning. Build stages: overlap alone already shows the CS-US interval and trial spacing; calling up the US adds acquisition, salience, blocking, unblocking, overshadowing, and US pre-exposure; inhibitory learning adds extinction, conditioned inhibition, and backward conditioning; cue-to-cue links add latent inhibition. The trial-level models now also get US pre-exposure through the context.
+- Backward conditioning depends on the gap: with the cue starting 2 moments after the US it gains strongly (the US is still in A1), with a 13-moment gap it becomes an inhibitor. The card uses the gap and its "Try this" points at the other case.
 
 ### 5. MINERVA-AL
 

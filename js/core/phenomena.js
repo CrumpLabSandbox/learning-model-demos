@@ -15,7 +15,11 @@ export function evaluatePhenomenon(model, phenomenon, { params = {}, options = {
   const design = parseDesign(phenomenon.design);
   const run = runModel(model, { design, params: { ...params, ...presetParams(model, phenomenon) }, options, seed });
   const lambda = run.params.lambda ?? 1;
-  const helpers = { at, final, phaseEnd, phaseValues, lambda, margin: 0.05 * Math.max(lambda, 0.2) };
+  // What the animal would do, trial by trial: the prediction for most
+  // models; a model can name a different per-cue series (SOP: how much of
+  // the US the cue calls up).
+  const response = (r, label) => (r.responseKey && r.stateSeries[r.responseKey]?.[label]) || r.series[label];
+  const helpers = { at, final, phaseEnd, phaseValues, response, lambda, margin: 0.05 * Math.max(lambda, 0.2) };
   const result = phenomenon.check(run, helpers);
   return { ...result, run };
 }

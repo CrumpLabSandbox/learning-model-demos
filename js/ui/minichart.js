@@ -8,16 +8,33 @@
 //   data-series="alpha"       plot a per-cue internal value, such as
 //                             attention, instead of the prediction
 //   data-labels="A=noise"     rename lines at their ends
+//   data-trial="30"           for a model that runs moment by moment (SOP),
+//                             draw inside that trial instead, following the
+//                             cue in data-cue (default: the first cue)
 
 import { parseDesign } from '../core/design.js';
 import { runModel } from '../core/runner.js';
 import * as rw from '../models/rescorla-wagner.js';
 import * as mackintosh from '../models/mackintosh.js';
 import * as pearceHall from '../models/pearce-hall.js';
+import * as sop from '../models/sop.js';
+import { defaultOptions } from '../core/runner.js';
 import { esc } from './equation.js';
 import { whenResized } from './widget-kit.js';
+import { trialPlot } from './timeline.js';
 
-const MODELS = { 'rescorla-wagner': rw, mackintosh, 'pearce-hall': pearceHall };
+const MODELS = { 'rescorla-wagner': rw, mackintosh, 'pearce-hall': pearceHall, sop };
+
+// Inside one trial of a moment-by-moment model.
+export function drawMiniTrial(el, { design, model = 'sop', trial, cue = null }) {
+  const m = MODELS[model];
+  const run = runModel(m, { design: parseDesign(design) });
+  const rec = run.trials[Math.max(1, Math.min(run.trials.length, trial)) - 1];
+  const c = cue ?? rec.present[0];
+  const n = Math.min(rec.moments.length, rec.moments.window + Math.max(25, rec.moments.window));
+  const { svg } = trialPlot({ run, rec, cue: c, n, width: el.clientWidth || 480, opts: defaultOptions(m), mini: true });
+  el.innerHTML = svg + (el.dataset.caption ? `<figcaption>${el.dataset.caption}</figcaption>` : '');
+}
 
 export function drawMini(el, { design, lines, params = {}, model = 'rescorla-wagner', labels = {}, seriesKey = null }) {
   const d = parseDesign(design);
@@ -68,6 +85,14 @@ export function drawMini(el, { design, lines, params = {}, model = 'rescorla-wag
 export function mountMinis(root) {
   const figs = [...root.querySelectorAll('[data-mini]')];
   const draw = (el) => {
+    if (el.dataset.trial) {
+      return drawMiniTrial(el, {
+        design: el.dataset.design.split('|').join('\n'),
+        model: el.dataset.model ?? 'sop',
+        trial: Number(el.dataset.trial),
+        cue: el.dataset.cue ?? null,
+      });
+    }
     let labels = {};
     if (el.dataset.labels) labels = Object.fromEntries(el.dataset.labels.split(',').map((kv) => kv.split('=')));
     drawMini(el, {

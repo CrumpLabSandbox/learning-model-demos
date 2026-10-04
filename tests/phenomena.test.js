@@ -3,26 +3,39 @@ import assert from 'node:assert/strict';
 import * as rw from '../js/models/rescorla-wagner.js';
 import * as mk from '../js/models/mackintosh.js';
 import * as ph from '../js/models/pearce-hall.js';
+import * as sop from '../js/models/sop.js';
 import { phenomena } from '../content/phenomena/index.js';
 import { evaluatePhenomenon } from '../js/core/phenomena.js';
 import { parseDesign } from '../js/core/design.js';
+import { runModel } from '../js/core/runner.js';
 
 // What each model produces with its default settings. These are the badges
 // students see; a change here is a change in what the site teaches.
 const expected = {
   'rescorla-wagner': {
     model: rw,
-    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition'],
+    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'us-preexposure'],
   },
   mackintosh: {
     model: mk,
-    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking'],
+    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'us-preexposure'],
   },
   'pearce-hall': {
     model: ph,
-    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition'],
+    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition', 'us-preexposure'],
+  },
+  sop: {
+    model: sop,
+    shows: [
+      'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition',
+      'trial-spacing', 'cs-us-interval', 'backward-conditioning', 'us-preexposure',
+    ],
   },
 };
+
+// Models that work trial by trial ignore timing, so no timing phenomenon
+// can depend on it for them.
+const timing = ['trial-spacing', 'cs-us-interval', 'backward-conditioning'];
 
 test('every phenomenon has a valid design, citation, and an explanation for every model', () => {
   for (const p of phenomena) {
@@ -47,6 +60,7 @@ const shownWith = (model, options) =>
 test('Rescorla-Wagner build stages unlock the expected phenomena', () => {
   assert.deepEqual(shownWith(rw, { useAlpha: false, summedError: false }), ['acquisition', 'extinction']);
   assert.deepEqual(shownWith(rw, { useAlpha: true, summedError: false }), ['acquisition', 'extinction', 'salience']);
+  for (const id of timing) assert.ok(!expected['rescorla-wagner'].shows.includes(id));
   assert.deepEqual(shownWith(rw, { useAlpha: true, summedError: true }), [...expected['rescorla-wagner'].shows].sort());
 });
 
@@ -60,8 +74,26 @@ test('Mackintosh: how the attention rule is written changes what the model predi
 });
 
 test('Pearce-Hall build stages unlock the expected phenomena', () => {
-  const base = ['acquisition', 'blocking', 'overshadowing', 'salience', 'unblocking'];
+  const base = ['acquisition', 'blocking', 'overshadowing', 'salience', 'unblocking', 'us-preexposure'];
   assert.deepEqual(shownWith(ph, { attention: false, inhibition: false }), base);
   assert.deepEqual(shownWith(ph, { attention: true, inhibition: false }), [...base, 'latent-inhibition'].sort());
   assert.deepEqual(shownWith(ph, { attention: true, inhibition: true }), [...expected['pearce-hall'].shows].sort());
+});
+
+test('SOP build stages unlock the expected phenomena', () => {
+  assert.deepEqual(shownWith(sop, { retrieval: false, inhibition: false, links: false }), ['cs-us-interval', 'trial-spacing']);
+  assert.deepEqual(shownWith(sop, { retrieval: true, inhibition: false, links: false }), [
+    'acquisition', 'blocking', 'cs-us-interval', 'overshadowing', 'salience', 'trial-spacing', 'unblocking', 'us-preexposure',
+  ]);
+  const three = shownWith(sop, { retrieval: true, inhibition: true, links: false });
+  assert.deepEqual(three, [...expected.sop.shows].filter((id) => id !== 'latent-inhibition').sort());
+  assert.deepEqual(shownWith(sop, { retrieval: true, inhibition: true, links: true }), [...expected.sop.shows].sort());
+});
+
+test('timing in a design changes nothing for the trial-by-trial models', () => {
+  const plain = parseDesign('Training: 10 A+, 10 B+');
+  const timed = parseDesign('Training: 10 A+ [CS 1-10, US 30-31, ITI 3], 10 B+ [US 1-2, CS 5-9]');
+  for (const model of [rw, mk, ph]) {
+    assert.deepEqual(runModel(model, { design: timed }).series, runModel(model, { design: plain }).series);
+  }
 });

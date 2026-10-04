@@ -15,12 +15,14 @@ import {
   equationWords,
   symbolsUsed,
   listCues,
+  cueSub,
 } from './equation.js';
 import { createChart, cueColor, stateSource } from './chart.js';
 import { renderArithmetic } from './arithmetic.js';
 import { createTable, tableCSV } from './table.js';
 import { installHighlighting } from './highlight.js';
 import { compareSketch, verdict } from '../core/sketch.js';
+import { createTimeline } from './timeline.js';
 
 const READINGS = [
   { key: 'words', label: 'Words' },
@@ -55,6 +57,18 @@ Add ", random" to a line to shuffle it, or
 ", blocked" to run each trial type in turn.
 The default alternates trial types.
 "Test:" lists the lines to plot.`;
+
+const TIMING_HELP = `
+
+Timing inside a trial, in moments:
+20 A+ [CS 1-10, US 9-10, ITI 100]
+CS 1-10: the cues are on from moment 1 to 10.
+US 9-10: the US is on at moments 9 and 10.
+ITI 100: 100 moments before the next trial.
+"Timing: CS 1-10, US 9-10" on its own line
+sets the timing for every trial type.
+"20 +" is the US on its own.
+"Context: Z" adds a context cue, on all the time.`;
 
 export function mountModelPage({
   root,
@@ -113,6 +127,21 @@ export function mountModelPage({
     onSketchEnd: () => renderPredictBar(),
   });
   const table = createTable($('table'), { onSelect: (t) => select(t, { scrollTable: false }) });
+  const timeline = model.realTime
+    ? createTimeline($('timeline'), {
+        spec,
+        onFocus: (cue) => {
+          state.focusCue = cue;
+          renderEquations();
+          renderArith();
+          renderTimeline();
+          saveUrl();
+        },
+      })
+    : null;
+  function renderTimeline() {
+    timeline?.update({ run: state.run, rec: currentRecord(), cue: state.focusCue, opts: state.options });
+  }
 
   // ---- Design -------------------------------------------------------------
   const presetSel = $('preset');
@@ -200,7 +229,7 @@ export function mountModelPage({
 
   // ---- Parameters and options --------------------------------------------
   function renderSliders() {
-    const ps = model.parameters(state.run.cues, state.options);
+    const ps = model.parameters(state.run.cues, state.options, { context: state.run.context });
     const groups = [
       { role: 'modeller', title: 'Set by the modeller' },
       { role: 'experimenter', title: 'Set by the experimenter' },
@@ -214,7 +243,7 @@ export function mountModelPage({
             const sym = p.variant === 'minus' ? symbolHTML(spec, p.sym, p.cue, '<sup>−</sup>') : symbolHTML(spec, p.sym, p.cue);
             const note = p.active ? '' : `<span class="note">Not in the equation right now. See Assumptions.</span>`;
             return (
-              `<div class="slider role-${p.role}${p.active ? '' : ' inactive'}" data-sym="${p.sym}"${p.cue ? ` data-cue="${p.cue}"` : ''}>` +
+              `<div class="slider role-${p.role}${p.active ? '' : ' inactive'}${p.advanced ? ' advanced' : ''}" data-sym="${p.sym}"${p.cue ? ` data-cue="${p.cue}"` : ''}>` +
               `<label class="slider-label" for="p-${p.key}">${sym} ${esc(p.label)}</label>` +
               `<output id="o-${p.key}" for="p-${p.key}">${fmtExact(v)}</output>` +
               `<input type="range" id="p-${p.key}" data-key="${p.key}" min="${p.min}" max="${p.max}" step="${p.step}" value="${v}"${p.active ? '' : ' disabled'}>` +
@@ -569,6 +598,7 @@ export function mountModelPage({
     state.focusCue = cue;
     renderEquations();
     renderArith();
+    renderTimeline();
     saveUrl();
   });
 
@@ -668,7 +698,7 @@ export function mountModelPage({
           if (v !== undefined) value = signed(def.exact ? fmtExact(v) : fmt(v));
         }
         return (
-          `<tr data-sym="${key}"${def.render?.sub === 'cue' ? ` data-cue="${cue}"` : ''}><td class="sym-cell">${symbol}</td>` +
+          `<tr data-sym="${key}"${cueSub(def.render) ? ` data-cue="${cue}"` : ''}><td class="sym-cell">${symbol}</td>` +
           `<td><strong>${esc(def.name)}</strong>. ${esc(def.meaning(cue))}` +
           (def.primer ? ` <a class="small" href="${primerUrl}#${def.primer}">How to read ${def.render ? 'this' : 'it'}</a>` : '') +
           `</td>` +
@@ -799,7 +829,7 @@ export function mountModelPage({
     clearTimeout(urlTimer);
     urlTimer = setTimeout(() => {
       const preset = phenomena.find((p) => p.id === state.presetId);
-      const defaults = model.parameters(state.run.cues, state.options);
+      const defaults = model.parameters(state.run.cues, state.options, { context: state.run.context });
       const params = {};
       for (const p of defaults) {
         const v = state.run.params[p.key];
@@ -834,6 +864,7 @@ export function mountModelPage({
     renderStepper();
     renderEquations();
     renderArith();
+    renderTimeline();
     table.select(state.t, { scroll: scrollTable });
     saveUrl();
   }
@@ -844,13 +875,19 @@ export function mountModelPage({
     scheduleCards();
   }
 
-  let cardsFrame = null;
+  // The badges run every phenomenon through the model. A model that runs
+  // moment by moment takes a few hundred milliseconds for that, so its
+  // badges wait until a slider stops moving.
+  let cardsTimer = null;
   function scheduleCards() {
-    cancelAnimationFrame(cardsFrame);
-    cardsFrame = requestAnimationFrame(() => {
-      renderCards();
-      if (state.stage !== null) renderBuild();
-    });
+    clearTimeout(cardsTimer);
+    cardsTimer = setTimeout(
+      () => {
+        renderCards();
+        if (state.stage !== null) renderBuild();
+      },
+      model.realTime ? 300 : 16,
+    );
   }
 
   function renderAll() {
@@ -954,7 +991,7 @@ function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
       <div class="error-msg" id="design-error" role="alert"></div>
       <div class="btn-row advanced"><button class="btn" id="reshuffle" hidden>Shuffle again</button></div>
       <p class="small muted essentials-only">Pick an experiment above. Switch to <em>Everything</em> to write your own.</p>
-      <details class="help advanced"><summary>How to write a design</summary><pre>${esc(DESIGN_HELP)}</pre></details>
+      <details class="help advanced"><summary>How to write a design</summary><pre>${esc(DESIGN_HELP + (model.realTime ? TIMING_HELP : ''))}</pre></details>
     </section>
     <section class="panel">
       <div class="panel-head"><h2>Parameters</h2><button class="btn" id="reset-params">Reset</button></div>
@@ -987,6 +1024,15 @@ function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
       <div id="chart"></div>
       <div class="predict-feedback" id="predict-feedback" hidden></div>
     </section>
+    ${
+      model.realTime
+        ? `<section class="panel spoiler" id="inside-panel">
+      <h2>Inside the trial</h2>
+      <p class="small muted">The trial you picked, moment by moment. Press Play, drag across the timeline, or use the arrow keys. The cue gains strength from the green area, where it and the US are both in A1, and loses strength from the red area, where it is in A1 while the US is in A2.</p>
+      <div id="timeline"></div>
+    </section>`
+        : ''
+    }
     ${(spec.charts ?? [])
       .map(
         (c) => `<section class="panel spoiler" id="panel-${c.key}">

@@ -43,6 +43,7 @@ js/core/                      no DOM: design parser, runner, rng, phenomenon che
 js/models/<model>.js          one module per model, common interface (see js/core/runner.js)
 js/ui/                        DOM: page.js wires everything; chart, equation, arithmetic, table, highlight, primer,
                               warmup, glossary, deck, minichart (model-drawn charts for slides),
+                              timeline (inside a trial, for models that run moment by moment),
                               widget-kit (sliders, number lines, check questions)
                               mathml.js has string helpers for hand-written MathML
 content/equations/<model>.js  equation spec per model: symbols, equations, words, table columns, build stages
@@ -58,7 +59,7 @@ css/site.css                  one stylesheet; colour tokens on :root with dark-m
 
 ## Adding a model
 
-1. `js/models/<id>.js`: export `id`, `name`, `year`, `citation`, `salienceKey(cue)`, `options`, `parameters(cues, opts)`, and `init(params, cues, opts, rng)` returning `{ trial, predict, state }`. `state()` returns per-cue maps (such as `{ V, alpha }`); the runner turns each into `run.stateSeries`. Wrap the per-trial math in `// #region update` and `// #endregion`; the page shows that region as the code reading. Export `status = 'preview'` until tests reproduce the published simulations; the page then shows a notice.
+1. `js/models/<id>.js`: export `id`, `name`, `year`, `citation`, `salienceKey(cue)`, `options`, `parameters(cues, opts, { context })`, and `init(params, cues, opts, rng, { context })` returning `{ trial, predict, state }`. `trial()` gets `{ cues, reinforced, magnitude, timing }`; trial-level models ignore `timing`. `state()` returns per-cue maps (such as `{ V, alpha }`); the runner turns each into `run.stateSeries`. A parameter with `advanced: true` is hidden in Essentials. Wrap the per-trial math in `// #region update` and `// #endregion`; the page shows that region as the code reading. Export `status = 'preview'` until tests reproduce the published simulations; the page then shows a notice. A model that runs moment by moment exports `realTime = true` and keeps `moments` on each trial record (see `js/models/sop.js`); the page then adds the Inside the trial view. If its V is not what the animal does, export `responseKey` naming a per-cue `state()` series; checks that compare responses (`h.response`) read it.
 2. `content/equations/<id>.js`: export `symbols`, `roles`, `equations(opts)`, `arithmetic(opts)`, `tableColumns(opts, cues)`, `absentNote(cue, rec)`, `codeNames`, `stages`, and `intro`, and optionally `charts` (extra charts of `stateSeries`, such as attention). Each symbol's `value(rec, cue)` must read from the trial record, never recompute, and has a `primer` anchor and either a `render` or a `display(opts)` text. Equation nodes: symbols, `mul`, `add`, `sub`, `neg`, `paren`, `abs`, `cases`, `clamp`, `const`, `sumPresent`, `sumEach`, `sumOthers` (see `js/ui/equation.js`). `$` in a title or words is the focus cue.
 3. Add a `models['<id>']` entry with `why` and `tryThis` to each phenomenon in `content/phenomena/index.js`, written from what the model actually does with its defaults, and add the model's expected results to `tests/phenomena.test.js`.
 4. `models/<id>.html`: copy an existing model page and change the imports, `defaultPreset`, and `overviewUrl`. Add the page to every page's navigation and to the landing page's units table.
@@ -73,7 +74,7 @@ The audience runs from students new to the area who find maths stressful to stud
 - Every technical term used anywhere goes in `content/glossary.js`. Link the first use on a page to `glossary.html#<id>`.
 - On model pages, mark anything beyond the essentials with the class `advanced`; Essentials view hides it.
 - Check questions have exactly one right answer, an explanation for every option, and, on the warm-up, a hint. Wrong answers are never scolded.
-- Every page uses the same navigation: Start here, Maths warm-up, Reading the equations, the model pages (Rescorla-Wagner, Mackintosh, Pearce-Hall), Glossary.
+- Every page uses the same navigation: Start here, Maths warm-up, Reading the equations, the model pages (Rescorla-Wagner, Mackintosh, Pearce-Hall, SOP), Glossary.
 - `tests/content.test.js` fails on any broken link between pages, sections, or glossary entries.
 
 ## Conventions
@@ -83,6 +84,7 @@ The audience runs from students new to the area who find maths stressful to stud
 - Anything that shows a symbol, value, or line for a symbol carries `data-sym` and, where it belongs to a cue, `data-cue`. `js/ui/highlight.js` links them on hover.
 - Phenomenon badges are computed by running the design, never typed by hand. A phenomenon sets salience with `salience: { A: 0.5 }`, never with a model's parameter name.
 - A design can name its context cue with `Context: Z`; it is added to every trial.
+- Timing is in moments: `20 A+ [CS 1-10, US 9-10, ITI 100]` for one trial type, or a `Timing:` line for all. `+` on its own is the US alone. Defaults are `DEFAULT_TIMING` in `js/core/design.js`.
 - Each phenomenon has a `predict` prompt naming lines that the chart plots. While a student sketches, anything that would give the answer away carries the `spoiler` class and is hidden.
 - Each symbol in an equation spec has a `primer` anchor pointing at the primer section that explains it.
 - Computed numbers show three decimals; parameters show the value as set.

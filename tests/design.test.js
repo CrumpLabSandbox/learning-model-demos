@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDesign, parseTrialType, formatDesign, expandDesign, DesignError } from '../js/core/design.js';
+import { parseDesign, parseTrialType, formatDesign, expandDesign, DesignError, DEFAULT_TIMING } from '../js/core/design.js';
 import { makeRng } from '../js/core/rng.js';
 
 test('parses trial types', () => {
@@ -76,4 +76,29 @@ test('expands alternate, blocked, and random orders', () => {
   assert.equal(r.filter((x) => x === 'A+').length, 10);
   assert.deepEqual(r, labels('10 A+, 10 B-, random', 7), 'same seed, same order');
   assert.notDeepEqual(r, labels('10 A+, 10 B-, random', 8), 'different seed, different order');
+});
+
+test('reads timing for moment-by-moment models, per item and for the whole design', () => {
+  const d = parseDesign('Timing: ITI 50\nTraining: 10 A+ [CS 1-5, US 6-7], 10 B+, 5 +\nContext: Z');
+  assert.deepEqual(d.timing, { iti: 50 });
+  assert.deepEqual(d.phases[0].trials[0].type.timing, { cs: [1, 5], us: [6, 7] });
+  assert.equal(d.phases[0].trials[2].type.label, '+');
+  assert.deepEqual(d.cues, ['A', 'B', 'Z']);
+  const seq = expandDesign(d);
+  assert.deepEqual(seq[0].timing, { cs: [1, 5], us: [6, 7], iti: 50 });
+  assert.deepEqual(seq[1].timing, { ...DEFAULT_TIMING, iti: 50 });
+  // The outcome on its own: no cue on, only the context.
+  assert.deepEqual(seq[2].cues, ['Z']);
+  assert.equal(seq[2].timing.cs, null);
+  assert.deepEqual(parseDesign(formatDesign(d)), d);
+});
+
+test('rejects malformed timing with a helpful message', () => {
+  assert.throws(() => parseDesign('10 A+ [CS 0-4]'), /count from 1/);
+  assert.throws(() => parseDesign('10 A+ [CS 5-4]'), /end comes after/);
+  assert.throws(() => parseDesign('10 A+ [gap 4]'), /not a timing setting/);
+  assert.throws(() => parseDesign('10 A+ [ITI 4-5]'), /one number/);
+  assert.throws(() => parseDesign('10 A+ CS 1-4]'), /square brackets/);
+  assert.throws(() => parseDesign('10 -'), /nothing in it/);
+  assert.throws(() => parseDesign('10 +'), /no cues/);
 });
