@@ -1,7 +1,7 @@
 // The "How to read the equations" primer. Each section has a small live
 // widget; the last ones run the real Rescorla-Wagner model.
 
-import { math, mo, mn, row, paren, sym, RW } from './mathml.js';
+import { math, mi, mo, mn, row, paren, sym, RW } from './mathml.js';
 import { fmt, fmtExact, signed } from '../core/format.js';
 import { installHighlighting } from './highlight.js';
 import { slider, wireSliders, numberLine, whenResized, renderCheck } from './widget-kit.js';
@@ -10,6 +10,7 @@ import { runModel, final } from '../core/runner.js';
 import * as rw from '../models/rescorla-wagner.js';
 import * as mackintosh from '../models/mackintosh.js';
 import * as pearceHall from '../models/pearce-hall.js';
+import * as sop from '../models/sop.js';
 import { cases } from '../../content/primer/fixed-points.js';
 import { checks } from '../../content/primer/checks.js';
 import { notation } from '../../content/primer/notation.js';
@@ -441,6 +442,92 @@ const widgets = {
         net > 0 ? 'Overall the cue predicts the outcome will happen.' : net < 0 ? 'Overall the cue predicts the outcome will NOT happen: it is an inhibitor.' : 'The two strengths cancel: overall the cue predicts nothing, though it has learned both.';
     };
     wireSliders(el, ['br-v', 'br-vb'], draw);
+    whenResized(el, () => draw(last));
+  },
+
+  states(el) {
+    // One stimulus, run through the real SOP model: how its elements move
+    // between inactive, A1, and A2 while it is on and after it goes off.
+    el.innerHTML =
+      `<div class="widget-grid"><div>` +
+      slider({ id: 'st-p1', label: 'p<sub>1</sub>: chance an inactive element becomes active, while A is on', min: 0.05, max: 1, step: 0.05, value: 0.2 }) +
+      slider({ id: 'st-pd1', label: 'p<sub>d1</sub>: chance an A1 element falls to A2', min: 0.05, max: 0.5, step: 0.05, value: 0.15 }) +
+      slider({ id: 'st-pd2', label: 'p<sub>d2</sub>: chance an A2 element falls back to inactive', min: 0.01, max: 0.2, step: 0.01, value: 0.03 }) +
+      slider({ id: 'st-on', label: 'A stays on for this many moments', min: 1, max: 30, step: 1, value: 10 }) +
+      `</div><div><div class="st-chart"></div><p class="st-say small"></p></div></div>`;
+    let last;
+    const draw = (v) => {
+      last = v;
+      const on = v['st-on'];
+      const run = runModel(sop, {
+        design: parseDesign(`1 A- [CS 1-${on}, ITI ${60 - on}]`),
+        params: { p1_A: v['st-p1'], pd1: v['st-pd1'], pd2: v['st-pd2'] },
+      });
+      const m = run.trials[0].moments;
+      const box = el.querySelector('.st-chart');
+      const W = Math.max(260, box.clientWidth || 420);
+      const H = 190;
+      const mg = { l: 34, r: 70, t: 14, b: 28 };
+      const n = m.length;
+      const x = (k) => mg.l + (k / n) * (W - mg.l - mg.r);
+      const y = (val) => mg.t + (1 - val) * (H - mg.t - mg.b);
+      const line = (arr, dash) => `<path d="M${x(0)},${y(0)}${Array.from(arr).map((val, k) => `L${x(k + 1).toFixed(1)},${y(val).toFixed(1)}`).join('')}" fill="none" stroke="var(--cue-1)" stroke-width="2.5"${dash ? ' stroke-dasharray="6 4"' : ''}/>`;
+      const grid = [0, 0.5, 1].map((g) => `<line x1="${mg.l}" x2="${W - mg.r}" y1="${y(g)}" y2="${y(g)}" stroke="var(--grid)"/><text class="tick" x="${mg.l - 5}" y="${y(g) + 4}" text-anchor="end">${g}</text>`).join('');
+      const band = `<rect x="${x(0)}" y="${mg.t}" width="${x(on) - x(0)}" height="${H - mg.t - mg.b}" fill="var(--surface-2)"/><text class="tick" x="${x(0) + 4}" y="${mg.t + 12}">A on</text>`;
+      const peak = Math.max(...m.A1.A);
+      const labels = `<text class="value-label" x="${W - mg.r + 6}" y="${y(m.A1.A[n - 1]) + 4}">A1</text><text class="value-label" x="${W - mg.r + 6}" y="${Math.min(y(m.A2.A[n - 1]) + 4, y(m.A1.A[n - 1]) - 10)}">A2</text>`;
+      box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="mini-chart" role="img" aria-label="Proportion of A's elements in A1 and A2 over 60 moments">${band}${grid}${line(m.A1.A)}${line(m.A2.A, true)}${labels}<text class="axis-title" x="${mg.l}" y="${H - 6}">moments →</text></svg>`;
+      const sags = m.A1.A[on - 1] < peak - 0.02;
+      el.querySelector('.st-say').innerHTML =
+        `A1 (solid) peaks at ${fmt(peak)}. ` +
+        (sags
+          ? 'Even while A stays on, A1 falls back from its peak: elements pile up in A2 and cannot go straight back to A1.'
+          : 'While A is on, A1 climbs.') +
+        ' After A goes off, A1 fades fast and A2 (dashed) lingers.';
+    };
+    wireSliders(el, ['st-p1', 'st-pd1', 'st-pd2', 'st-on'], draw);
+    whenResized(el, () => draw(last));
+  },
+
+  overlap(el) {
+    // Adding up over moments: the cue's A1 times the US's A1, moment by
+    // moment, for different gaps between the cue and the US.
+    el.innerHTML =
+      `<div class="widget-grid"><div>` +
+      slider({ id: 'ov-us', label: 'The US arrives at moment', min: 1, max: 30, step: 1, value: 9 }) +
+      `<p class="small muted">The cue A is on from moment 1 to 10.</p>` +
+      `</div><div><div class="ov-chart"></div><p class="ov-say small"></p></div></div>`;
+    let last;
+    const draw = (v) => {
+      last = v;
+      const u = v['ov-us'];
+      const run = runModel(sop, { design: parseDesign(`1 A+ [CS 1-10, US ${u}-${u + 1}, ITI 45]`), options: { retrieval: false } });
+      const m = run.trials[0].moments;
+      const n = 40;
+      const prod = Array.from({ length: n }, (_, k) => m.A1.A[k] * m.A1.US[k]);
+      const total = prod.reduce((a, b) => a + b, 0);
+      const box = el.querySelector('.ov-chart');
+      const W = Math.max(260, box.clientWidth || 420);
+      const H = 200;
+      const mg = { l: 34, r: 14, t: 14, b: 28 };
+      const x = (k) => mg.l + (k / n) * (W - mg.l - mg.r);
+      const y = (val) => mg.t + (1 - val) * (H - mg.t - mg.b);
+      const line = (arr, color) => {
+        const pts = `M${x(0)},${y(0)}${Array.from({ length: n }, (_, k) => `L${x(k + 1).toFixed(1)},${y(arr[k]).toFixed(1)}`).join('')}`;
+        return `<path d="${pts}" fill="none" stroke="${color}" stroke-width="2.5"/>`;
+      };
+      let area = `M${x(0)},${y(0)}`;
+      prod.forEach((val, k) => (area += ` L${x(k)},${y(val)} L${x(k + 1)},${y(val)}`));
+      area += ` L${x(n)},${y(0)} Z`;
+      const grid = [0, 0.5, 1].map((g) => `<line x1="${mg.l}" x2="${W - mg.r}" y1="${y(g)}" y2="${y(g)}" stroke="var(--grid)"/><text class="tick" x="${mg.l - 5}" y="${y(g) + 4}" text-anchor="end">${g}</text>`).join('');
+      box.innerHTML =
+        `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="mini-chart" role="img" aria-label="A in A1, the US in A1, and their product over moments">${grid}<path d="${area}" class="tl-gain"/>${line(m.A1.A, 'var(--cue-1)')}${line(m.A1.US, 'var(--ink-2)')}<text class="axis-title" x="${mg.l}" y="${H - 6}">moments →</text></svg>` +
+        `<div class="tl-key small"><span class="key"><span class="swatch" style="background:var(--cue-1)"></span>A in A1</span><span class="key"><span class="swatch" style="background:var(--ink-2)"></span>US in A1</span><span class="key"><span class="swatch block gain"></span>A1 × A1 at each moment</span></div>`;
+      el.querySelector('.ov-say').innerHTML =
+        `At each moment, multiply A's A1 by the US's A1: the green area. Add those up over every moment: ${math(`<munder>${mo('Σ')}${mi('t')}</munder>`)} gives <strong>${fmt(total)}</strong>. ` +
+        (total < 0.05 ? 'A has faded before the US arrives, so there is almost nothing to add up.' : 'The more the two overlap in time, the bigger the total.');
+    };
+    wireSliders(el, ['ov-us'], draw);
     whenResized(el, () => draw(last));
   },
 

@@ -18,6 +18,7 @@
       <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
       <a href="models/mackintosh.html">Mackintosh</a>
       <a href="models/pearce-hall.html">Pearce-Hall</a>
+      <a href="models/sop.html">SOP</a>
       <a href="glossary.html">Glossary</a>
     </nav>
   </header>
@@ -41,6 +42,8 @@
           <li><a href="#absolute">Absolute value: size without sign</a></li>
           <li><a href="#changing">When attention changes</a></li>
           <li><a href="#bar">A bar over a letter</a></li>
+          <li><a href="#states">Moments and states</a></li>
+          <li><a href="#overlap">Adding up over moments</a></li>
           <li><a href="#notation">Notation map</a></li>
         </ol>
         <p class="small" style="margin:.75rem 0 0"><a href="decks/reading-equations.html">Overview slides for this page</a></p>
@@ -91,6 +94,7 @@
                 <tr><td class="sym-cell"><span class="sym role-computed">Σ</span></td><td>sigma (SIG-muh)</td><td>"Add up". ΣV means the strengths of the cues present, added together.</td><td>a label</td></tr>
                 <tr><td class="sym-cell"><span class="sym">θ</span></td><td>theta (THAY-tuh)</td><td>In Mackintosh's model, θ is the learning rate for the outcome and θ<sub>α</sub> sets how fast attention changes.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
                 <tr><td class="sym-cell"><span class="sym">γ</span></td><td>gamma (GAM-uh)</td><td>How fast attention changes in the Pearce-Hall model.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
+                <tr><td class="sym-cell"><span class="sym">ρ</span></td><td>rho (ROW)</td><td>In SOP, how strongly a cue's link strength turns into calling up the US.</td><td><span class="role-badge role-modeller">parameter</span></td></tr>
               </tbody>
             </table>
           </div>
@@ -182,8 +186,30 @@
           <div data-check="bar"></div>
         </section>
 
+        <section id="states">
+          <h2>16. Moments and states</h2>
+          <p>SOP runs in <strong>moments</strong>, small steps of time inside a trial. Each stimulus is a set of elements, and at each moment every element is in one of three states: inactive, primary activity (<strong>A1</strong>), or secondary activity (<strong>A2</strong>).</p>
+          <p>Two kinds of p appear, and the subscript says which is which:</p>
+          <ul>
+            <li><strong>A proportion</strong>: p<sub>A1,A</sub> is the share of A's elements in A1 right now, from 0 to 1. Read the subscript as "state A1, stimulus A". It changes every moment.</li>
+            <li><strong>A chance per moment</strong>: p<sub>1</sub> is the chance that an inactive element becomes active while the stimulus is on; p<sub>d1</sub> and p<sub>d2</sub> are the chances of decaying from A1 and from A2 ("d" for decay). These are parameters.</li>
+          </ul>
+          <p>Elements go round one way: inactive → A1 → A2 → inactive. So the three proportions always add up to 1.</p>
+          <div class="widget" data-widget="states"></div>
+          <div data-check="states"></div>
+        </section>
+
+        <section id="overlap">
+          <h2>17. Adding up over moments</h2>
+          <p>In SOP a cue learns from <strong>overlap</strong>: how much it and the US are active at the same moments. At each moment, multiply the two proportions. If either is 0, that moment adds nothing. Then add up over every moment of the trial:</p>
+          <div class="big-math"><math><mrow><munder><mo>Σ</mo><mi>t</mi></munder><msub><mi>p</mi><mtext>A1,A</mtext></msub><mo>&#x2062;</mo><msub><mi>p</mi><mtext>A1,US</mtext></msub></mrow></math></div>
+          <p>The t under Σ means "over every moment t". It is the same Σ as in Rescorla-Wagner, adding up over moments instead of over cues. The gain on a trial is L<sup>+</sup> times this total; the loss is L<sup>−</sup> times the same kind of total with the US in A2.</p>
+          <div class="widget" data-widget="overlap"></div>
+          <div data-check="overlap"></div>
+        </section>
+
         <section id="notation">
-          <h2>16. Notation map</h2>
+          <h2>18. Notation map</h2>
           <p>Different papers and textbooks write the same ideas in different ways. If a reading uses symbols you do not recognise, find the idea here.</p>
           <div class="widget" data-widget="notation"></div>
           <p class="small muted">For Rescorla-Wagner, the "original paper" column follows the 1972 chapter, which writes the compound of cues A and X as V<sub>AX</sub> and numbers the outcome with a subscript. The last column lists forms that are common across sources rather than any one book. When you quote a source, use its own symbols.</p>

@@ -6,7 +6,8 @@
 //   design    trial-design text (see js/core/design.js)
 //   empirical one sentence on what animals or people do, with a citation
 //   criterion how the check decides, in words
-//   check     (run, h) -> { shown, measure }   h has at(), final(), phaseEnd(), phaseValues(), margin
+//   check     (run, h) -> { shown, measure }   h has at(), final(), phaseEnd(), phaseValues(),
+//             response(), lambda, and margin
 //   salience  optional salience per cue that this design needs, applied when it
 //             is loaded; each model maps it to its own parameter (salienceKey)
 //   focus     the trial and cue to show first: { t } or { phase }, and { cue }
@@ -52,6 +53,10 @@ export const phenomena = [
         why: 'On the first trials the outcome is a surprise, so attention to A is high and A gains strength quickly (S α λ). As A comes to predict the outcome, the surprise shrinks, attention fades, and the steps get smaller.',
         tryThis: 'Watch the attention chart fall as the prediction line rises. Then set γ to 1, the 1980 model, and compare.',
       },
+      sop: {
+        why: "On the first trial the US arrives with all its elements inactive, so they go to A1 at the same moments as A's: a big overlap and a big gain. As V_A grows, A calls up the US into A2 before it arrives. Those elements cannot go to A1, so there is less to gain and more to lose. Learning levels off where the gain and the loss balance.",
+        tryThis: "Step to trial 1, then trial 30, and compare the green and red areas in Inside the trial. Then switch off 'Associative activation': nothing calls up the US, and V climbs in a straight line.",
+      },
     },
   },
   {
@@ -81,6 +86,10 @@ export const phenomena = [
         why: 'On A− trials the outcome falls short of A\'s prediction, so A gains inhibitory strength V̄ and its net prediction V − V̄ falls. The surprise of the missing outcome also brings attention to A back up, which speeds this along. Nothing is erased: extinction adds inhibition on top of the old learning.',
         tryThis: 'Look at the trial table: after extinction V_A is still about 1, and V̄_A has grown to match it. Then switch off \'Inhibitory learning\': extinction cannot happen at all.',
       },
+      sop: {
+        why: "On A− trials no US arrives, so nothing is in A1 alongside A and there is no gain. But A still calls up the US into A2 while A itself is in A1, so A loses strength. Once A no longer calls up the US, the loss stops, so V settles near 0.",
+        tryThis: "Step to trial 21 and look at the dashed US line in Inside the trial: the US is called up although it never arrives. Then switch off 'Inhibitory learning': extinction cannot happen.",
+      },
     },
   },
   {
@@ -92,10 +101,11 @@ export const phenomena = [
     salience: { A: 0.5, B: 0.1 },
     empirical: 'A more intense or noticeable cue is learned about faster than a faint one.',
     citation: 'Kamin & Schaub (1963)',
-    criterion: 'Halfway through training, V for the more salient cue A is ahead of V for B.',
+    criterion: 'Halfway through training, the response to the more salient cue A is ahead of the response to B. For most models the response is V; for SOP it is how much of the US the cue calls up.',
     check(run, h) {
-      const v = h.phaseValues(run, 0, 'A');
-      const w = h.phaseValues(run, 0, 'B');
+      const { start, end } = run.phases[0];
+      const v = h.response(run, 'A').slice(start, end + 1);
+      const w = h.response(run, 'B').slice(start, end + 1);
       const mid = Math.floor(v.length / 2);
       return {
         shown: v[mid] - w[mid] > h.margin,
@@ -114,6 +124,10 @@ export const phenomena = [
       'pearce-hall': {
         why: 'S_A is larger than S_B, so every step for A is larger. Salience S never changes; attention α does.',
         tryThis: 'Set the two saliences equal and the lines become one.',
+      },
+      sop: {
+        why: "A's salience p1 is higher, so its elements reach A1 sooner and A calls up the US sooner: the chart of what each cue calls up shows A ahead. The V lines tell a different story. A faint cue needs a bigger V to call up the US as strongly, so B's V ends higher. That is why the check reads what each cue calls up.",
+        tryThis: "Compare the prediction chart with the chart of what each cue calls up. Then set the two saliences equal and the lines become one.",
       },
     },
   },
@@ -144,6 +158,10 @@ export const phenomena = [
       'pearce-hall': {
         why: 'On the first compound trial B is new, gets full attention, and learns. But A already predicts the outcome, so there is almost no surprise, and attention to B collapses after that one trial. D\'s partner C is new too, so the outcome stays surprising and D keeps learning.',
         tryThis: 'Step to trials 21 and 23 and compare α_B in the table: 0.8 on the first compound trial, under 0.2 two trials later. Switching off \'Attention follows surprise\' does not remove blocking: in this version a cue only gains strength when the outcome is bigger than predicted, and A already predicts it.',
+      },
+      sop: {
+        why: "By the compound trials A calls up the US into A2 before it arrives, so few US elements are left to be felt in A1 with B: B gains little. And B is in A1 while the US is in A2, so B also loses. The gain and the loss nearly cancel. This is blocking without any shared error term. D's partner C is new, so the US is felt in full and D gains.",
+        tryThis: "Step to trial 21, focus on B, and open Inside the trial: the green and red areas are about the same size. Then look at D on trial 22.",
       },
     },
   },
@@ -179,6 +197,10 @@ export const phenomena = [
         why: 'When the outcome jumps to 2, A no longer predicts it, so the compound trials are a surprise. That keeps attention to B high, and B learns. With the same outcome as before there is no surprise, attention to D fades, and D stays blocked.',
         tryThis: 'Compare α_B and α_D in the attention chart during the compound phase. Then compare with Mackintosh, where attention to B falls either way.',
       },
+      sop: {
+        why: "AB+(2) doubles the US intensity, so its elements reach A1 faster than A can call them up into A2. More of the US is felt in A1 at the same moments as B, so B gains. With the same US as before, A calls up enough of it to block D.",
+        tryThis: "Change AB+(2) to AB+ in the design, and B is blocked like D.",
+      },
     },
   },
   {
@@ -209,6 +231,10 @@ export const phenomena = [
         why: 'A and B gain strength together, so the outcome becomes predicted about twice as fast as for C alone. The surprise, and with it attention, fades sooner, so B stops learning at about half of λ.',
         tryThis: 'Raise B\'s salience: B takes a bigger share before attention fades.',
       },
+      sop: {
+        why: "A and B both call up the US, so together they reach the point where gain and loss balance sooner than C does alone. Each ends with only part of the strength C gets.",
+        tryThis: "Raise A's salience. B gets a smaller share.",
+      },
     },
   },
   {
@@ -237,6 +263,10 @@ export const phenomena = [
       'pearce-hall': {
         why: 'On AX− trials A predicts the outcome, but it does not arrive, so the trial falls short and X, which is present, gains inhibitory strength. X\'s net strength V − V̄ goes below zero.',
         tryThis: 'Look at X in the trial table: its V stays at 0 and its V̄ grows. Switch off \'Inhibitory learning\' and X never moves.',
+      },
+      sop: {
+        why: "On AX− trials A calls up the US into A2. X is in A1 at the same moments, while the US is in A2, so X loses strength and goes below zero. The loss stops once X's negative link cancels A's, so that together they no longer call up the US.",
+        tryThis: "Switch off 'Inhibitory learning' and X never moves. SOP needs a US in A2 to make an inhibitor.",
       },
     },
   },
@@ -275,6 +305,10 @@ export const phenomena = [
         why: 'During pre-exposure nothing follows A and nothing is predicted, so there is no surprise and attention to A falls to zero. When conditioning starts, A begins with almost no attention and learns slowly, while the new cue B starts with full attention.',
         tryThis: 'Set γ to 1, the 1980 model: attention recovers after one surprising trial, and the effect is much smaller.',
       },
+      sop: {
+        why: "During pre-exposure the context Z and A are both in A1, so Z gains a link to A. When conditioning starts, Z calls up A into A2 before A appears. Those elements cannot go to A1, so A is less active than B and learns more slowly. The context primes A, and a primed cue is learned about slowly.",
+        tryThis: "Compare A's solid line on trial 31 with B's on trial 32 in Inside the trial. Then switch off 'Cues link to each other': Z cannot call up A, and the effect disappears.",
+      },
     },
   },
   {
@@ -304,6 +338,10 @@ export const phenomena = [
       'pearce-hall': {
         why: 'B is absent in the second phase, and the model only changes cues that are present, so B keeps what it learned.',
         tryThis: 'Compare with MINERVA-AL, later in the course.',
+      },
+      sop: {
+        why: "B is absent in the second phase, so B's elements are never in A1, and B learns nothing. Learning in SOP needs the cue itself to be in A1.",
+        tryThis: "Dickinson and Burke (1996) changed SOP so that a cue called up into A2 can also learn, which gives backward blocking. That version is not on this page.",
       },
     },
   },
@@ -338,6 +376,146 @@ export const phenomena = [
       'pearce-hall': {
         why: 'The prediction for AB is the sum of A\'s and B\'s net strengths. AB− trials do add inhibition to A and B, but the A+ and B+ trials add it back, and the compound always ends up predicting more than either part.',
         tryThis: 'Try any settings: the sum is the problem, as it is for the other models so far.',
+      },
+      sop: {
+        why: "The prediction for AB is V_A + V_B: SOP adds up its cues' links, as Rescorla-Wagner does, so the compound always calls up more of the US than either part.",
+        tryThis: "Try any settings. Later versions of SOP let a compound activate elements of its own, so that AB is more than A plus B. They are not on this page.",
+      },
+    },
+  },
+  {
+    id: 'trial-spacing',
+    title: 'Trial spacing',
+    predict: { cues: ['A', 'B'], prompt: 'A\'s trials are spread out, with a long gap between them. B\'s trials come close together. Each gets 10 trials with the outcome. Sketch A and B.' },
+    focus: { phase: 1, cue: 'B' },
+    design: 'Spaced: 10 A+ [ITI 200]\nMassed: 10 B+ [ITI 5]',
+    empirical:
+      'Trials spread out in time produce more learning per trial than the same trials packed close together: the intertrial interval effect.',
+    citation: 'Gibbon, Baldock, Locurto, Gold, & Terrace (1977)',
+    criterion: 'After 10 trials each, V for the spaced cue A is ahead of V for the massed cue B.',
+    check(run, h) {
+      const a = h.phaseEnd(run, 0, 'A');
+      const b = h.final(run, 'B');
+      return { shown: a - b > h.margin, measure: `After 10 trials each: A (spaced) ${f(a)}, B (massed) ${f(b)}.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: "Rescorla-Wagner works trial by trial. It has no time between trials, so the timing in square brackets makes no difference: A and B learn exactly the same.",
+        tryThis: "Compare with SOP, where what is still active from the last trial matters.",
+      },
+      mackintosh: {
+        why: "The model works trial by trial and ignores the time between trials, so A and B learn exactly the same.",
+        tryThis: "Compare with SOP, where what is still active from the last trial matters.",
+      },
+      'pearce-hall': {
+        why: "The model works trial by trial and ignores the time between trials, so A and B learn exactly the same.",
+        tryThis: "Compare with SOP, where what is still active from the last trial matters.",
+      },
+      sop: {
+        why: "With only 5 moments between B's trials, the last US is still in A2 when the next trial starts, and so are B's own elements. Fewer US elements can go to A1, so B gains less; the lingering US in A2 costs B some strength; and B itself is less active. With 200 moments between A's trials, everything has faded back to inactive.",
+        tryThis: "Step to trial 12 and open Inside the trial: the dashed lines start high. Then raise 'Decay from A2' (Everything view): A2 fades within the short gap, and the massed trials catch up.",
+      },
+    },
+  },
+  {
+    id: 'cs-us-interval',
+    title: 'CS-US interval',
+    predict: { cues: ['A', 'B'], prompt: 'For A, the outcome comes right as A ends. For B, the outcome comes 20 moments after B ends. Sketch A and B.' },
+    focus: { t: 2, cue: 'B' },
+    design: 'Training: 20 A+ [CS 1-10, US 11-12], 20 B+ [CS 1-10, US 31-32]',
+    empirical:
+      'Conditioning is weaker when a gap separates the end of the cue from the outcome (trace conditioning), and the longer the gap, the weaker it is.',
+    citation: 'Pavlov (1927); Kamin (1965)',
+    criterion: 'V for A, followed at once by the outcome, ends above V for B, followed after a gap.',
+    check(run, h) {
+      const a = h.final(run, 'A');
+      const b = h.final(run, 'B');
+      return { shown: a - b > h.margin, measure: `A (no gap) ends at ${f(a)}, B (20-moment gap) at ${f(b)}.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: "The model has no time inside a trial: a trial is just which cues were present and whether the outcome happened. A gap between the cue and the outcome cannot matter.",
+        tryThis: "Compare with SOP, the first model in the course where time inside the trial matters.",
+      },
+      mackintosh: {
+        why: "The model has no time inside a trial, so a gap between the cue and the outcome cannot matter.",
+        tryThis: "Compare with SOP, where time inside the trial matters.",
+      },
+      'pearce-hall': {
+        why: "The model has no time inside a trial, so a gap between the cue and the outcome cannot matter.",
+        tryThis: "Compare with SOP, where time inside the trial matters.",
+      },
+      sop: {
+        why: "A's elements are still in A1 when the US arrives, so they overlap the US in A1. B ends 20 moments before the US. By then B's elements have decayed to A2, so there is almost no overlap and almost no learning.",
+        tryThis: "Edit the design to bring B's US closer, such as US 15-16, and watch B's line rise.",
+      },
+    },
+  },
+  {
+    id: 'backward-conditioning',
+    title: 'Backward conditioning',
+    predict: { cues: ['A', 'B'], prompt: 'On A\'s trials the outcome comes first and A comes after it. On B\'s trials B comes first, as usual. Sketch A and B. Can a line go below zero?' },
+    focus: { t: 1, cue: 'A' },
+    design: 'Training: 20 A+ [US 1-2, CS 16-25], 20 B+',
+    empirical:
+      'When the cue follows the outcome, a few pairings can make it weakly excitatory, but many pairings make it an inhibitor.',
+    citation: 'Heth (1976)',
+    criterion: 'V for the backward cue A ends below zero.',
+    check(run, h) {
+      const a = h.final(run, 'A');
+      const b = h.final(run, 'B');
+      return { shown: a < -h.margin, measure: `A (backward) ends at ${f(a)}, B (forward) at ${f(b)}.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: "The model does not know the order of events inside a trial, so a backward pairing counts as an ordinary A+ trial, and A gains strength like B.",
+        tryThis: "Compare with SOP, where A comes while the US is fading and becomes an inhibitor.",
+      },
+      mackintosh: {
+        why: "The model does not know the order of events inside a trial, so a backward pairing counts as an ordinary A+ trial.",
+        tryThis: "Compare with SOP, where the order matters.",
+      },
+      'pearce-hall': {
+        why: "The model does not know the order of events inside a trial, so a backward pairing counts as an ordinary A+ trial.",
+        tryThis: "Compare with SOP, where the order matters.",
+      },
+      sop: {
+        why: "On A's trials the US comes first. By the time A appears, most US elements have left A1 for A2. A is in A1 while the US is in A2, so on every trial the loss beats the gain, and A becomes an inhibitor.",
+        tryThis: "Edit the design so that A starts sooner after the US, such as CS 4-13. The US is still in A1 when A appears, and A gains strength instead: timing decides whether a backward cue excites or inhibits.",
+      },
+    },
+  },
+  {
+    id: 'us-preexposure',
+    title: 'US pre-exposure',
+    predict: { cues: ['A', 'B'], prompt: 'A is trained first. Then the outcome is presented 30 times on its own, in the same box (the context Z). Then B is trained. Sketch A and B.' },
+    focus: { phase: 2, cue: 'B' },
+    design: 'Control: 10 A+\nUS alone: 30 +\nConditioning: 10 B+\nContext: Z',
+    empirical:
+      'Presenting the outcome on its own many times, before a cue is paired with it, slows learning about the cue.',
+    citation: 'Randich & LoLordo (1979)',
+    criterion: 'After 10 trials each, V for B, trained after the outcome-alone trials, is behind V for A, trained before them.',
+    check(run, h) {
+      const a = h.phaseEnd(run, 0, 'A');
+      const b = h.final(run, 'B');
+      return { shown: a - b > h.margin, measure: `After 10 trials each: A (before) ${f(a)}, B (after the outcome alone) ${f(b)}.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: "On the outcome-alone trials the context Z is the only cue present, so it gains strength toward λ. When B is trained, Z already predicts the outcome, so the shared error is small and the context blocks B.",
+        tryThis: "Delete the Context line. With no context, the outcome-alone trials have no cue to learn about, and the effect disappears.",
+      },
+      mackintosh: {
+        why: "The context Z gains strength on the outcome-alone trials. On B's trials Z already predicts the outcome better than the new cue B does, so attention to B falls and B learns slowly.",
+        tryThis: "Delete the Context line and the effect disappears.",
+      },
+      'pearce-hall': {
+        why: "The context Z gains strength on the outcome-alone trials, so when B is trained the outcome is already predicted. There is little surprise, so attention to B falls, and B gains strength only when the outcome is bigger than predicted.",
+        tryThis: "Delete the Context line and the effect disappears.",
+      },
+      sop: {
+        why: "On the outcome-alone trials the context Z is in A1 at the same moments as the US, so Z gains a link to it. Z is always there, so during conditioning it keeps calling up the US into A2. When B's US arrives, fewer of its elements can go to A1: B gains less and loses more.",
+        tryThis: "Watch Z's line on the prediction chart during the outcome-alone trials. Then switch off 'Associative activation': Z can no longer call up the US, and the effect disappears.",
       },
     },
   },

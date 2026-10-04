@@ -8,7 +8,9 @@
 // The model's spec describes what to draw:
 //   arithmetic(opts) -> {
 //     line:   { target, prediction, parts, error }   symbol keys; parts is the
-//             per-cue symbol stacked to make the prediction, or null
+//             per-cue symbol stacked to make the prediction, or null.
+//             A model with no outcome-versus-prediction error (SOP) gives
+//             line: null and a lead(rec, cue) sentence instead.
 //     chains: [{ title, factors: [keys], signed: [keys], result,
 //                when?(rec, cue), whenFalse?(rec, cue) }]
 //     states: [{ sym, after(rec, cue) }]              values before -> after
@@ -16,7 +18,7 @@
 //   }
 
 import { fmt, fmtExact, signed } from '../core/format.js';
-import { esc, symbolHTML, symbolText } from './equation.js';
+import { esc, symbolHTML, symbolText, cueSub } from './equation.js';
 import { cueColor } from './chart.js';
 
 function niceStep(span) {
@@ -30,7 +32,7 @@ function svgSym(spec, key, cue, opts) {
   const def = spec.symbols[key];
   const r = def.render;
   if (!r) return esc(def.display ? def.display(opts) : def.name);
-  const sub = r.sub === 'cue' ? cue : r.sub;
+  const sub = r.sub === 'cue' ? cue : r.sub?.replaceAll('$', cue);
   const base = `${esc(r.pre ?? '')}${esc(r.base)}${r.bar ? '\u0305' : ''}`;
   return sub ? `${base}<tspan dy="4" font-size="0.75em">${esc(sub)}</tspan><tspan dy="-4">\u200b</tspan>` : base;
 }
@@ -127,7 +129,7 @@ function factorBox(spec, key, cue, value, signedScale, opts) {
     : `<span class="bar-fill" style="left:0;width:${mag * 100}%"></span>`;
   const symbol = def.render ? symbolHTML(spec, key, cue) : `<span class="sym role-${def.role}">${esc(def.display ? def.display(opts) : def.name)}</span>`;
   return (
-    `<div class="factor role-${def.role}" data-sym="${key}"${def.render?.sub === 'cue' ? ` data-cue="${cue}"` : ''}>` +
+    `<div class="factor role-${def.role}" data-sym="${key}"${cueSub(def.render) ? ` data-cue="${cue}"` : ''}>` +
     `<div class="f-name">${symbol} ${def.render ? esc(def.name) : ''}</div>` +
     `<div class="f-value">${text}</div><div class="bar-track">${bar}</div></div>`
   );
@@ -173,7 +175,8 @@ export function renderArithmetic(el, { spec, arith, rec, cue, present, run, widt
     .join('<br>');
   const verdict = arith.verdict ? arith.verdict(rec, cue) : defaultVerdict(spec, arith.line, rec, cue);
   el.innerHTML =
-    numberLine({ spec, line: arith.line, rec, cue, present, run, width, opts }) +
+    (arith.line ? numberLine({ spec, line: arith.line, rec, cue, present, run, width, opts }) : '') +
+    (arith.lead ? `<p class="small">${arith.lead(rec, cue)}</p>` : '') +
     chains +
     `<p class="verdict">${states}<br>${esc(verdict)}</p>`;
 }

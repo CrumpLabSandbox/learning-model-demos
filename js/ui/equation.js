@@ -7,8 +7,18 @@ export function esc(s) {
   return String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 }
 
+// A subscript that names the focus cue: 'cue' on its own, or text with $ in
+// it, such as 'A1,$' for p_A1,A.
+export function cueSub(r) {
+  return r?.sub === 'cue' || Boolean(r?.sub?.includes?.('$'));
+}
+function subText(r, cue) {
+  if (r.sub === 'cue') return cue;
+  return r.sub ? r.sub.replaceAll('$', cue) : r.sub;
+}
+
 function attrs(key, def, cue) {
-  const c = def.render?.sub === 'cue' || cue ? cue : null;
+  const c = cueSub(def.render) || cue ? cue : null;
   return `class="sym role-${def.role}" data-sym="${key}"${c ? ` data-cue="${c}"` : ''}`;
 }
 
@@ -23,7 +33,7 @@ export function symbolHTML(spec, key, cue, extra = '') {
   const def = spec.symbols[key];
   const r = def.render;
   if (!r) return `<span ${attrs(key, def, null)}>${extra}</span>`;
-  const sub = r.sub === 'cue' ? cue : r.sub;
+  const sub = subText(r, cue);
   const base = r.bar ? `<i class="overbar">${r.base}</i>` : `<i>${r.base}</i>`;
   return `<span ${attrs(key, def, cue)}>${r.pre ?? ''}${base}${sub ? `<sub>${sub}</sub>` : ''}${r.sup ? `<sup>${r.sup}</sup>` : ''}${extra}</span>`;
 }
@@ -33,7 +43,7 @@ export function symbolText(spec, key, cue, opts = {}) {
   const def = spec.symbols[key];
   const r = def.render;
   if (!r) return def.display ? def.display(opts) : def.name;
-  const sub = r.sub === 'cue' ? cue : r.sub;
+  const sub = subText(r, cue);
   return `${r.pre ?? ''}${r.base}${r.bar ? '\u0305' : ''}${sub ? `_${sub}` : ''}`;
 }
 
@@ -53,7 +63,7 @@ export function symbolMathML(spec, key, cue) {
   const def = spec.symbols[key];
   const r = def.render;
   const pre = r.pre ? mi(r.pre) : '';
-  const sub = r.sub === 'cue' ? cue : r.sub;
+  const sub = subText(r, cue);
   const base = r.bar ? `<mover accent="true">${mi(r.base)}<mo stretchy="false">¯</mo></mover>` : mi(r.base);
   let core = base;
   if (sub && r.sup) core = `<msubsup>${base}${scriptMathML(sub)}${scriptMathML(r.sup)}</msubsup>`;
@@ -104,10 +114,20 @@ function nodeMathML(node, ctx, mode, first = true) {
         '+',
       );
     }
+    case 'sumMoments': {
+      // A sum over the moments of a trial. Symbols: Σ over t, then the
+      // product at each moment. Numbers: the total the model added up.
+      if (mode === 'numbers') {
+        const v = spec.symbols[node.of].value(ctx.rec, cue);
+        return numberMathML(spec, node.of, cue, v, !first);
+      }
+      const def = spec.symbols[node.of];
+      return `<mrow class="group role-${def.role}" data-sym="${node.of}" data-cue="${cue}"><munder><mo>Σ</mo><mi>t</mi></munder>${nodeMathML(node.arg, ctx, mode, true)}</mrow>`;
+    }
     case 'neg':
       return `<mo>−</mo>${nodeMathML(node.arg, ctx, mode, true)}`;
     case 'clamp':
-      return `${nodeMathML(node.arg, ctx, mode, true)}${mode === 'symbols' ? `<mtext class="case-cond">  ${esc(node.note)}</mtext>` : ''}`;
+      return `${nodeMathML(node.arg, ctx, mode, true)}${mode === 'symbols' ? `<mspace width="0.8em"></mspace><mtext class="case-cond">${esc(node.note)}</mtext>` : ''}`;
     case 'abs':
       return `<mrow${node.group ? ` data-sym="${node.group}" class="group role-${spec.symbols[node.group].role}"` : ''}><mo>|</mo>${nodeMathML(node.arg, ctx, mode, true)}<mo>|</mo></mrow>`;
     case 'cases': {
@@ -200,6 +220,8 @@ export function evaluate(node, ctx) {
       return Math.abs(evaluate(node.arg, ctx));
     case 'sumEach':
       return ctx.present.reduce((s, c) => s + evaluate(node.each(c), ctx), 0);
+    case 'sumMoments':
+      return ctx.spec.symbols[node.of].value(ctx.rec, ctx.cue);
     case 'sumOthers':
       return ctx.present.filter((c) => c !== ctx.cue).reduce((s, c) => s + ctx.spec.symbols[node.of].value(ctx.rec, c), 0);
     case 'neg':

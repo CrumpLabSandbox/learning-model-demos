@@ -74,4 +74,20 @@ export const checks = {
       { text: '0.9', correct: false, why: 'That ignores the inhibition. The cue has learned both, so its prediction is V − V̄ = 0.2.' },
     ],
   },
+  states: {
+    q: 'At one moment p<sub>A1,A</sub> = 0.4 and p<sub>A2,A</sub> = 0.35. What proportion of A\'s elements are inactive?',
+    options: [
+      { text: '0.25', correct: true, why: 'Right. Every element is in exactly one state, so the three proportions add up to 1: 1 − 0.4 − 0.35 = 0.25.' },
+      { text: '0.75', correct: false, why: 'That is the proportion that is active, in A1 or A2: 0.4 + 0.35 = 0.75. The rest, 1 − 0.75 = 0.25, are inactive.' },
+      { text: '0.4', correct: false, why: 'That is the proportion in A1. The three states share all the elements, so inactive is 1 − 0.4 − 0.35 = 0.25.' },
+    ],
+  },
+  overlap: {
+    q: 'At one moment, 0.5 of the cue\'s elements are in A1 and none of the US\'s are. How much does this moment add to the gain?',
+    options: [
+      { text: 'Nothing', correct: true, why: 'Right. The moment adds the product, 0.5 × 0 = 0. Gain needs both to be active at the same moment.' },
+      { text: '0.5', correct: false, why: 'That adds instead of multiplying. Each moment adds the product 0.5 × 0, and anything times 0 is 0.' },
+      { text: '0.25', correct: false, why: 'That would be 0.5 × 0.5. Here the US has nothing in A1, so the product is 0.5 × 0 = 0.' },
+    ],
+  },
 };

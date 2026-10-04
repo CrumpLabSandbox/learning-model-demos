@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SOP Overview · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for Wagner's SOP model: elements that are inactive, in A1, or in A2; learning from what is active at the same moments; and why timing matters.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+</head>
+<body class="deck-page">
+  <main class="deck" data-title="SOP overview" data-back="../models/sop.html#view=essentials" data-back-label="Open the model">
+    <section class="slide" data-title="SOP: what is active, moment by moment">
+      <div class="kicker">Overview · model 4</div>
+      <h1>SOP: what is active, moment by moment</h1>
+      <p class="sub">Allan Wagner, 1981. The same Wagner as in Rescorla-Wagner, nine years later, asking a new question.</p>
+      <aside class="notes">Wagner, A. R. (1981). SOP: A model of automatic memory processing in animal behavior. In Spear &amp; Miller (Eds.), Information processing in animals: Memory mechanisms. The name stands for "sometimes opponent process". Computational details follow Mazur &amp; Wagner (1982).</aside>
+    </section>
+    <section class="slide" data-title="A new question">
+      <h2>A new question</h2>
+      <p>Rescorla-Wagner asks: <strong>how surprising was this trial?</strong></p>
+      <p>SOP asks: <strong>what is active in memory at this moment?</strong></p>
+      <p>A trial is no longer one step. It is a stretch of time, and what matters is what overlaps with what, moment by moment.</p>
+      <p class="sub">So for the first time in this course, the timing inside a trial and the gap between trials can change what is learned.</p>
+    </section>
+    <section class="slide" data-title="An everyday version">
+      <h2>An everyday version</h2>
+      <p>The doorbell rings. For a moment it is vivid: you are hearing it. That is <strong>primary activity, A1</strong>.</p>
+      <p>A few seconds later you are no longer hearing it, but it still echoes in your mind. That is <strong>secondary activity, A2</strong>.</p>
+      <p>While it is still echoing, a second ring feels less fresh. Something that is already in A2 cannot become vivid again straight away.</p>
+    </section>
+    <section class="slide" data-title="Three states">
+      <h2>Three states</h2>
+      <p>Each stimulus is a set of many small <a href="../glossary.html#element">elements</a>. At any moment each element is in one of three states, and they go round one way:</p>
+      <div class="state-cycle" role="img" aria-label="Inactive goes to A1 when the stimulus is presented; A1 decays quickly to A2; A2 decays slowly back to inactive.">
+        <div class="state-box inactive"><strong>Inactive</strong><span>resting</span></div>
+        <div class="state-arrow">presented<br>→</div>
+        <div class="state-box a1"><strong>A1</strong><span>vivid, brief</span></div>
+        <div class="state-arrow">decays fast<br>→</div>
+        <div class="state-box a2"><strong>A2</strong><span>fading, lingers</span></div>
+        <div class="state-arrow">decays slowly<br>→ back to inactive</div>
+      </div>
+      <p class="sub">The model tracks the proportion of elements in each state, from 0 to 1.</p>
+    </section>
+    <section class="slide" data-title="Inside one trial">
+      <h2>Inside one trial</h2>
+      <figure data-mini data-model="sop" data-design="Training: 30 A+" data-trial="1" data-cue="A" data-caption="The first trial of acquisition, 35 moments. Top: when A and the US are on. Middle: the proportion of elements in A1 (solid) and A2 (dashed). Bottom: what A gains (green) and loses (red) on each moment."></figure>
+      <p class="sub">This is the real model's output, from the model page.</p>
+    </section>
+    <section class="slide" data-title="Learning from overlap">
+      <h2>Learning from overlap</h2>
+      <p><span class="pill gain">Gain</span> when the cue and the US are <strong>both in A1</strong> at the same moments.</p>
+      <p><span class="pill loss">Loss</span> when the cue is in A1 while the US is <strong>in A2</strong>, fading or only remembered.</p>
+      <p>Add up the overlaps over every moment of the trial. That is how much the link between the cue and the US changes.</p>
+      <p class="sub">There is no error term, no "outcome minus prediction". The overlap does the work.</p>
+    </section>
+    <section class="slide" data-title="Why learning levels off">
+      <h2>Why learning levels off</h2>
+      <div class="two-col">
+        <figure data-mini data-model="sop" data-design="Training: 30 A+" data-trial="30" data-cue="A" data-caption="Trial 30. A calls up the US into A2 before it arrives (the dashed grey line rises early), so little of the US reaches A1."></figure>
+        <div>
+          <p>A trained cue <strong>calls up</strong> the US. But a called-up US goes to A2, not A1.</p>
+          <p>Those elements are not free when the real US arrives, so the US is felt less: less gain, more loss.</p>
+          <p>Learning stops where gain and loss balance.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="Timing matters">
+      <h2>Timing matters</h2>
+      <div class="two-col">
+        <figure data-mini data-model="sop" data-design="Training: 20 A+ [CS 1-10, US 11-12], 20 B+ [CS 1-10, US 31-32]" data-lines="A,B" data-labels="A=no gap,B=gap" data-caption="Link strength over trials. A is followed at once by the US; B is followed after a 20-moment gap."></figure>
+        <div>
+          <p>If the US comes long after the cue has gone, the cue's elements have already faded to A2. There is almost no overlap in A1, so almost nothing is learned.</p>
+          <p>Trials packed close together also learn less: the last US is still lingering in A2.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="Backward conditioning">
+      <h2>US first, cue second</h2>
+      <div class="two-col">
+        <figure data-mini data-model="sop" data-design="Training: 20 A+ [US 1-2, CS 16-25]" data-trial="20" data-cue="A" data-caption="Trial 20. The US comes first. A overlaps the tail of the US's A1 (green) and the US fading in A2 (red). The red is a little bigger."></figure>
+        <div>
+          <p>When the cue comes <em>after</em> the US, the cue is active mostly while the US is fading in A2.</p>
+          <p>The loss beats the gain by a little on every trial, so over many trials the cue becomes an <a href="../glossary.html#conditioned-inhibition">inhibitor</a>. Rescorla-Wagner cannot tell the order apart.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="Sometimes opponent">
+      <h2>Why "sometimes opponent"</h2>
+      <p>The response is built from the US's activity: some from A1, some from A2. The two parts can push in the same direction or in opposite directions.</p>
+      <p>When they are opposite, a cue that calls up the US into A2 produces a response <strong>opposite</strong> to the response to the US itself. Cues that predict a drug, for example, can produce effects opposite to the drug's own.</p>
+      <aside class="notes">On the model page the response is R = w1 × (US in A1) + w2 × (US in A2). Set w2 to a negative number in Everything view and tick "Show the response R" to see the opponent response. The drug example is Siegel's work on conditioned compensatory responses and drug tolerance.</aside>
+    </section>
+    <section class="slide" data-title="What it gets wrong">
+      <h2>What it gets wrong</h2>
+      <ul>
+        <li><strong><a href="../glossary.html#backward-blocking">Backward blocking</a>.</strong> An absent cue's elements are inactive, so it learns nothing.</li>
+        <li><strong><a href="../glossary.html#negative-patterning">Negative patterning</a>.</strong> A compound still calls up the sum of what its parts call up.</li>
+        <li>Many parameters. Different settings can change which effects appear, so its predictions need careful checking.</li>
+      </ul>
+      <p class="sub">Later versions of SOP fix some of these. This site shows the 1981 model.</p>
+    </section>
+    <section class="slide" data-title="Try these first">
+      <h2>Try these first on the model page</h2>
+      <ol class="path-steps">
+        <li>Load <strong>Acquisition</strong>, step to trial 1, and press <strong>Play</strong> in <em>Inside the trial</em>.</li>
+        <li>On the <strong>Backward conditioning</strong> card, press <strong>Predict, then run</strong>.</li>
+        <li>Load <strong>Blocking</strong>, step to trial 21, and follow B: the gain and the loss nearly cancel.</li>
+      </ol>
+      <p><a class="btn primary" href="../models/sop.html#view=essentials">Open SOP (Essentials view)</a></p>
+      <p class="sub">New notation here: proportions such as p<sub>A1</sub>, probabilities such as p<sub>1</sub>, and Σ over moments. See <a href="../primer.html#states">Reading the equations, sections 16 and 17</a>.</p>
+    </section>
+  </main>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

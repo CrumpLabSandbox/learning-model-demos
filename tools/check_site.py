@@ -136,7 +136,7 @@ class Checker:
                 page.wait_for_timeout(120)
                 empty_widgets += page.eval_on_selector_all(".slide.current .widget", "ws => ws.filter(w => w.innerHTML.length < 50).length")
                 charts_expected += page.eval_on_selector_all(".slide.current [data-mini]", "s => s.length")
-                charts_drawn += page.eval_on_selector_all(".slide.current [data-mini] svg.mini path.mini-line", "s => s.length > 0 ? 1 : 0")
+                charts_drawn += page.eval_on_selector_all(".slide.current [data-mini] svg.mini :is(path.mini-line, polyline.tl-line)", "s => s.length > 0 ? 1 : 0")
             self.check(f"{deck}: keys and Next button reach the last slide", page.text_content(".deck-count") == f"{count} / {count}" and page.url.endswith(f"#{count}"))
             self.check(f"{deck}: every widget renders", empty_widgets == 0, f"{empty_widgets} empty")
             self.check(f"{deck}: every model chart draws", charts_drawn >= min(charts_expected, 1) if charts_expected else True, f"{charts_drawn} of {charts_expected}")
@@ -320,11 +320,81 @@ class Checker:
             page.close()
         ctx.close()
 
+    # -- a model that runs moment by moment (SOP) -----------------------------
+    def real_time_model(self, browser) -> None:
+        ctx = browser.new_context(viewport=DESKTOP)
+        page = self.open(ctx, "models/sop.html#view=everything&preset=acquisition&t=1")
+        self.check("sop: shows the preview notice", page.is_visible(".preview-note"))
+        self.check("sop: inside the trial draws the cue and the US in A1 and A2", len(page.query_selector_all("#timeline polyline.tl-line")) == 4)
+        self.check("sop: inside the trial shades the gain and the loss", page.query_selector("#timeline path.tl-gain") is not None and page.query_selector("#timeline path.tl-loss") is not None)
+        self.check("sop: starts at the moment the US arrives", page.text_content(".tl-label") == "Moment 9 of 110")
+        self.check("sop: three-state bars for the cue and the US", len(page.query_selector_all(".tl-state-row")) == 2)
+        page.click('[data-mact="fwd"]')
+        self.check("sop: stepping moves one moment", page.text_content(".tl-label") == "Moment 10 of 110")
+        page.click('[data-mact="play"]')
+        page.wait_for_timeout(700)
+        page.click('[data-mact="play"]')
+        moment = int(re.search(r"Moment (\d+)", page.text_content(".tl-label")).group(1))
+        self.check("sop: play moves through the moments", moment > 11, f"at moment {moment}")
+        box = page.locator("#timeline svg").bounding_box()
+        page.mouse.click(box["x"] + box["width"] * 0.2, box["y"] + box["height"] / 2)
+        self.check("sop: clicking the timeline picks a moment", page.text_content(".tl-label") != f"Moment {moment} of 110")
+        self.check("sop: the moment readout works the arithmetic", "elements on the move" in page.text_content(".tl-readout") and "Gain:" in page.text_content(".tl-readout"))
+        self.check("sop: chart of what each cue calls up draws", len(page.query_selector_all("#chart-recall path.series")) >= 1)
+        self.check("sop: equations render for the selected trial", len(page.query_selector_all("#eq-list .eq-card")) == 5)
+
+        self.clean(page, "sop acquisition")
+        page.close()
+
+        # Following a cue in the timeline follows it everywhere.
+        page = self.open(ctx, "models/sop.html#view=everything&preset=blocking&t=21&cue=A")
+        page.click('.tl-cues [data-tl-focus="B"]')
+        page.wait_for_timeout(150)
+        self.check("sop: following a cue in the timeline focuses the equations on it", page.get_attribute('#cue-chips [data-focus="B"]', "aria-pressed") == "true")
+
+        # Timing written in the design reaches the model.
+        page.fill("#design-text", "Training: 10 A+ [CS 1-5, US 20-21]")
+        page.wait_for_timeout(600)
+        page.click('[data-act="fwd"]')
+        page.wait_for_timeout(150)
+        self.check("sop: timing in square brackets is read", page.text_content("#design-error") == "" and page.text_content(".tl-label").endswith("of 121"), page.text_content(".tl-label"))
+
+        badge = lambda: page.text_content('.card:has(h3:text("Extinction")) .badge')
+        before = badge()
+        page.click('[data-opt="inhibition"]')
+        # SOP's badges wait for the sliders to settle, then take a moment to compute.
+        page.wait_for_function("b => document.querySelector('.card:has(h3) .badge') && [...document.querySelectorAll('.card h3')].find(h => h.textContent.startsWith('Extinction')).querySelector('.badge').textContent !== b", arg=before, timeout=5000)
+        self.check("sop: switching off inhibitory learning flips the extinction badge", before != badge(), f"{before} -> {badge()}")
+        page.click('[data-opt="inhibition"]')
+        page.click('[data-act="start"]')
+        page.wait_for_timeout(200)
+        while page.query_selector('#build [data-act="next"]'):
+            page.click('#build [data-act="next"]')
+            page.wait_for_timeout(200)
+        self.check("sop: build reaches the full model", page.query_selector('#build [data-act="done"]') is not None)
+        page.click('#build [data-act="done"]')
+        page.click('.card:has(h3:text("Backward conditioning")) [data-predict="1"]')
+        page.wait_for_timeout(1500)
+        self.check("sop: predicting hides inside the trial", page.is_hidden("#inside-panel"))
+        page.click('[data-pact="skip"]')
+        self.shot(page, "sop-page", full=True)
+        self.clean(page, "sop")
+        page.close()
+        page = self.open(ctx, "models/sop.html#view=essentials")
+        self.check("sop: essentials hides the advanced sliders", page.is_hidden('#p-pd1') and page.is_visible('#p-Lp'))
+        page.close()
+        ctx.close()
+
     # -- primer, warm-up, glossary, landing -----------------------------------
     def learning_pages(self, browser) -> None:
         ctx = browser.new_context(viewport=DESKTOP)
         page = self.open(ctx, "primer.html")
-        self.check("primer: 16 sections with widgets", len(page.query_selector_all("article section")) == 16 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
+        self.check("primer: 18 sections with widgets", len(page.query_selector_all("article section")) == 18 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
+        self.check("primer: states section runs SOP", len(page.query_selector_all("#states .st-chart path")) == 2)
+        page.eval_on_selector("#ov-us", "el => { el.value = '30'; el.dispatchEvent(new Event('input', { bubbles: true })); }")
+        self.check("primer: a long gap leaves nothing to add up", "almost nothing" in page.text_content("#overlap .ov-say"))
+        page.click("#states [data-check] [data-opt='0']")
+        self.check("primer: states question answered", "Yes" in page.text_content("#states .check-why"))
         self.check("primer: attention section draws three models", len(page.query_selector_all("#changing .ch-chart path")) == 3)
         page.click("#bar [data-check] [data-opt='0']")
         self.check("primer: bar question answered", "Yes" in page.text_content("#bar .check-why"))
@@ -366,7 +436,7 @@ class Checker:
         # on <math>. Make every equation far too wide and check that each one
         # scrolls inside its own box instead of widening the page.
         phone = browser.new_context(viewport=PHONE)
-        for path in ("primer.html", "models/rescorla-wagner.html#view=everything", "models/mackintosh.html#view=everything&cue=B", "models/pearce-hall.html#view=everything&preset=extinction&t=25&cue=A", "decks/reading-equations.html#5"):
+        for path in ("primer.html", "models/rescorla-wagner.html#view=everything", "models/mackintosh.html#view=everything&cue=B", "models/pearce-hall.html#view=everything&preset=extinction&t=25&cue=A", "models/sop.html#view=everything&t=9", "decks/reading-equations.html#5"):
             pg = self.open(phone, path)
             pg.add_style_tag(content="math { font-size: 2.4rem !important; max-width: none !important; overflow: visible !important; }")
             pg.wait_for_timeout(200)
@@ -379,7 +449,7 @@ class Checker:
         if self.built:
             page.wait_for_timeout(300)
             self.check("landing: shows the build version", "Site version" in page.text_content("#build-info"))
-        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8 and page.query_selector('.units a[href="models/pearce-hall.html#view=essentials"]') is not None)
+        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8 and page.query_selector('.units a[href="models/sop.html#view=essentials"]') is not None)
         page.close()
         ctx.close()
 
@@ -394,7 +464,7 @@ def run_checks(directory: Path, browsers: list[str]) -> bool:
                 print(f"\n== {name} ({'built site' if built else 'source'}, {base}) ==")
                 browser = getattr(pw, name).launch()
                 c = Checker(base, name, built)
-                for section in (c.pages, c.decks, c.model, c.attention_models, c.learning_pages):
+                for section in (c.pages, c.decks, c.model, c.attention_models, c.real_time_model, c.learning_pages):
                     print(f"- {section.__name__}")
                     c.run(section.__name__, section, browser)
                 browser.close()
