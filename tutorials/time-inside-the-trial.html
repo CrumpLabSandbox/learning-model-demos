@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Time inside the trial · Learning Model Demos</title>
+  <meta name="description" content="How Wagner's SOP model makes the timing of cues and outcomes matter: the CS-US interval, backward conditioning, and trial spacing.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Learning Model Demos</a>
+    <nav aria-label="Pages">
+      <a href="../index.html#start">Start here</a>
+      <a href="../warm-up.html">Maths warm-up</a>
+      <a href="../primer.html">Reading the equations</a>
+      <a href="../models/rescorla-wagner.html">Rescorla-Wagner</a>
+      <a href="../models/mackintosh.html">Mackintosh</a>
+      <a href="../models/pearce-hall.html">Pearce-Hall</a>
+      <a href="../models/sop.html">SOP</a>
+      <a href="../models/minerva-al.html">MINERVA-AL</a>
+      <a href="../compare.html">Compare</a>
+      <a href="../index.html#tutorials" aria-current="page">Tutorials</a>
+      <a href="../glossary.html">Glossary</a>
+    </nav>
+  </header>
+  <main class="page">
+    <article class="prose tutorial" id="tutorial">
+      <p class="kicker">Tutorial · about 12 minutes</p>
+
+      <h1>Time inside the trial</h1>
+      <p class="lede">For the trial-by-trial models, a trial is one step: these cues, this outcome. Real experiments happen in time. The gap between a cue and the outcome, their order, and the time between trials all change what is learned. SOP is the model on this site that can see them.</p>
+
+      <h2>The idea in one picture</h2>
+      <figure data-mini data-model="sop" data-design="Training: 30 A+" data-trial="1" data-cue="A" data-caption="SOP, the first trial of acquisition. Solid lines: elements in primary activity (A1). Dashed: secondary activity (A2). Green: what A gains. Red: what it loses."></figure>
+      <p>Each stimulus is a set of elements that are inactive, in <a href="../glossary.html#primary-activity">A1</a> (vivid, brief), or in <a href="../glossary.html#secondary-activity">A2</a> (fading, lingering). A cue gains strength when it and the US are both in A1 at the same <a href="../glossary.html#moment">moments</a>, and loses strength when it is in A1 while the US is in A2. The notation is explained in <a href="../primer.html#states">Reading the equations, section 16</a>.</p>
+      <div data-check="sopOverlap"></div>
+
+      <h2>A gap between cue and outcome</h2>
+      <div class="two-figs">
+        <figure data-mini data-model="sop" data-design="Training: 20 A+ [CS 1-10, US 11-12], 20 B+ [CS 1-10, US 31-32]" data-trial="1" data-cue="A" data-caption="No gap: the US arrives while A is still in A1."></figure>
+        <figure data-mini data-model="sop" data-design="Training: 20 A+ [CS 1-10, US 11-12], 20 B+ [CS 1-10, US 31-32]" data-trial="2" data-cue="B" data-caption="A 20-moment gap: B has faded before the US arrives."></figure>
+      </div>
+      <p>If the US arrives long after the cue has gone, the cue's elements have already left A1. There is almost no overlap, so almost nothing is learned: <a href="../glossary.html#trace-conditioning">trace conditioning</a> is weak.</p>
+      <div data-verdicts="cs-us-interval"></div>
+
+      <h2>The outcome first, the cue second</h2>
+      <figure data-mini data-model="sop" data-design="Training: 20 A+ [US 1-2, CS 16-25]" data-trial="20" data-cue="A" data-caption="Backward pairing: A comes while the US is fading. The loss is a little bigger than the gain."></figure>
+      <p>When the cue follows the outcome, it is active while the US is fading in A2. The loss beats the gain by a little on every trial, and over many trials the cue becomes an inhibitor: <a href="../glossary.html#backward-conditioning">backward conditioning</a>.</p>
+      <div data-verdicts="backward-conditioning"></div>
+
+      <h2>Trials close together</h2>
+      <figure data-mini data-model="sop" data-design="Spaced: 10 A+ [ITI 200]|Massed: 10 B+ [ITI 5]" data-lines="A,B" data-labels="A=spaced,B=massed" data-caption="Link strength: A's trials 200 moments apart, B's only 5."></figure>
+      <p>With only a short gap, the last trial is still active when the next begins.</p>
+      <div data-check="sopSpacing"></div>
+      <div data-verdicts="trial-spacing"></div>
+
+      <h2>Try it yourself</h2>
+      <p>On the <a href="../models/sop.html#preset=cs-us-interval&amp;view=essentials">SOP page</a>, open <em>Inside the trial</em> and press Play. Then write your own timing in the design, such as <code>20 A+ [CS 1-10, US 15-16]</code>, and watch the green area shrink as the gap grows.</p>
+      <p class="small muted">Next: <a href="../index.html#tutorials">all tutorials</a> · <a href="../compare.html">compare the models</a> · <a href="../glossary.html">glossary</a></p>
+    </article>
+  </main>
+  <script type="module">
+    import { mountTutorial } from '../js/ui/tutorial.js';
+    mountTutorial(document.getElementById('tutorial'));
+  </script>
+</body>
+</html>

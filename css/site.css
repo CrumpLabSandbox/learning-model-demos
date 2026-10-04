@@ -658,3 +658,43 @@ math .case-cond { font-size: 0.8em; color: var(--muted); }
 .vec-cell.on { background: var(--accent); color: #fff; border-color: transparent; }
 .vec-cell.neg { background: var(--bad); color: #fff; border-color: transparent; }
 .toggle-inline { display: inline-flex; gap: 0.3rem; align-items: center; margin-right: 0.6rem; }
+
+/* The phenomenon-by-model table on the landing page. */
+.matrix-section { margin-top: 2rem; scroll-margin-top: 1rem; }
+.matrix { border-collapse: collapse; font-size: 0.9rem; min-width: 34rem; }
+.matrix th, .matrix td { padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--border); text-align: center; }
+.matrix th.left { text-align: left; font-weight: 600; }
+.matrix thead th { font-size: 0.85rem; vertical-align: bottom; }
+.matrix td a { display: inline-block; min-width: 1.8rem; border-radius: 4px; text-decoration: none; font-weight: 700; }
+.matrix td.yes a { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.matrix td.no a { color: var(--muted); }
+.matrix tbody tr:hover { background: var(--surface-2); }
+
+/* Comparison page: one experiment, several models. */
+.compare-controls { margin-bottom: 1rem; }
+.compare-row { display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; align-items: flex-end; }
+.cmp-models { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.2rem 0.4rem; }
+.cmp-models legend { padding: 0; margin-bottom: 0.2rem; }
+.cmp-own { margin: 0.6rem 0; }
+.cmp-about { margin: 0.5rem 0; }
+.cmp-about h2 { margin-bottom: 0.3rem; }
+.cmp-scale-note { margin: 0.3rem 0 0.8rem; }
+.compare-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 30rem), 1fr)); gap: 1rem; }
+.cmp-card { min-width: 0; margin: 0; }
+.cmp-card h3 { margin: 0; }
+.cmp-plotted { margin: 0.2rem 0 0.4rem; }
+.cmp-about .design-text { white-space: pre-line; }
+
+/* Tutorials. */
+.tutorial { max-width: 46rem; }
+.tutorial figure[data-mini] { margin: 0.8rem 0; }
+.tutorial .two-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 1rem; }
+.tutorial .step-no-big { display: inline-flex; align-items: center; justify-content: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; margin-right: 0.4rem; font-size: 0.95rem; }
+.verdicts { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0 0.2rem; }
+.verdict { padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid var(--border); text-decoration: none; font-size: 0.9rem; }
+.verdict.yes { color: var(--good); background: color-mix(in srgb, var(--good) 12%, transparent); border-color: transparent; }
+.verdict.no { color: var(--muted); }
+.tutorial-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 1rem; }
+.tutorial-cards .entry-card h3 { margin-top: 0.2rem; }
+.tutorial .design-text { white-space: pre-line; }
+.tutorials-section { margin-top: 2rem; scroll-margin-top: 1rem; }

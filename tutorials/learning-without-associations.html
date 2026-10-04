@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning without associations · Learning Model Demos</title>
+  <meta name="description" content="How MINERVA-AL explains learning by storing every trial and recalling similar ones, with no associative strength at all.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Learning Model Demos</a>
+    <nav aria-label="Pages">
+      <a href="../index.html#start">Start here</a>
+      <a href="../warm-up.html">Maths warm-up</a>
+      <a href="../primer.html">Reading the equations</a>
+      <a href="../models/rescorla-wagner.html">Rescorla-Wagner</a>
+      <a href="../models/mackintosh.html">Mackintosh</a>
+      <a href="../models/pearce-hall.html">Pearce-Hall</a>
+      <a href="../models/sop.html">SOP</a>
+      <a href="../models/minerva-al.html">MINERVA-AL</a>
+      <a href="../compare.html">Compare</a>
+      <a href="../index.html#tutorials" aria-current="page">Tutorials</a>
+      <a href="../glossary.html">Glossary</a>
+    </nav>
+  </header>
+  <main class="page">
+    <article class="prose tutorial" id="tutorial">
+      <p class="kicker">Tutorial · about 15 minutes</p>
+
+      <h1>Learning without associations</h1>
+      <p class="lede">Every model before MINERVA-AL keeps a strength for each cue and updates it. MINERVA-AL keeps no strengths. It remembers every trial, and when cues appear, it recalls the trials most like now. Learning is remembering.</p>
+
+      <h2>Events are lists of numbers</h2>
+      <p>To store whole events, MINERVA-AL writes each one as a <a href="../glossary.html#vector">vector</a>: each stimulus has its own block of <a href="../glossary.html#feature">features</a>, 1s when it is present and 0s when it is not. Tick the boxes to build an event.</p>
+      <div class="widget" data-widget="vectors"></div>
+
+      <h2>Recalling is adding up similar traces</h2>
+      <p>The cues present, the <a href="../glossary.html#probe">probe</a>, are compared with every trace in memory. Each trace counts in proportion to its <a href="../glossary.html#similarity">similarity</a>, cubed, and they add up to the <a href="../glossary.html#echo">echo</a>: what the learner expects. Try the three probes.</p>
+      <div class="widget" data-widget="echo"></div>
+
+      <h2>Storing only the surprise</h2>
+      <p>Each trial stores what happened minus what memory expected: <a href="../glossary.html#discrepancy-encoding">discrepancy encoding</a>. That one choice produces most of what the other models explain with strengths.</p>
+      <div data-check="malStore"></div>
+      <div class="two-figs">
+        <figure data-mini data-model="minerva-al" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="Storing the discrepancy: B is blocked. (Both start above zero before their own trials, because their probes share the context with every trace.)"></figure>
+        <figure data-mini data-model="minerva-al" data-options="discrepancy:0" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="Storing every event as it is: no blocking."></figure>
+      </div>
+
+      <h2>What memory can do that strengths cannot</h2>
+      <h3>Backward blocking</h3>
+      <figure data-mini data-model="minerva-al" data-design="Compound: 20 AB+, 20 CD+|Element: 20 A+" data-lines="B,D" data-caption="B weakens while only A is trained."></figure>
+      <div data-check="malBackward"></div>
+      <h3>Negative patterning</h3>
+      <figure data-mini data-model="minerva-al" data-design="Training: 40 A+, 40 B+, 40 AB-|Test: A, AB" data-lines="A,AB" data-caption="A brings back the outcome; AB does not."></figure>
+      <p>AB is most similar to the AB traces, and cubing makes them count far more than the A and B traces. The compound is remembered as its own pattern.</p>
+      <div data-verdicts="negative-patterning"></div>
+
+      <h2>Try it yourself</h2>
+      <p>On the <a href="../models/minerva-al.html#preset=backward-blocking&amp;view=essentials">MINERVA-AL page</a>, step to a trial in the second phase and look at the <em>Memory</em> panel: the red features in B's block are the opposite of B. The model and its tests follow <a href="../decks/minerva-al.html">Jamieson, Crump, and Hannah (2012)</a>.</p>
+      <p class="small muted">Next: <a href="../index.html#tutorials">all tutorials</a> · <a href="../compare.html">compare the models</a> · <a href="../glossary.html">glossary</a></p>
+    </article>
+  </main>
+  <script type="module">
+    import { mountTutorial } from '../js/ui/tutorial.js';
+    mountTutorial(document.getElementById('tutorial'));
+  </script>
+</body>
+</html>

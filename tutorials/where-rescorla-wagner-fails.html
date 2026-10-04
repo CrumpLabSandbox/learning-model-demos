@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Where Rescorla-Wagner fails · Learning Model Demos</title>
+  <meta name="description" content="Four findings that Rescorla-Wagner cannot explain, why not, and which later models fix each one.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Learning Model Demos</a>
+    <nav aria-label="Pages">
+      <a href="../index.html#start">Start here</a>
+      <a href="../warm-up.html">Maths warm-up</a>
+      <a href="../primer.html">Reading the equations</a>
+      <a href="../models/rescorla-wagner.html">Rescorla-Wagner</a>
+      <a href="../models/mackintosh.html">Mackintosh</a>
+      <a href="../models/pearce-hall.html">Pearce-Hall</a>
+      <a href="../models/sop.html">SOP</a>
+      <a href="../models/minerva-al.html">MINERVA-AL</a>
+      <a href="../compare.html">Compare</a>
+      <a href="../index.html#tutorials" aria-current="page">Tutorials</a>
+      <a href="../glossary.html">Glossary</a>
+    </nav>
+  </header>
+  <main class="page">
+    <article class="prose tutorial" id="tutorial">
+      <p class="kicker">Tutorial · about 15 minutes</p>
+
+      <h1>Where Rescorla-Wagner fails</h1>
+      <p class="lede">Rescorla-Wagner explains a lot with one equation: acquisition, extinction, blocking, overshadowing, and conditioned inhibition. Its failures are just as useful, because each one points to an idea a later model added.</p>
+      <p>Each failure below comes from one feature of the equation, ΔV = αβ(λ − ΣV). If the <a href="../primer.html#read">equation</a> is new to you, start with <a href="../decks/rescorla-wagner.html">the overview slides</a>.</p>
+
+      <h2>1. Latent inhibition: nothing to learn when nothing happens</h2>
+      <div class="two-figs">
+        <figure data-mini data-model="rescorla-wagner" data-design="Pre-exposure: 30 A-|Conditioning: 15 A+, 15 B+|Context: Z" data-lines="A,B" data-caption="Rescorla-Wagner: A, pre-exposed, learns as fast as the new cue B."></figure>
+        <figure data-mini data-model="pearce-hall" data-design="Pre-exposure: 30 A-|Conditioning: 15 A+, 15 B+|Context: Z" data-lines="A,B" data-caption="Pearce-Hall: A is slower."></figure>
+      </div>
+      <p>A cue shown many times on its own is learned about more slowly later. In Rescorla-Wagner, pre-exposure changes nothing: λ and V<sub>A</sub> are both 0, so the error is 0, and α<sub>A</sub> is a fixed parameter.</p>
+      <div data-check="rwLatent"></div>
+      <p><strong>Fixed by</strong> attention that changes (<a href="../models/pearce-hall.html#preset=latent-inhibition">Pearce-Hall</a>), the context calling up the cue (<a href="../models/sop.html#preset=latent-inhibition">SOP</a>), and old traces of the cue alone (<a href="../models/minerva-al.html#preset=latent-inhibition">MINERVA-AL</a>).</p>
+      <div data-verdicts="latent-inhibition"></div>
+
+      <h2>2. Backward blocking: absent cues never change</h2>
+      <div class="two-figs">
+        <figure data-mini data-model="rescorla-wagner" data-design="Compound: 20 AB+, 20 CD+|Element: 20 A+" data-lines="B,D" data-caption="Rescorla-Wagner: B and D stay equal."></figure>
+        <figure data-mini data-model="minerva-al" data-design="Compound: 20 AB+, 20 CD+|Element: 20 A+" data-lines="B,D" data-caption="MINERVA-AL: B falls while A is trained."></figure>
+      </div>
+      <p>After AB+ training, training A alone weakens B, even though B is never shown again. Rescorla-Wagner only changes the cues that are present, so B keeps exactly what it learned.</p>
+      <p><strong>Fixed by</strong> <a href="../models/minerva-al.html#preset=backward-blocking">MINERVA-AL</a>: A brings back B from memory, B is not there, and the new traces store the opposite of B.</p>
+      <div data-verdicts="backward-blocking"></div>
+
+      <h2>3. Negative patterning: a compound is just a sum</h2>
+      <div class="two-figs">
+        <figure data-mini data-model="rescorla-wagner" data-design="Training: 40 A+, 40 B+, 40 AB-|Test: A, AB" data-lines="A,AB" data-caption="Rescorla-Wagner: AB predicts more than A."></figure>
+        <figure data-mini data-model="minerva-al" data-design="Training: 40 A+, 40 B+, 40 AB-|Test: A, AB" data-lines="A,AB" data-caption="MINERVA-AL: AB predicts nothing."></figure>
+      </div>
+      <p>Animals learn that A alone and B alone mean the outcome, but A and B together do not. In Rescorla-Wagner the compound predicts V<sub>A</sub> + V<sub>B</sub>, so it always predicts more than either part.</p>
+      <div data-check="rwSum"></div>
+      <p><strong>Fixed by</strong> models that treat a compound as its own pattern, such as <a href="../models/minerva-al.html#preset=negative-patterning">MINERVA-AL</a>, which retrieves the traces most like AB.</p>
+      <div data-verdicts="negative-patterning"></div>
+
+      <h2>4. Time: a trial is a single step</h2>
+      <figure data-mini data-model="sop" data-design="Training: 20 A+ [CS 1-10, US 11-12], 20 B+ [CS 1-10, US 31-32]" data-lines="A,B" data-labels="A=no gap,B=gap" data-caption="SOP: a gap between cue and outcome slows learning. Rescorla-Wagner gives both the same line."></figure>
+      <p>A gap between the cue and the outcome weakens learning, the order of cue and outcome matters, and spaced trials teach more than massed ones. Rescorla-Wagner has no time inside a trial or between trials, so none of these can matter.</p>
+      <p><strong>Fixed by</strong> <a href="../tutorials/time-inside-the-trial.html">SOP</a>, which runs moment by moment.</p>
+      <div data-verdicts="cs-us-interval"></div>
+
+      <h2>What the failures teach</h2>
+      <p>Each failure is a precise prediction that turned out wrong, which is what makes a model useful. The later models each keep part of Rescorla-Wagner's idea and change one thing: what drives attention, what is active when, or what is stored in memory.</p>
+      <p class="small muted">Next: <a href="../index.html#tutorials">all tutorials</a> · <a href="../compare.html">compare the models</a> · <a href="../glossary.html">glossary</a></p>
+    </article>
+  </main>
+  <script type="module">
+    import { mountTutorial } from '../js/ui/tutorial.js';
+    mountTutorial(document.getElementById('tutorial'));
+  </script>
+</body>
+</html>

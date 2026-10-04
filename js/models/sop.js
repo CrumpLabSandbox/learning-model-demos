@@ -69,6 +69,8 @@ export const realTime = true;
 // The phenomenon checks that compare responses read this per-cue series
 // (see the test presentation below), not V.
 export const responseKey = 'recall';
+// What the prediction chart shows for this model.
+export const predictionTitle = 'Link strength V';
 
 export const salienceKey = (cue) => `p1_${cue}`;
 

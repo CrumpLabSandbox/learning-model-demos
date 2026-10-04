@@ -8,6 +8,8 @@
 //   data-series="alpha"       plot a per-cue internal value, such as
 //                             attention, instead of the prediction
 //   data-labels="A=noise"     rename lines at their ends
+//   data-options="discrepancy:0"   switch a model's assumptions (1 on, 0 off)
+//   data-params="L:0.33"      set a model's parameters
 //   data-trial="30"           for a model that runs moment by moment (SOP),
 //                             draw inside that trial instead, following the
 //                             cue in data-cue (default: the first cue)
@@ -37,9 +39,9 @@ export function drawMiniTrial(el, { design, model = 'sop', trial, cue = null }) 
   el.innerHTML = svg + (el.dataset.caption ? `<figcaption>${el.dataset.caption}</figcaption>` : '');
 }
 
-export function drawMini(el, { design, lines, params = {}, model = 'rescorla-wagner', labels = {}, seriesKey = null }) {
+export function drawMini(el, { design, lines, params = {}, options = {}, model = 'rescorla-wagner', labels = {}, seriesKey = null }) {
   const d = parseDesign(design);
-  const run = runModel(MODELS[model], { design: d, params });
+  const run = runModel(MODELS[model], { design: d, params, options });
   const show = lines ?? d.probes ?? d.cues;
   const series = seriesKey ? run.stateSeries[seriesKey] : run.series;
   const n = run.trials.length;
@@ -96,7 +98,12 @@ export function mountMinis(root) {
     }
     let labels = {};
     if (el.dataset.labels) labels = Object.fromEntries(el.dataset.labels.split(',').map((kv) => kv.split('=')));
+    const pairs = (text) => (text ? text.split(',').map((kv) => kv.split(':')) : []);
+    const options = Object.fromEntries(pairs(el.dataset.options).map(([k, v]) => [k, v === '1']));
+    const params = Object.fromEntries(pairs(el.dataset.params).map(([k, v]) => [k, Number(v)]));
     drawMini(el, {
+      options,
+      params,
       design: el.dataset.design.split('|').join('\n'),
       lines: el.dataset.lines ? el.dataset.lines.split(',') : undefined,
       labels,
