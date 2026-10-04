@@ -9,6 +9,7 @@ import { parseDesign } from '../core/design.js';
 import { runModel } from '../core/runner.js';
 import * as rw from '../models/rescorla-wagner.js';
 import { esc } from './equation.js';
+import { whenResized } from './widget-kit.js';
 
 const MODELS = { 'rescorla-wagner': rw };
 
@@ -70,12 +71,6 @@ export function mountMinis(root) {
   };
   for (const el of figs) {
     draw(el);
-    let w = el.clientWidth;
-    new ResizeObserver(() => {
-      if (el.clientWidth !== w && el.clientWidth > 0) {
-        w = el.clientWidth;
-        draw(el);
-      }
-    }).observe(el);
+    whenResized(el, () => draw(el));
   }
 }

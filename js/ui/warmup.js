@@ -216,4 +216,5 @@ export function mountWarmupWidgets(root) {
 export function mountWarmup(root) {
   mountWarmupWidgets(root);
   for (const el of root.querySelectorAll('[data-check]')) renderCheck(el, checks[el.dataset.check]);
+  document.documentElement.setAttribute('data-ready', '');
 }

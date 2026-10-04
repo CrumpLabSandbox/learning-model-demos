@@ -68,13 +68,19 @@ export function numberLine(el, { lo, hi, marks = [], arrows = [], bars = [], row
   el.innerHTML = `<svg class="numline" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${out.join('')}</svg>`;
 }
 
+// Call fn when el changes width. The redraw waits for the next animation
+// frame: redrawing inside the observer callback can change the size again in
+// the same frame, which Safari reports as a "ResizeObserver loop" error.
 export function whenResized(el, fn) {
   let w = el.clientWidth;
+  let frame = 0;
   new ResizeObserver(() => {
-    if (el.clientWidth !== w) {
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => {
+      if (el.clientWidth === w || el.clientWidth === 0) return;
       w = el.clientWidth;
       fn();
-    }
+    });
   }).observe(el);
 }
 

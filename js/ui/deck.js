@@ -131,4 +131,5 @@ export function mountDeck(deck) {
   window.addEventListener('afterprint', () => show(current, { push: false }));
 
   show(current, { push: false });
+  document.documentElement.setAttribute('data-ready', '');
 }
