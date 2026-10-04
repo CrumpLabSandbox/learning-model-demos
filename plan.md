@@ -218,7 +218,7 @@ Jamieson, Crump, and Hannah (2012). Events are feature vectors for cues and outc
 - Why it ends the sequence: the same phenomena the earlier models handle with changing strengths or attention fall out of storing and retrieving instances. The comparison view makes this the final teaching point.
 - Views: the trace matrix filling up, the echo for the current probe, and similarity per trace; a slider for the number of simulated learners with the spread shown.
 - Toggles: the similarity exponent; discrepancy encoding on or off, which shows that storing raw events does not produce blocking.
-- Tests: reproduce the key figures from the 2012 paper with fixed seeds.
+- Tests: reproduce the paper's tables with fixed seeds (done; see Milestone 5).
 
 ## Milestones
 
@@ -327,11 +327,19 @@ Notes from building it:
 
 ### 5. MINERVA-AL
 
-- [ ] Vector events, trace matrix, echo with the similarity exponent, and discrepancy encoding, from the paper's equations
-- [ ] Seeded generator, many learners, mean and spread on the chart
-- [ ] Trace matrix, echo, and similarity views
-- [ ] Tests reproducing the key figures with fixed seeds
-- [ ] Overview deck and glossary entries for MINERVA-AL
+- [x] Vector events, trace matrix, echo with the similarity exponent, and discrepancy encoding, from the paper's equations (Eqs. 2-7)
+- [x] Seeded generator, many learners (25 by default, as in the paper), mean and spread on the chart
+- [x] Memory view: learner 1's traces as a heatmap with the probe, similarity and activation per trace, the echo, the event, and the new trace
+- [x] Tests reproducing the paper's Tables 2, 3, 5, 7, 8, 9, 10, 12, and 13 (L = .67) and the extinction result of Figure 1, with a fixed seed. The page carries no Preview notice.
+- [x] Overview deck, glossary entries, primer sections on events as vectors and on similarity and the echo, and notation map rows
+
+Notes from building it:
+
+- The paper's details that matter, checked against the PDF: each stimulus is a field of 20 features set to 1 (salience α and a muted outcome multiply them); the context is in every probe; similarity is the cosine over the cue fields only (Eq. 7), so a trace's outcome features never change how similar it is; noise from ±0.001 is added to the echo before it is scaled by its largest feature (Eq. 4); retrieval X|P is Eq. 5; memory starts empty; and each trial stores E − C′ with probability L per feature (Eq. 6). A first version computed the cosine over every feature, and extinction failed: once A is learned, an A− trace holds almost nothing but the opposite of the outcome, and over the whole vector it barely resembles A.
+- Choices this site adds: n in Eq. 5 is the number of outcome features (so perfect retrieval is 1, as in the tables); when a design has no Context line the model adds a context of its own; all learners see the same trial sequence; the outcome is written O, not X, because designs here use X as a cue.
+- With these settings MINERVA-AL shows acquisition, extinction, salience, blocking, overshadowing, conditioned inhibition, latent inhibition, backward blocking, and negative patterning. Switching off discrepancy encoding (MINERVA 2) leaves acquisition, extinction, latent inhibition, and negative patterning. It does not show unblocking in this site's design (the size-2 outcome reaches D's echo through the shared context), US pre-exposure, or the timing effects.
+- A new cue tested in a trained context already retrieves some of the outcome (about 0.6), because its probe shares the context with every trace and the echo is scaled to its largest feature. This is the model's behaviour, and the deck mentions it.
+- The framework gained: an optional `summary()` for models with many learners and a spread band on the chart; equations that are not about one cue (`cueless`), equations that apply only on some trials (`when`), fraction, square root, power, and indexed-sum nodes; and the memory view.
 
 ### 6. Comparison and teaching
 

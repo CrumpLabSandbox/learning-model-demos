@@ -90,4 +90,20 @@ export const checks = {
       { text: '0.25', correct: false, why: 'That would be 0.5 × 0.5. Here the US has nothing in A1, so the product is 0.5 × 0 = 0.' },
     ],
   },
+  vectors: {
+    q: 'With four features per stimulus, A is [1, 1, 1, 1, 0, 0, 0, 0] and the outcome is [0, 0, 0, 0, 1, 1, 1, 1]. What is the event when A is followed by the outcome?',
+    options: [
+      { text: '[1, 1, 1, 1, 1, 1, 1, 1]', correct: true, why: 'Right. Stimuli that happen together are added, feature by feature. A fills the first four, the outcome the last four.' },
+      { text: '[1, 1, 1, 1, 0, 0, 0, 0]', correct: false, why: 'That is A on its own: the probe, before the outcome. The event adds the outcome\'s features too.' },
+      { text: '[2, 2, 2, 2, 0, 0, 0, 0]', correct: false, why: 'Adding A to itself would give 2s. Here A and the outcome have separate fields, so adding them fills all eight features with 1.' },
+    ],
+  },
+  echo: {
+    q: 'Trace 1 has similarity 0.5 to the probe and trace 2 has similarity 1. With the exponent k = 3, how much more does trace 2 count in the echo?',
+    options: [
+      { text: '8 times as much', correct: true, why: 'Right. 0.5³ = 0.125 and 1³ = 1, and 1 is 8 times 0.125. Cubing makes close matches count far more than loose ones.' },
+      { text: 'Twice as much', correct: false, why: 'That compares the similarities, 1 and 0.5. The activations are cubed: 1³ = 1 and 0.5³ = 0.125, which is 8 times.' },
+      { text: '3 times as much', correct: false, why: 'The 3 is a power, not a multiplier: 0.5³ = 0.5 × 0.5 × 0.5 = 0.125, so trace 2 counts 1 / 0.125 = 8 times as much.' },
+    ],
+  },
 };

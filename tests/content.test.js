@@ -10,6 +10,8 @@ import { checks as primerChecks } from '../content/primer/checks.js';
 import * as rwSpec from '../content/equations/rescorla-wagner.js';
 import * as mkSpec from '../content/equations/mackintosh.js';
 import * as phSpec from '../content/equations/pearce-hall.js';
+import * as sopSpec from '../content/equations/sop.js';
+import * as malSpec from '../content/equations/minerva-al.js';
 
 const root = new URL('..', import.meta.url).pathname;
 const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'models/rescorla-wagner.html', ...readdirSync(join(root, 'decks')).map((f) => `decks/${f}`)];
@@ -56,7 +58,7 @@ test('glossary entries are complete and their cross-links resolve', () => {
 
 test('every symbol in every model links to a primer section that exists', () => {
   const primerIds = ids(read('primer.html'));
-  for (const spec of [rwSpec, mkSpec, phSpec]) {
+  for (const spec of [rwSpec, mkSpec, phSpec, sopSpec, malSpec]) {
     for (const [key, def] of Object.entries(spec.symbols)) {
       assert.ok(primerIds.has(def.primer), `${key} -> #${def.primer}`);
       assert.ok(def.render || def.display, `${key} needs a render or a display text`);

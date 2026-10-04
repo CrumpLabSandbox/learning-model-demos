@@ -11,6 +11,7 @@ import * as rw from '../models/rescorla-wagner.js';
 import * as mackintosh from '../models/mackintosh.js';
 import * as pearceHall from '../models/pearce-hall.js';
 import * as sop from '../models/sop.js';
+import * as minerva from '../models/minerva-al.js';
 import { cases } from '../../content/primer/fixed-points.js';
 import { checks } from '../../content/primer/checks.js';
 import { notation } from '../../content/primer/notation.js';
@@ -529,6 +530,90 @@ const widgets = {
     };
     wireSliders(el, ['ov-us'], draw);
     whenResized(el, () => draw(last));
+  },
+
+  vectors(el) {
+    // An event as a vector: each stimulus has its own field of features,
+    // 1 when it is present and 0 when it is absent.
+    const fields = ['A', 'B', 'context', 'outcome'];
+    const on = { A: true, B: false, context: true, outcome: true };
+    const F = 4;
+    const draw = () => {
+      const values = fields.flatMap((f) => Array(F).fill(on[f] ? 1 : 0));
+      const probe = fields.flatMap((f) => Array(F).fill(on[f] && f !== 'outcome' ? 1 : 0));
+      const cells = (vals) =>
+        fields
+          .map((f, i) => `<div class="vec-field"><div class="vec-name">${f}</div><div class="vec-cells">${vals.slice(i * F, (i + 1) * F).map((v) => `<span class="vec-cell${v ? ' on' : ''}">${v}</span>`).join('')}</div></div>`)
+          .join('');
+      el.querySelector('.vec-event').innerHTML = cells(values);
+      el.querySelector('.vec-probe').innerHTML = cells(probe);
+      el.querySelector('.vec-say').textContent = `As a list of numbers, the event is [${values.join(', ')}]. The probe is the same without the outcome: what the learner sees before finding out.`;
+    };
+    el.innerHTML =
+      `<div class="btn-row">${fields.map((f) => `<label class="toggle-inline"><input type="checkbox" data-vec="${f}"${on[f] ? ' checked' : ''}> ${f}</label>`).join('')}</div>` +
+      `<div class="small muted" style="margin-top:.5rem">The event (what happened on the trial)</div><div class="vec-row vec-event"></div>` +
+      `<div class="small muted">The probe (the event without the outcome)</div><div class="vec-row vec-probe"></div>` +
+      `<p class="vec-say small"></p>`;
+    el.addEventListener('change', (ev) => {
+      const f = ev.target.dataset.vec;
+      if (!f) return;
+      on[f] = ev.target.checked;
+      draw();
+    });
+    draw();
+  },
+
+  echo(el) {
+    // A tiny memory of three traces, probed with A, B, or AB, using the
+    // model's own similarity and activation.
+    const F = 4;
+    const fields = ['A', 'B', 'outcome'];
+    const vec = (a, b, o) => Float64Array.from([...Array(F).fill(a), ...Array(F).fill(b), ...Array(F).fill(o)]);
+    const traces = [
+      { label: 'trace 1: A then the outcome', v: vec(1, 0, 1) },
+      { label: 'trace 2: B, no outcome', v: vec(0, 1, 0) },
+      { label: 'trace 3: A and B, the outcome missing', v: vec(1, 1, -1) },
+    ];
+    const cueNorm = (v) => Math.sqrt(v.slice(0, 2 * F).reduce((s, x) => s + x * x, 0));
+    let probeName = 'A';
+    let k = 3;
+    const draw = () => {
+      const probe = vec(probeName.includes('A') ? 1 : 0, probeName.includes('B') ? 1 : 0, 0);
+      const probeFields = [0, 1].filter((f) => probe[f * F] !== 0);
+      const pnorm = cueNorm(probe);
+      const rows = traces.map((t) => {
+        const S = minerva.similarity(probe, pnorm, probeFields, t.v, cueNorm(t.v), F);
+        return { ...t, S, A: minerva.activation(S, k) };
+      });
+      const echo = new Float64Array(3 * F);
+      for (const r of rows) for (let j = 0; j < echo.length; j++) echo[j] += r.A * r.v[j];
+      const max = Math.max(...echo.map(Math.abs));
+      const scaled = echo.map((x) => (max ? x / max : 0));
+      const retrieval = scaled.slice(2 * F).reduce((s, x) => s + x, 0) / F;
+      const cells = (v) => fields.map((f, i) => `<span class="vec-cells">${[...v.slice(i * F, (i + 1) * F)].map((x) => `<span class="vec-cell${x > 0.001 ? ' on' : x < -0.001 ? ' neg' : ''}">${fmt(x, 1)}</span>`).join('')}</span>`).join('');
+      el.querySelector('.ec-table').innerHTML =
+        `<tr><th class="left">Trace</th><th>similarity S</th><th>activation S<sup>${k}</sup></th></tr>` +
+        rows.map((r) => `<tr><td class="left">${r.label}</td><td>${signed(fmt(r.S))}</td><td>${signed(fmt(r.A))}</td></tr>`).join('');
+      el.querySelector('.ec-echo').innerHTML = `<div class="small muted">The scaled echo: A, B, outcome</div><div class="vec-row">${cells(scaled)}</div>`;
+      el.querySelector('.ec-say').innerHTML =
+        `Retrieval of the outcome given ${probeName}: <strong>${signed(fmt(retrieval))}</strong>. ` +
+        (retrieval > 0.3 ? 'The probe brings the outcome back.' : retrieval < -0.3 ? 'The probe brings back the opposite of the outcome: it predicts the outcome will not happen.' : 'The probe brings back little of the outcome either way.');
+    };
+    el.innerHTML =
+      `<div class="btn-row"><span class="small muted">Probe with</span>${['A', 'B', 'AB'].map((p) => `<button class="btn" data-ec-probe="${p}" aria-pressed="${p === probeName}">${p}</button>`).join('')}` +
+      `<span class="small muted" style="margin-left:1rem">Exponent k</span>${[1, 3, 5].map((x) => `<button class="btn" data-ec-k="${x}" aria-pressed="${x === k}">${x}</button>`).join('')}</div>` +
+      `<div class="table-scroll"><table class="symbol-guide ec-table small"></table></div><div class="ec-echo"></div><p class="ec-say small"></p>`;
+    el.addEventListener('click', (ev) => {
+      const p = ev.target.closest('[data-ec-probe]')?.dataset.ecProbe;
+      const kk = ev.target.closest('[data-ec-k]')?.dataset.ecK;
+      if (p) probeName = p;
+      if (kk) k = Number(kk);
+      if (!p && !kk) return;
+      for (const b of el.querySelectorAll('[data-ec-probe]')) b.setAttribute('aria-pressed', String(b.dataset.ecProbe === probeName));
+      for (const b of el.querySelectorAll('[data-ec-k]')) b.setAttribute('aria-pressed', String(Number(b.dataset.ecK) === k));
+      draw();
+    });
+    draw();
   },
 
   notation(el) {

@@ -106,4 +106,16 @@ export const notation = [
     original: 'L<sup>+</sup>, L<sup>−</sup>',
     other: 'separate excitatory and inhibitory strengths V<sup>+</sup> and V<sup>−</sup>',
   },
+  {
+    idea: 'How well a probe brings back the outcome (MINERVA-AL)',
+    site: 'O|P, with O for the outcome',
+    original: 'X|P, with X for the outcome',
+    other: 'retrieval, recall, expectancy',
+  },
+  {
+    idea: 'A memory trace and the echo (MINERVA-AL)',
+    site: 'M<sub>ij</sub> (feature j of trace i), C<sub>j</sub> and the scaled C′<sub>j</sub>',
+    original: 'M<sub>ij</sub>, C<sub>j</sub>, C′<sub>j</sub>',
+    other: 'T<sub>ij</sub> for a trace in Hintzman (1986); the echo\'s content and its intensity',
+  },
 ];

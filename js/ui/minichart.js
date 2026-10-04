@@ -18,12 +18,13 @@ import * as rw from '../models/rescorla-wagner.js';
 import * as mackintosh from '../models/mackintosh.js';
 import * as pearceHall from '../models/pearce-hall.js';
 import * as sop from '../models/sop.js';
+import * as minervaAL from '../models/minerva-al.js';
 import { defaultOptions } from '../core/runner.js';
 import { esc } from './equation.js';
 import { whenResized } from './widget-kit.js';
 import { trialPlot } from './timeline.js';
 
-const MODELS = { 'rescorla-wagner': rw, mackintosh, 'pearce-hall': pearceHall, sop };
+const MODELS = { 'rescorla-wagner': rw, mackintosh, 'pearce-hall': pearceHall, sop, 'minerva-al': minervaAL };
 
 // Inside one trial of a moment-by-moment model.
 export function drawMiniTrial(el, { design, model = 'sop', trial, cue = null }) {

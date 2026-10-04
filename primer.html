@@ -19,6 +19,7 @@
       <a href="models/mackintosh.html">Mackintosh</a>
       <a href="models/pearce-hall.html">Pearce-Hall</a>
       <a href="models/sop.html">SOP</a>
+      <a href="models/minerva-al.html">MINERVA-AL</a>
       <a href="glossary.html">Glossary</a>
     </nav>
   </header>
@@ -44,6 +45,8 @@
           <li><a href="#bar">A bar over a letter</a></li>
           <li><a href="#states">Moments and states</a></li>
           <li><a href="#overlap">Adding up over moments</a></li>
+          <li><a href="#vectors">Events as lists of numbers</a></li>
+          <li><a href="#echo">Similarity and the echo</a></li>
           <li><a href="#notation">Notation map</a></li>
         </ol>
         <p class="small" style="margin:.75rem 0 0"><a href="decks/reading-equations.html">Overview slides for this page</a></p>
@@ -208,8 +211,24 @@
           <div data-check="overlap"></div>
         </section>
 
+        <section id="vectors">
+          <h2>18. Events as lists of numbers</h2>
+          <p>MINERVA-AL has no strength for each cue. Instead it stores whole events. To do that, it writes each event as a <a href="glossary.html#vector">vector</a>: a list of numbers, one per <strong>feature</strong>.</p>
+          <p>Each stimulus has its own block of features (20 in the paper). A stimulus that is present fills its block with 1s; one that is absent leaves its block at 0. Stimuli that happen together are added. So P<sub>j</sub> is feature j of the probe, E<sub>j</sub> is feature j of the event, and M<sub>ij</sub> is feature j of memory trace i: the second letter in the subscript counts features, the first counts traces.</p>
+          <div class="widget" data-widget="vectors"></div>
+          <div data-check="vectors"></div>
+        </section>
+
+        <section id="echo">
+          <h2>19. Similarity and the echo</h2>
+          <p>When cues appear, MINERVA-AL compares them, the <strong>probe</strong>, with every trace in memory. <strong>Similarity</strong> S is the cosine: multiply the two lists feature by feature, add up, and divide by both lengths. It is 1 when they match, 0 when they share nothing, and −1 when one is the opposite of the other.</p>
+          <p>Each trace then counts in proportion to S<sup>3</sup>. Cubing keeps the sign and shrinks loose matches: 0.5 becomes 0.125, while 1 stays 1. The traces, each weighted this way, add up to the <a href="glossary.html#echo">echo</a>, which is scaled so its biggest feature is 1. How much of the outcome is in the echo, from −1 to 1, is written O|P: "the outcome given the probe".</p>
+          <div class="widget" data-widget="echo"></div>
+          <div data-check="echo"></div>
+        </section>
+
         <section id="notation">
-          <h2>18. Notation map</h2>
+          <h2>20. Notation map</h2>
           <p>Different papers and textbooks write the same ideas in different ways. If a reading uses symbols you do not recognise, find the idea here.</p>
           <div class="widget" data-widget="notation"></div>
           <p class="small muted">For Rescorla-Wagner, the "original paper" column follows the 1972 chapter, which writes the compound of cues A and X as V<sub>AX</sub> and numbers the outcome with a subscript. The last column lists forms that are common across sources rather than any one book. When you quote a source, use its own symbols.</p>

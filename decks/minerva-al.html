@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MINERVA-AL Overview · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for MINERVA-AL: learning as remembering. Every trial is stored as a trace, and expectations come from recalling similar traces.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+</head>
+<body class="deck-page">
+  <main class="deck" data-title="MINERVA-AL overview" data-back="../models/minerva-al.html#view=essentials" data-back-label="Open the model">
+    <section class="slide" data-title="MINERVA-AL: learning as remembering">
+      <div class="kicker">Overview · model 5</div>
+      <h1>MINERVA-AL: learning as remembering</h1>
+      <p class="sub">Randall Jamieson, Matthew Crump, and Samuel Hannah, 2012. Built on Douglas Hintzman's memory model, MINERVA 2.</p>
+      <aside class="notes">Jamieson, R. K., Crump, M. J. C., &amp; Hannah, S. D. (2012). An instance theory of associative learning. Learning &amp; Behavior, 40, 61–82. The site reproduces the paper's tables of simulation results in its automated tests.</aside>
+    </section>
+    <section class="slide" data-title="No strengths at all">
+      <h2>No strengths at all</h2>
+      <p>Every model so far keeps one number per cue, its strength, and updates it after each trial. The trials themselves are forgotten.</p>
+      <p>MINERVA-AL keeps <strong>every trial</strong> in memory, as its own <a href="../glossary.html#trace">trace</a>. Nothing is ever updated.</p>
+      <p class="big">Learning is remembering. Expecting is recalling.</p>
+    </section>
+    <section class="slide" data-title="An everyday version">
+      <h2>An everyday version</h2>
+      <p>You meet a dog in the park. Memories of other dogs come back, and the ones most like this dog come back most strongly.</p>
+      <p>What you expect, a wagging tail or a growl, is a blend of what happened with all of them, weighted by how alike they are.</p>
+    </section>
+    <section class="slide" data-title="Events as lists of numbers">
+      <h2>Events as lists of numbers</h2>
+      <p>Each stimulus has its own block of <a href="../glossary.html#feature">features</a>: 1s when it is there, 0s when it is not. A trial is the stimuli on it, added together. Tick the boxes.</p>
+      <div class="widget" data-widget="vectors"></div>
+    </section>
+    <section class="slide" data-title="Recalling: the echo">
+      <h2>Recalling: the echo</h2>
+      <p>The cues (the <a href="../glossary.html#probe">probe</a>) are compared with every trace. Each trace counts in proportion to its similarity, cubed, and they add up to the <a href="../glossary.html#echo">echo</a>: what the learner expects.</p>
+      <div class="widget" data-widget="echo"></div>
+    </section>
+    <section class="slide" data-title="What gets stored: the surprise">
+      <h2>What gets stored: the surprise</h2>
+      <p>Each trial does not store the event itself, but <strong>what happened minus what was expected</strong>.</p>
+      <ul>
+        <li>An outcome that was expected leaves almost no mark.</li>
+        <li>An outcome that was not expected is stored strongly.</li>
+        <li>An outcome that was expected but did not come is stored as its <strong>opposite</strong>.</li>
+      </ul>
+      <p class="sub">The paper calls this <a href="../glossary.html#discrepancy-encoding">discrepancy encoding</a>. Switch it off on the model page and blocking disappears.</p>
+    </section>
+    <section class="slide" data-title="Blocking">
+      <h2>Blocking</h2>
+      <div class="two-col">
+        <figure data-mini data-model="minerva-al" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="Retrieval of the outcome given B and given D, averaged over 25 simulated learners."></figure>
+        <div>
+          <p>By the compound trials, A already brings back the outcome. The surprising thing on an AB trial is B, so each trace stores B strongly and the outcome only weakly.</p>
+          <p>Later, B brings back those traces, and with them little outcome.</p>
+        </div>
+      </div>
+      <aside class="notes">A new cue starts well above zero here: its probe includes the context, which matches every trace a little, and the echo is scaled so its biggest feature is 1. The paper's Table 7 shows the same blocking effect.</aside>
+    </section>
+    <section class="slide" data-title="Backward blocking">
+      <h2>Backward blocking</h2>
+      <div class="two-col">
+        <figure data-mini data-model="minerva-al" data-design="Compound: 20 AB+, 20 CD+|Element: 20 A+" data-lines="B,D" data-caption="After AB+ training, A+ trials lower B, though B never appears again."></figure>
+        <div>
+          <p>On the A+ trials, A brings back B from the old AB traces, but B is not there. So each new trace stores the <strong>opposite</strong> of B.</p>
+          <p>When B is tested, those traces match it negatively and take outcome away from its echo. No other model on this site can do this.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="Negative patterning">
+      <h2>Negative patterning</h2>
+      <div class="two-col">
+        <figure data-mini data-model="minerva-al" data-design="Training: 40 A+, 40 B+, 40 AB-|Test: A, AB" data-lines="A,AB" data-caption="A brings back the outcome; the compound AB does not."></figure>
+        <div>
+          <p>AB is compared with every trace. The AB traces match it best, and cubing makes them count far more than the A and B traces.</p>
+          <p>So the compound is remembered as its own pattern, not as A plus B. The models built on summed strengths cannot do this.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="Many learners">
+      <h2>Many learners</h2>
+      <p>Which features are stored on each trial is random, so two simulated learners never learn quite alike.</p>
+      <p>The model page runs 25 <a href="../glossary.html#simulated-learner">simulated learners</a>, as the paper did, and plots their average. The shaded band shows the spread. The memory view follows learner 1.</p>
+    </section>
+    <section class="slide" data-title="What it gets wrong">
+      <h2>What it gets wrong</h2>
+      <ul>
+        <li><strong>Time.</strong> Each trial is one event, so trial spacing, the gap between cue and outcome, and their order cannot matter. Compare SOP.</li>
+        <li><strong>Unblocking</strong> with a bigger outcome is not produced in this site's design.</li>
+        <li>A brand-new cue tested in a familiar context already brings back some of the outcome.</li>
+      </ul>
+      <p class="sub">Like every model here, it is a precise claim that can be tested, and its failures are informative.</p>
+    </section>
+    <section class="slide" data-title="Try these first">
+      <h2>Try these first on the model page</h2>
+      <ol class="path-steps">
+        <li>On the <strong>Backward blocking</strong> card, press <strong>Predict, then run</strong>.</li>
+        <li>Step to a trial in the second phase and look at the <strong>Memory</strong> panel: find the red features in B's block.</li>
+        <li>Switch off <strong>Store the discrepancy</strong> and watch which badges flip.</li>
+      </ol>
+      <p><a class="btn primary" href="../models/minerva-al.html#view=essentials">Open MINERVA-AL (Essentials view)</a></p>
+      <p class="sub">New notation here: vectors, features, similarity, and the echo. See <a href="../primer.html#vectors">Reading the equations, sections 18 and 19</a>.</p>
+    </section>
+  </main>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

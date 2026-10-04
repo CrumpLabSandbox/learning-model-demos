@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pearce-Hall · Learning Model Demos</title>
-  <meta name="description" content="Run the Pearce-Hall model trial by trial: attention follows recent surprise, and cues gain excitatory or inhibitory strength.">
+  <title>MINERVA-AL · Learning Model Demos</title>
+  <meta name="description" content="Run MINERVA-AL trial by trial: every trial is stored as a memory trace, and expectations come from retrieving traces like what is present now.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
 </head>
@@ -19,7 +19,7 @@
       <a href="mackintosh.html">Mackintosh</a>
       <a href="pearce-hall.html" aria-current="page">Pearce-Hall</a>
       <a href="sop.html">SOP</a>
-      <a href="minerva-al.html">MINERVA-AL</a>
+      <a href="minerva-al.html" aria-current="page">MINERVA-AL</a>
       <a href="../glossary.html">Glossary</a>
     </nav>
   </header>
@@ -27,8 +27,8 @@
     <noscript><p>This demo needs JavaScript.</p></noscript>
   </main>
   <script type="module">
-    import * as model from '../js/models/pearce-hall.js';
-    import * as spec from '../content/equations/pearce-hall.js';
+    import * as model from '../js/models/minerva-al.js';
+    import * as spec from '../content/equations/minerva-al.js';
     import { phenomena } from '../content/phenomena/index.js';
     import { mountModelPage } from '../js/ui/page.js';
 
@@ -37,9 +37,9 @@
       model,
       spec,
       phenomena,
-      modelSourceUrl: '../js/models/pearce-hall.js',
-      defaultPreset: 'blocking',
-      overviewUrl: '../decks/pearce-hall.html',
+      modelSourceUrl: '../js/models/minerva-al.js',
+      defaultPreset: 'backward-blocking',
+      overviewUrl: '../decks/minerva-al.html',
     });
   </script>
 </body>

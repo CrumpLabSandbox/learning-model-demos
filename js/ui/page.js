@@ -23,6 +23,7 @@ import { createTable, tableCSV } from './table.js';
 import { installHighlighting } from './highlight.js';
 import { compareSketch, verdict } from '../core/sketch.js';
 import { createTimeline } from './timeline.js';
+import { createMemoryView } from './memory.js';
 
 const READINGS = [
   { key: 'words', label: 'Words' },
@@ -141,6 +142,15 @@ export function mountModelPage({
     : null;
   function renderTimeline() {
     timeline?.update({ run: state.run, rec: currentRecord(), cue: state.focusCue, opts: state.options });
+  }
+  // An instance model (MINERVA-AL) shows learner 1's memory.
+  const memoryView = model.memory
+    ? createMemoryView($('memory'), {
+        fieldName: (f) => (f === state.run?.context ? `${f} (context)` : f),
+      })
+    : null;
+  function renderMemory() {
+    memoryView?.update({ run: state.run, rec: currentRecord() });
   }
 
   // ---- Design -------------------------------------------------------------
@@ -612,8 +622,11 @@ export function mountModelPage({
     const cue = state.focusCue;
     const run = state.run;
     $('eq-context').textContent = rec ? `trial ${rec.index}, ${rec.phaseName}, ${rec.label}` : 'before training';
-    $('cue-chips').innerHTML =
-      `<span class="muted">Show the update for</span>` +
+    // A model whose equations are not about one cue (MINERVA-AL) shows a
+    // note in place of the cue chips.
+    $('cue-chips').innerHTML = spec.cueless
+      ? `<span class="small muted">${spec.cuelessNote ?? ''}</span>`
+      : `<span class="muted">Show the update for</span>` +
       run.cues
         .map((c) => {
           const present = rec?.present.includes(c);
@@ -624,12 +637,15 @@ export function mountModelPage({
     const eqs = spec.equations(state.options);
     const list = $('eq-list');
     if (!rec) {
-      list.innerHTML = `<p class="notice">Before training, every strength V starts at 0. Press <strong>Step</strong> or click the chart to see the first trial worked through.</p>`;
-    } else if (!rec.present.includes(cue)) {
+      list.innerHTML = `<p class="notice">${spec.beforeTraining ?? 'Before training, every strength V starts at 0.'} Press <strong>Step</strong> or click the chart to see the first trial worked through.</p>`;
+    } else if (!spec.cueless && !rec.present.includes(cue)) {
       list.innerHTML = `<p class="notice">${spec.absentNote(cue, rec)}</p>`;
     } else {
       const ctx = { spec, rec, cue, present: rec.present };
+      // An equation can say it does not apply on a trial (eq.when), such as
+      // comparing the probe with traces when memory is still empty.
       list.innerHTML = eqs
+        .filter((eq) => !eq.when || eq.when(rec))
         .map((eq, i) => {
           const rows = [];
           if (state.readings.includes('words')) rows.push(reading('Words', `<div class="words">${equationWords(eq, ctx)}</div>`, 'words'));
@@ -693,7 +709,7 @@ export function mountModelPage({
         const def = spec.symbols[key];
         const symbol = def.render ? symbolHTML(spec, key, cue) : `<span class="sym role-${def.role}" data-sym="${key}">${esc(def.display ? def.display(state.options) : def.name)}</span>`;
         let value = '–';
-        if (rec && rec.present.includes(cue)) {
+        if (rec && (spec.cueless || rec.present.includes(cue))) {
           const v = def.value(rec, cue);
           if (v !== undefined) value = signed(def.exact ? fmtExact(v) : fmt(v));
         }
@@ -865,6 +881,7 @@ export function mountModelPage({
     renderEquations();
     renderArith();
     renderTimeline();
+    renderMemory();
     table.select(state.t, { scroll: scrollTable });
     saveUrl();
   }
@@ -886,7 +903,7 @@ export function mountModelPage({
         renderCards();
         if (state.stage !== null) renderBuild();
       },
-      model.realTime ? 300 : 16,
+      model.realTime || model.memory ? 300 : 16,
     );
   }
 
@@ -1024,6 +1041,15 @@ function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
       <div id="chart"></div>
       <div class="predict-feedback" id="predict-feedback" hidden></div>
     </section>
+    ${
+      model.memory
+        ? `<section class="panel spoiler" id="memory-panel">
+      <h2>Memory</h2>
+      <p class="small muted">Everything learner 1 has stored, one row per trial. Pick a trial on the chart to see memory as it was then. Compare the colours of the probe with each trace: the traces most like the probe answer most strongly.</p>
+      <div id="memory"></div>
+    </section>`
+        : ''
+    }
     ${
       model.realTime
         ? `<section class="panel spoiler" id="inside-panel">
