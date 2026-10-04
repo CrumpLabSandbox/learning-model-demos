@@ -376,4 +376,5 @@ export function mountPrimer(root) {
   }
   for (const el of root.querySelectorAll('[data-check]')) renderCheck(el, checks[el.dataset.check]);
   installHighlighting(root);
+  document.documentElement.setAttribute('data-ready', '');
 }

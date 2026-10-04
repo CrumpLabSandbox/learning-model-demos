@@ -894,6 +894,7 @@ export function mountModelPage({
     if (valid.length) state.readings = valid;
   }
   renderAll();
+  document.documentElement.setAttribute('data-ready', '');
 
   return { state };
 }

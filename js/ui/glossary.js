@@ -38,4 +38,5 @@ export function mountGlossary(root) {
     for (const e of root.querySelectorAll('.gl-target')) e.classList.remove('gl-target');
     document.getElementById(location.hash.slice(1))?.classList.add('gl-target');
   });
+  document.documentElement.setAttribute('data-ready', '');
 }

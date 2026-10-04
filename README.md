@@ -8,23 +8,30 @@ Interactive demos of associative learning models, built so students can see how 
 
 ## Run it
 
-It is a static site with no build step. Serve the folder and open it in a browser:
+The source is a static site with no build step. Serve the folder and open it in a browser:
 
 ```sh
-python3 -m http.server 8000
-# open http://localhost:8000
+python3 tools/site_tool.py serve --source
+# open http://localhost:8000/learning-model-demos/
 ```
 
-Opening `index.html` directly from disk does not work, because browsers block ES modules on `file://`.
+Any static server works, but browsers block ES modules on `file://`, so opening `index.html` directly from disk does not work.
 
-## Test it
+## Build and check it
 
 ```sh
-npm test
+pip install -r requirements-dev.txt     # Playwright, for the browser checks
+python3 tools/site_tool.py build        # the deployable site, in _site/
+python3 tools/site_tool.py serve        # build, then serve it like GitHub Pages does
+python3 tools/site_tool.py check        # build, then test every page in a real browser
 ```
 
-Tests use Node's built-in runner and import the same model files the site uses. Node 20 or later.
+The build copies the site files and stamps every script and stylesheet address with a version, so a browser never mixes a cached old file with a new one after an update. The check loads every page the way GitHub Pages serves it and writes screenshots to `_check/`.
+
+`npm test` runs the unit tests (Node 20 or later).
 
 ## Publish it
 
-The site is live at https://crumplabsandbox.github.io/learning-model-demos/. GitHub Pages deploys it from `main` (Settings, Pages, "Deploy from a branch", `main`, `/ (root)`). Every push to `main` updates it.
+Pushing to `main` builds the site, checks it in a browser, and publishes it to GitHub Pages only if every check passes. This needs Settings, Pages, Source set to **GitHub Actions**. The landing page shows the version it was built from.
+
+Every push also runs the checks in Chromium, Firefox, and WebKit (Safari's engine). Each run's screenshots and report are attached to it under Actions, as artifacts.

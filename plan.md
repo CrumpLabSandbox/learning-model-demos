@@ -277,6 +277,16 @@ Notes from building it:
 - Tests check that every link between pages, into page sections, and into the glossary resolves; that every check question has exactly one right answer with an explanation for every option; and that every deck has slides and a way back.
 - From here on, every new model ships with an overview deck, glossary entries for its new terms, and the same Essentials view.
 
+### Tooling: build, serve, and check like GitHub Pages
+
+After the scaffolding went live, the slide decks broke for some visitors. The cause was browser caching: GitHub Pages lets browsers keep files for ten minutes, so a browser could combine a new deck script with an old cached copy of a module it imports. When one ES module import fails, the whole page script stops, and all the slides showed at once with no controls.
+
+- [x] `tools/site_tool.py` (Python standard library): `build` writes `_site/` with every script and stylesheet address version-stamped and fails on broken imports or links; `serve` serves it under `/learning-model-demos/` like GitHub Pages; `check` builds, serves, and runs the browser checks
+- [x] `tools/check_site.py` (Playwright): every page at desktop and phone size, with no console errors, failed requests, unstamped assets, or sideways scrolling, plus the decks, model page, predict-first, primer, warm-up, and glossary; screenshots to `_check/`
+- [x] A load guard on every page: if a page's script never finishes starting, a reload message appears instead of a broken page
+- [x] CI runs the browser checks in Chromium, Firefox, and WebKit on every push; deploys from `main` go through GitHub Actions and only happen when the checks pass
+- [ ] Switch Settings > Pages > Source to GitHub Actions so the built, version-stamped site is what gets published
+
 ### 3. Attention models
 
 - [ ] Mackintosh, with the explicit associability rule documented on the page

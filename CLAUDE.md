@@ -4,7 +4,8 @@ Interactive browser demos of associative learning models for teaching. The plan 
 
 ## Ground rules
 
-- Static site. Plain HTML, CSS, and JavaScript ES modules. No build step, no runtime dependencies, no npm packages.
+- Static site. Plain HTML, CSS, and JavaScript ES modules, with no runtime dependencies and no npm packages. The source folders run as they are on any static server.
+- The deployed site is built by `tools/site_tool.py` (Python standard library only). The build copies the site files, stamps every script and stylesheet address with a version so browsers never mix cached old files with new ones, and fails on any broken import or link. Never hand-edit `_site/`.
 - Every model is implemented from its original paper, with the citation at the top of the model file. Any choice the paper leaves open is stated in a comment and on the page.
 - A model is not used in class until tests reproduce known analytic results or published simulations.
 - Model files contain only the math. They never touch the DOM, so Node tests import exactly the code the browser runs.
@@ -12,16 +13,27 @@ Interactive browser demos of associative learning models for teaching. The plan 
 ## Commands
 
 ```sh
-npm test                     # node --test, runs tests/*.test.js
-python3 -m http.server 8000  # then open http://localhost:8000
+npm test                               # unit tests: node --test, runs tests/*.test.js
+python3 tools/site_tool.py build       # build the deployable site into _site/
+python3 tools/site_tool.py serve       # build and serve at http://localhost:8000/learning-model-demos/
+python3 tools/site_tool.py serve --source   # serve the source folders instead, no build
+python3 tools/site_tool.py check       # build, serve, and run the browser checks (tools/check_site.py)
 ```
 
-ES modules do not load from `file://`, so always open the site through a local server.
+The browser checks need `pip install -r requirements-dev.txt` (Playwright). They load every page under the same `/learning-model-demos/` prefix GitHub Pages uses, fail on any console error, failed request, unstamped asset, or sideways scrolling on a phone, and exercise the decks, model page, predict-first, primer, warm-up, and glossary. Screenshots go to `_check/<browser>/` and a summary to `_check/report.md`. Run the checks and look at the screenshots before pushing any change to pages, styles, or scripts. Add a check to `tools/check_site.py` for every new interactive feature.
+
+ES modules do not load from `file://`, so always open the site through a server.
+
+## Publishing
+
+`.github/workflows/pages.yml` builds, checks, and deploys `_site/` to GitHub Pages on every push to `main`, and deploys nothing if a check fails. `.github/workflows/test.yml` runs the unit tests and the browser checks in Chromium, Firefox, and WebKit on every push, and uploads the screenshots and report as artifacts.
+
+Every page that runs a module loads `js/load-guard.js` first, and its mount function sets `data-ready` on `<html>` when it finishes. If it never does, the guard shows a reload message instead of a broken page.
 
 ## Layout
 
 ```
-index.html                    landing page: three entry points by background, and every unit
+index.html                    landing page: three entry points by background, every unit, and the build version
 warm-up.html                  maths warm-up for students who need basic maths support
 primer.html                   how to read the equations: widgets, checks, notation map
 glossary.html                 plain-language glossary, rendered from content/glossary.js
@@ -39,6 +51,8 @@ content/primer/               primer content: worked fixed points, check questio
 content/warmup/               warm-up check questions (each with a hint)
 content/glossary.js           every technical term: plain definition, example, links
 tests/                        node:test files
+tools/site_tool.py            build, serve under the GitHub Pages prefix, and check (Python)
+tools/check_site.py           browser checks with Playwright, run by site_tool.py check
 css/site.css                  one stylesheet; colour tokens on :root with dark-mode overrides
 ```
 

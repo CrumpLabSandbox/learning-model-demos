@@ -3,7 +3,7 @@ on:
   push:
   pull_request:
 jobs:
-  test:
+  unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -11,3 +11,26 @@ jobs:
         with:
           node-version: 22
       - run: node --test
+
+  browsers:
+    # Build the site and check it in each browser engine. WebKit is the
+    # engine behind Safari. Screenshots and a report are uploaded either way.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-dev.txt
+      - run: python -m playwright install --with-deps ${{ matrix.browser }}
+      - run: python tools/site_tool.py check --browsers ${{ matrix.browser }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: site-check-${{ matrix.browser }}
+          path: _check/
+          retention-days: 14
