@@ -6,6 +6,7 @@
 import { fmt, signed } from '../core/format.js';
 import { esc } from './equation.js';
 import { sketchPoints } from '../core/sketch.js';
+import { whenResized } from './widget-kit.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 
@@ -106,7 +107,7 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
     ev.preventDefault();
   });
 
-  new ResizeObserver(() => draw()).observe(container);
+  whenResized(container, () => draw());
 
   function update(props) {
     model = props;

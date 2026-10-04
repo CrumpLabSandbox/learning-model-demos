@@ -67,6 +67,24 @@ class Checker:
         probs = page.problems  # type: ignore[attr-defined]
         self.check(f"{label}: no errors or failed requests", not probs, "; ".join(probs[:4]))
 
+    @staticmethod
+    def too_wide(page: Page, width: int) -> str:
+        """The innermost elements that stick out past the right edge and are
+        not inside a scrolling box, so a failure says what to fix."""
+        return page.evaluate(
+            """(w) => {
+              const scrolls = (e) => { for (let a = e.parentElement; a; a = a.parentElement) {
+                const o = getComputedStyle(a).overflowX; if (o === 'auto' || o === 'scroll' || o === 'hidden') return true; } return false; };
+              // Content can stick out of its own box (text that will not wrap),
+              // so measure the content's width as well as the box.
+              const right = (e) => { const r = e.getBoundingClientRect(); return getComputedStyle(e).overflowX === 'visible' ? Math.max(r.right, r.left + e.scrollWidth) : r.right; };
+              const bad = [...document.body.querySelectorAll('*')].filter((e) => right(e) > w + 1 && !scrolls(e));
+              const inner = bad.filter((e) => !bad.some((o) => o !== e && e.contains(o)));
+              return inner.slice(0, 3).map((e) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}${e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\\s+/).join('.') : ''} "${(e.textContent || '').trim().slice(0, 40)}" ends at ${Math.round(right(e))}px`).join('; ') || 'unknown';
+            }""",
+            width,
+        )
+
     def shot(self, page: Page, name: str, full: bool = False) -> None:
         page.screenshot(path=str(self.shots / f"{name}.png"), full_page=full)
 
@@ -92,7 +110,7 @@ class Checker:
                     self.check(f"{label}: finished starting", page.evaluate("document.documentElement.hasAttribute('data-ready')"))
                 if size_name == "phone":
                     width = page.evaluate("document.documentElement.scrollWidth")
-                    self.check(f"{label}: no sideways scrolling", width <= size["width"] + 1, f"page is {width}px wide")
+                    self.check(f"{label}: no sideways scrolling", width <= size["width"] + 1, f"page is {width}px wide; too wide: {self.too_wide(page, size['width'])}")
                 self.shot(page, f"{size_name}-{path.replace('/', '-').removesuffix('.html')}", full=(size_name == "desktop"))
                 page.close()
             ctx.close()
