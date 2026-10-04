@@ -52,7 +52,7 @@ Each model page has the same parts, in the same places, so that once a student l
 | Numbers | $\Delta V_A = 0.3 \times 0.5 \times (1 - 0.45) = 0.083$ for the selected trial |
 | Code | the JavaScript line that implements it |
 
-Every symbol has a colour and a legend chip: its name, its meaning, its range, whether it is set by the experimenter (λ, which cues are present), set by the modeller (α, β), or computed by the model (V, ΣV, ΔV), and where it appears on the page. Hovering a symbol highlights the matching slider, chart line, and table column.
+Every symbol is coloured by who sets it: the experimenter (λ, which cues are present), the modeller (α, β), or the model itself (V, ΣV, ΔV). A symbol guide below the equations gives each one's name, meaning, range, role, where it appears on the page, and its value on the selected trial. Hovering a symbol highlights the matching slider, chart line, and table column.
 
 **Arithmetic view.** The selected trial's update drawn as arithmetic, not just typed: the error term as the gap between λ and ΣV on a gauge, each multiplier as a bar, and the product as the resulting step on the chart. For sums over cues, one bar per cue stacked to the total.
 
@@ -107,6 +107,8 @@ js/
     design.js              trial-design format and parser
     runner.js              runs a design through a model, returns a Run
     rng.js                 seedable random numbers
+    phenomena.js           run a phenomenon and report whether the effect appears
+    format.js              number formatting
     url-state.js           encode and decode page state in the URL
   models/
     rescorla-wagner.js     one module per model, common interface
@@ -119,17 +121,18 @@ js/
     equation.js            MathML from an equation spec, four readings, legend
     arithmetic.js          arithmetic view of one update
     table.js               trial table and CSV export
-    controls.js            sliders, toggles, step controls
-    sketch.js              predict-first sketching
+    highlight.js           hover links between symbols, sliders, lines, and columns
+    page.js                the shared model page: sliders, toggles, steps, cards
+    sketch.js              predict-first sketching (Milestone 2)
 content/
-  phenomena/*.json         design, empirical result, citation, expected pattern
-  equations/*.json         equation specs per model: symbols, colours, words, code
+  phenomena/index.js       design, empirical result, citation, live check, per-model notes
+  equations/<model>.js     equation specs per model: symbols, roles, words, table, stages
   tutorials/*.html
 tests/
   *.test.js                node --test
 ```
 
-**Design format.** A design is a list of phases. A phase is a list of trial types with counts and an order, `blocked` or `random`. A trial type is a string such as `A+`, `AB+`, or `A-`, with any number of cue letters and an optional outcome magnitude such as `A+(0.5)`. Each trial type may carry a timing profile, in moments, for the real-time model. Trial-level models ignore timing.
+**Design format.** A design is a list of phases. A phase is a list of trial types with counts and an order: `alternate` (the default, one of each type in turn), `random` (shuffled with a seed), or `blocked`. A trial type is a string such as `A+`, `AB+`, or `A-`, with any number of cue letters and an optional outcome magnitude such as `A+(0.5)`. Each trial type may carry a timing profile, in moments, for the real-time model. Trial-level models ignore timing.
 
 **Model interface.** Every model module exports the same shape:
 
@@ -143,7 +146,7 @@ tests/
 
 **Stochastic models.** MINERVA-AL runs many simulated learners with a seeded generator and the chart shows the mean and spread. Presets fix the seed so the page is reproducible.
 
-**Equation specs.** Each equation is a small JSON object: a tree of terms with a symbol, colour, words, and the key that fetches its value from the trial record. One spec drives the MathML rendering, the words reading, the numbers reading, the legend, the hover links, and the arithmetic view. The code reading points at the line in the model module.
+**Equation specs.** Each equation is a small object in a JavaScript module, so specs and presets load without a server request and run in Node tests: a tree of terms with a symbol, colour, words, and the key that fetches its value from the trial record. One spec drives the MathML rendering, the words reading, the numbers reading, the legend, the hover links, and the arithmetic view. The code reading points at the line in the model module.
 
 ## Models
 
@@ -218,17 +221,25 @@ Jamieson, Crump, and Hannah (2012). Events are feature vectors for cues and outc
 
 ### 1. Static site skeleton and Rescorla-Wagner
 
-- [ ] Repo layout above, a CLAUDE.md, GitHub Pages serving `index.html` from `main`
-- [ ] Design format and parser, tested in Node on the blocking design
-- [ ] Runner and trial record format, with Rescorla-Wagner as the first model and tests for asymptote, blocking, overshadowing, and extinction
-- [ ] SVG chart with phases and a trial scrubber
-- [ ] Parameter sliders linked to the equation by colour and hover
-- [ ] Equation spec format, MathML rendering, and the four readings
-- [ ] Arithmetic view, trial table with CSV export, and step controls
-- [ ] Build-the-equation mode and the summed-error toggle
-- [ ] Phenomenon cards for the five phenomena Rescorla-Wagner gets and the three it gets wrong
-- [ ] URL state and share link
+- [x] Repo layout above, a CLAUDE.md, and a README
+- [ ] GitHub Pages serving `index.html` from `main`: needs the Pages setting turned on once the work is merged
+- [x] Design format and parser, tested in Node on the blocking design
+- [x] Runner and trial record format, with Rescorla-Wagner as the first model and tests for asymptote, blocking, overshadowing, and extinction
+- [x] SVG chart with phases and a trial scrubber
+- [x] Parameter sliders linked to the equation by colour and hover
+- [x] Equation spec format, MathML rendering, and the four readings
+- [x] Arithmetic view, trial table with CSV export, and step controls
+- [x] Build-the-equation mode and the summed-error toggle
+- [x] Phenomenon cards for the five phenomena Rescorla-Wagner gets and the three it gets wrong, plus a salience card that build mode needs to show what α adds
+- [x] URL state and share link
 - [ ] Try the page with two or three students and fix what confuses them before adding models
+
+Notes from building it:
+
+- Symbol colours mark who sets each quantity (experimenter, modeller, or computed by the model) rather than giving every symbol its own colour. Ten distinct colours on one page would clash with the cue colours on the chart. Hover links do the per-symbol matching instead.
+- Equations render as inline MathML. Chromium does not stretch a horizontal brace without a math font, so the prediction-error bracket is drawn with CSS. Firefox and Safari still need checking.
+- Tests also check that every equation on the page evaluates to the number the model used, for every combination of assumption toggles. This keeps the displayed equations and the code from drifting apart.
+- A GitHub Actions workflow runs the tests on every push.
 
 ### 2. Reading equations primer and predict-first
 
@@ -284,7 +295,7 @@ Jamieson, Crump, and Hannah (2012). Events are feature vectors for cues and outc
 | The equation panel becomes a wall of symbols that students skip. | Default to the words reading and the arithmetic view, with symbols one click away. Test the pages with students at the end of Milestone 1. |
 | SOP's real-time structure does not fit the trial-level interface. | The runner handles moments, and the per-trial summary puts SOP on the shared chart. Build this in Milestone 4 rather than retrofitting it later. |
 | MINERVA-AL results vary from run to run and are sensitive to its parameters. | Average over many learners by default, show the spread, and fix seeds for presets. |
-| MathML renders differently across browsers. | Check the equations in Chrome, Firefox, and Safari in Milestone 1. Fall back to a vendored KaTeX file if needed, still with no build step. |
+| MathML renders differently across browsers. | Checked in Chromium in Milestone 1. Check Firefox and Safari before classroom use. Fall back to a vendored KaTeX file if needed, still with no build step. |
 | The project grows into a general modeling toolkit. | Keep to the five models and the listed phenomena until the teaching version is in use. |
 | Large designs make MINERVA-AL slow in the browser. | Cap trial counts and learners in the interface. Classroom designs are small anyway. |
 

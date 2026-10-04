@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning Model Demos</title>
+  <meta name="description" content="Interactive demos of associative learning models, from Rescorla-Wagner to MINERVA-AL, built to connect each equation to how the model behaves.">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">Learning Model Demos</a>
+    <nav aria-label="Models">
+      <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
+    </nav>
+  </header>
+  <main class="page">
+    <div class="prose">
+      <h1>Learning Model Demos</h1>
+      <p>Models of associative learning are written as equations. These demos let you run each model one trial at a time and see exactly what each equation does: which numbers go in, which come out, and which term is responsible for each thing the model predicts.</p>
+      <p>Every model page works the same way. Pick a classic experiment, step through its trials, and read each equation four ways: in words, in symbols, with the numbers from the trial you selected, and as the code that ran. Then switch off one assumption at a time and see what breaks.</p>
+    </div>
+
+    <h2 style="margin-top:1.5rem">Models</h2>
+    <ul class="model-list">
+      <li>
+        <h3><a href="models/rescorla-wagner.html">Rescorla-Wagner</a> <span class="muted">(1972)</span></h3>
+        <p class="small">Learning driven by a shared prediction error. Explains blocking, overshadowing, and conditioned inhibition, and fails on latent inhibition, backward blocking, and negative patterning.</p>
+      </li>
+      <li class="soon">
+        <h3>Mackintosh <span class="muted">(1975)</span></h3>
+        <p class="small">Attention rises for the best predictor of the outcome. Coming next.</p>
+      </li>
+      <li class="soon">
+        <h3>Pearce-Hall <span class="muted">(1980)</span></h3>
+        <p class="small">Attention follows recent surprise. Planned.</p>
+      </li>
+      <li class="soon">
+        <h3>SOP <span class="muted">(Wagner, 1981)</span></h3>
+        <p class="small">Learning moment by moment, from what is active in memory. Planned.</p>
+      </li>
+      <li class="soon">
+        <h3>MINERVA-AL <span class="muted">(Jamieson, Crump, &amp; Hannah, 2012)</span></h3>
+        <p class="small">Learning without associations: store instances, retrieve an echo. Planned.</p>
+      </li>
+    </ul>
+
+    <div class="prose small muted" style="margin-top:2rem">
+      <p>Built as a static site with no build step. Each model is tested against published results before it is used in class. Source and plan on <a href="https://github.com/CrumpLabSandbox/learning-model-demos">GitHub</a>.</p>
+    </div>
+  </main>
+</body>
+</html>

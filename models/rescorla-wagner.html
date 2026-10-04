@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rescorla-Wagner · Learning Model Demos</title>
+  <meta name="description" content="Run the Rescorla-Wagner model trial by trial and see how each term in its equation produces acquisition, blocking, overshadowing, and conditioned inhibition.">
+  <link rel="stylesheet" href="../css/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Learning Model Demos</a>
+    <nav aria-label="Models">
+      <a href="rescorla-wagner.html" aria-current="page">Rescorla-Wagner</a>
+    </nav>
+  </header>
+  <main class="page" id="app">
+    <noscript><p>This demo needs JavaScript.</p></noscript>
+  </main>
+  <script type="module">
+    import * as model from '../js/models/rescorla-wagner.js';
+    import * as spec from '../content/equations/rescorla-wagner.js';
+    import { phenomena } from '../content/phenomena/index.js';
+    import { mountModelPage } from '../js/ui/page.js';
+
+    mountModelPage({
+      root: document.getElementById('app'),
+      model,
+      spec,
+      phenomena,
+      modelSourceUrl: '../js/models/rescorla-wagner.js',
+      defaultPreset: 'blocking',
+    });
+  </script>
+</body>
+</html>

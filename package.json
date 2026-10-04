@@ -1,0 +1,10 @@
+{
+  "name": "learning-model-demos",
+  "private": true,
+  "description": "Interactive browser demos of associative learning models. Static site, no build step, no dependencies.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "serve": "python3 -m http.server 8000"
+  }
+}
