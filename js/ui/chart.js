@@ -38,7 +38,7 @@ function intTicks(n, width) {
 // A model page can add charts of other per-cue values, such as attention,
 // with source = (run) => ({ series, probes, title, floor, ceiling }).
 export function predictionSource(run) {
-  return { series: run.series, probes: run.displayProbes, title: 'Prediction', floor: run.params.lambda ?? 1 };
+  return { series: run.series, spread: run.spread, probes: run.displayProbes, title: run.predictionTitle ?? 'Prediction', floor: run.params.lambda ?? 1 };
 }
 
 export function stateSource(key, title, ceiling = 1) {
@@ -143,7 +143,8 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
     const iw = width - m.left - m.right;
     const ih = height - m.top - m.bottom;
 
-    const shown = isSketching ? [] : probes.flatMap((p) => series[p]);
+    const band = (p, sign) => series[p].map((v, i) => v + sign * (src.spread?.[p]?.[i] ?? 0));
+    const shown = isSketching ? [] : probes.flatMap((p) => (src.spread?.[p] ? [...band(p, 1), ...band(p, -1)] : series[p]));
     const sketched = sketchCues.flatMap((c) => Object.values(pr.sketches[c] ?? {}));
     const lambda = src.floor ?? 1;
     let lo = Math.min(0, ...shown, ...sketched);
@@ -224,6 +225,15 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
       prevY = ly;
       parts.push(`<text class="end-label" x="${e.x + 6}" y="${ly + 4}">${e.c}</text>`);
     }
+    // The spread across simulated learners: a band one standard deviation
+    // either side of the mean.
+    if (!isSketching && src.spread) probes.forEach((p) => {
+      if (!src.spread[p]) return;
+      const hi = band(p, 1).slice(0, upTo + 1);
+      const lo = band(p, -1).slice(0, upTo + 1);
+      const d = hi.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('') + lo.map((v, i) => `L${x(lo.length - 1 - i).toFixed(1)},${y(lo[lo.length - 1 - i]).toFixed(1)}`).join('') + 'Z';
+      parts.push(`<path class="spread" d="${d}"${p.length === 1 ? ` data-cue="${p}"` : ''} style="fill:${colorOf(p)}"/>`);
+    });
     if (!isSketching) probes.forEach((p) => {
       const s = series[p];
       const d = s.slice(0, upTo + 1).map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
@@ -301,7 +311,7 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
     const keys = probes
       .map((p) => {
         const single = p.length === 1;
-        const v = rt <= upTo ? signed(fmt(series[p][rt])) : '–';
+        const v = rt <= upTo ? signed(fmt(series[p][rt])) + (src.spread?.[p] ? ` ± ${fmt(src.spread[p][rt])}` : '') : '–';
         return `<span class="key"${single ? ` data-cue="${p}"` : ''}><span class="swatch${single ? '' : ' compound'}" style="background:${single ? cueColor(run, p) : 'var(--ink-2)'}"></span>${p}${p === run.context ? ' <span class="muted small">(context)</span>' : ''} <span class="muted">${v}</span></span>`;
       })
       .join('');

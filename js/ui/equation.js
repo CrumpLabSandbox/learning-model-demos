@@ -62,6 +62,9 @@ function scriptMathML(t) {
 export function symbolMathML(spec, key, cue) {
   const def = spec.symbols[key];
   const r = def.render;
+  // A symbol with no render, such as O|P, can give its own MathML, or is
+  // written as its display text.
+  if (!r) return `<mrow ${attrs(key, def, null)}>${def.mathml ?? `<mtext>${esc(def.display ? def.display({}) : def.name)}</mtext>`}</mrow>`;
   const pre = r.pre ? mi(r.pre) : '';
   const sub = subText(r, cue);
   const base = r.bar ? `<mover accent="true">${mi(r.base)}<mo stretchy="false">¯</mo></mover>` : mi(r.base);
@@ -114,15 +117,27 @@ function nodeMathML(node, ctx, mode, first = true) {
         '+',
       );
     }
-    case 'sumMoments': {
-      // A sum over the moments of a trial. Symbols: Σ over t, then the
-      // product at each moment. Numbers: the total the model added up.
+    case 'sumMoments':
+    case 'sumOver': {
+      // A sum over an index: moments t (sumMoments), or features j or traces
+      // i (sumOver with index). Symbols: Σ over the index, then the term.
+      // Numbers: the total the model added up, read from the record.
       if (mode === 'numbers') {
         const v = spec.symbols[node.of].value(ctx.rec, cue);
         return numberMathML(spec, node.of, cue, v, !first);
       }
       const def = spec.symbols[node.of];
-      return `<mrow class="group role-${def.role}" data-sym="${node.of}" data-cue="${cue}"><munder><mo>Σ</mo><mi>t</mi></munder>${nodeMathML(node.arg, ctx, mode, true)}</mrow>`;
+      const index = node.op === 'sumMoments' ? 't' : node.index;
+      return `<mrow class="group role-${def.role}" data-sym="${node.of}"${cueSub(def.render) || node.op === 'sumMoments' ? ` data-cue="${cue}"` : ''}><munder><mo>Σ</mo><mi>${index}</mi></munder>${nodeMathML(node.arg, ctx, mode, true)}</mrow>`;
+    }
+    case 'frac':
+      return `<mfrac><mrow>${nodeMathML(node.num, ctx, mode, true)}</mrow><mrow>${nodeMathML(node.den, ctx, mode, true)}</mrow></mfrac>`;
+    case 'sqrt':
+      return `<msqrt>${nodeMathML(node.arg, ctx, mode, true)}</msqrt>`;
+    case 'pow': {
+      const base = nodeMathML(node.arg, ctx, mode, true);
+      const wrapped = mode === 'numbers' && evaluate(node.arg, ctx) < 0 ? `<mrow><mo>(</mo>${base}<mo>)</mo></mrow>` : `<mrow>${base}</mrow>`;
+      return `<msup>${wrapped}<mrow>${nodeMathML(node.exp, ctx, mode, true)}</mrow></msup>`;
     }
     case 'neg':
       return `<mo>−</mo>${nodeMathML(node.arg, ctx, mode, true)}`;
@@ -221,7 +236,17 @@ export function evaluate(node, ctx) {
     case 'sumEach':
       return ctx.present.reduce((s, c) => s + evaluate(node.each(c), ctx), 0);
     case 'sumMoments':
+    case 'sumOver':
       return ctx.spec.symbols[node.of].value(ctx.rec, ctx.cue);
+    case 'frac':
+      return evaluate(node.num, ctx) / evaluate(node.den, ctx);
+    case 'sqrt':
+      return Math.sqrt(evaluate(node.arg, ctx));
+    case 'pow': {
+      // The sign of the base is kept, as MINERVA's activation does.
+      const b = evaluate(node.arg, ctx);
+      return Math.sign(b) * Math.abs(b) ** evaluate(node.exp, ctx);
+    }
     case 'sumOthers':
       return ctx.present.filter((c) => c !== ctx.cue).reduce((s, c) => s + ctx.spec.symbols[node.of].value(ctx.rec, c), 0);
     case 'neg':
@@ -243,6 +268,8 @@ export function symbolsUsed(eqs) {
   const visit = (n) => {
     for (const key of [n.sym, n.of, n.group]) if (key && !out.includes(key)) out.push(key);
     if (n.op === 'clamp') [n.lo, n.hi].forEach(visit);
+    if (n.op === 'frac') [n.num, n.den].forEach(visit);
+    if (n.op === 'pow') visit(n.exp);
     if (n.op === 'sumEach') visit(n.each('A'));
     if (n.arg) visit(n.arg);
     if (n.args) n.args.forEach(visit);

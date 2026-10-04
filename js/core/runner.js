@@ -12,6 +12,9 @@
 //                           timing is { cs, us, iti } in moments (see design.js);
 //                           models that work trial by trial ignore it
 //   predict(cues) -> number, the prediction for a probe, without learning
+//   summary(cues) -> { mean, sd }, optional, for a model that simulates many
+//                    learners: the mean is the prediction, and the chart
+//                    shows the spread
 //   state() -> internal values for model-specific views
 
 import { expandDesign } from './design.js';
@@ -50,7 +53,18 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
   const learner = model.init(fullParams, cues, opts, rng, extra);
 
   const labels = probeLabels(design);
-  const series = Object.fromEntries(labels.map((l) => [l, [learner.predict([...l])]]));
+  const series = Object.fromEntries(labels.map((l) => [l, []]));
+  const spread = learner.summary ? Object.fromEntries(labels.map((l) => [l, []])) : null;
+  const observe = () => {
+    for (const l of labels) {
+      if (spread) {
+        const s = learner.summary([...l]);
+        series[l].push(s.mean);
+        spread[l].push(s.sd);
+      } else series[l].push(learner.predict([...l]));
+    }
+  };
+  observe();
   const initialState = learner.state();
 
   const trials = sequence.map((entry, i) => {
@@ -60,7 +74,7 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
       magnitude: entry.type.magnitude,
       timing: entry.timing,
     });
-    for (const l of labels) series[l].push(learner.predict([...l]));
+    observe();
     return {
       index: i + 1,
       phaseIndex: entry.phaseIndex,
@@ -94,11 +108,13 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
     seed,
     trials,
     series,
+    spread,
     labels,
     displayProbes: design.probes ?? cues,
     context: design.context ?? null,
     stateSeries,
     responseKey: model.responseKey ?? null,
+    predictionTitle: model.predictionTitle ?? null,
     phases,
     initialState,
   };

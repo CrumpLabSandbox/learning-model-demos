@@ -147,7 +147,7 @@ export function renderArithmetic(el, { spec, arith, rec, cue, present, run, widt
     el.innerHTML = '<p class="notice">Select a trial to see its arithmetic.</p>';
     return;
   }
-  if (!present.includes(cue)) {
+  if (!spec.cueless && !present.includes(cue)) {
     el.innerHTML = `<p class="notice">${spec.absentNote(cue, rec)}</p>`;
     return;
   }

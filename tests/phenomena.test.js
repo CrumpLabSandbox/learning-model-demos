@@ -4,6 +4,7 @@ import * as rw from '../js/models/rescorla-wagner.js';
 import * as mk from '../js/models/mackintosh.js';
 import * as ph from '../js/models/pearce-hall.js';
 import * as sop from '../js/models/sop.js';
+import * as mal from '../js/models/minerva-al.js';
 import { phenomena } from '../content/phenomena/index.js';
 import { evaluatePhenomenon } from '../js/core/phenomena.js';
 import { parseDesign } from '../js/core/design.js';
@@ -29,6 +30,13 @@ const expected = {
     shows: [
       'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition',
       'trial-spacing', 'cs-us-interval', 'backward-conditioning', 'us-preexposure',
+    ],
+  },
+  'minerva-al': {
+    model: mal,
+    shows: [
+      'acquisition', 'extinction', 'salience', 'blocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition',
+      'backward-blocking', 'negative-patterning',
     ],
   },
 };
@@ -93,7 +101,12 @@ test('SOP build stages unlock the expected phenomena', () => {
 test('timing in a design changes nothing for the trial-by-trial models', () => {
   const plain = parseDesign('Training: 10 A+, 10 B+');
   const timed = parseDesign('Training: 10 A+ [CS 1-10, US 30-31, ITI 3], 10 B+ [US 1-2, CS 5-9]');
-  for (const model of [rw, mk, ph]) {
+  for (const model of [rw, mk, ph, mal]) {
     assert.deepEqual(runModel(model, { design: timed }).series, runModel(model, { design: plain }).series);
   }
+});
+
+test('MINERVA-AL: storing the discrepancy is what produces cue competition and retrospective revaluation', () => {
+  assert.deepEqual(shownWith(mal, { discrepancy: false }), ['acquisition', 'extinction', 'latent-inhibition', 'negative-patterning']);
+  assert.deepEqual(shownWith(mal, { discrepancy: true }), [...expected['minerva-al'].shows].sort());
 });

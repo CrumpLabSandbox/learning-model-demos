@@ -49,10 +49,13 @@ export const name = 'MINERVA-AL';
 export const year = 2012;
 export const citation =
   'Jamieson, R. K., Crump, M. J. C., & Hannah, S. D. (2012). An instance theory of associative learning. Learning & Behavior, 40, 61–82.';
-export const status = 'preview';
+// Not a preview: tests/minerva-al.test.js reproduces the paper's Tables 2,
+// 3, 5, 7, 8, 9, 10, 12, and 13 and the extinction result of Figure 1.
 // Keeps every trace: trial records point into learner 1's memory, for the
 // memory view.
 export const memory = true;
+// What the prediction chart shows for this model.
+export const predictionTitle = 'Retrieval of the outcome';
 
 export const salienceKey = (cue) => `alpha_${cue}`;
 
@@ -74,7 +77,7 @@ export function parameters(cues) {
     ps.push({ key: `alpha_${c}`, sym: 'alpha', cue: c, label: `Salience of ${c}`, min: 0.05, max: 1, step: 0.05, default: 1, role: 'modeller', active: true, advanced: true });
   }
   ps.push({ key: 'learners', sym: 'N', label: 'Simulated learners', min: 1, max: 100, step: 1, default: 25, role: 'experimenter', active: true });
-  ps.push({ key: 'F', sym: 'F', label: 'Features per stimulus', min: 4, max: 60, step: 2, default: 20, role: 'modeller', active: true, advanced: true });
+  ps.push({ key: 'F', sym: 'n', label: 'Features per stimulus', min: 4, max: 60, step: 2, default: 20, role: 'modeller', active: true, advanced: true });
   ps.push({ key: 'noise', sym: 'noise', label: 'Echo noise (largest value)', min: 0, max: 0.1, step: 0.001, default: 0.001, role: 'modeller', active: true, advanced: true });
   return ps;
 }
@@ -174,6 +177,19 @@ export function init(params, cues, opts = {}, rng, { context = null } = {}) {
   // Retrieval of X for a probe, for every learner, without storing anything.
   const retrievals = (present) => learners.map((l) => readEcho(rawEcho(l, present).sum).retrieval);
 
+  function fullNorm(v) {
+    let ss = 0;
+    for (let j = 0; j < D; j++) ss += v[j] * v[j];
+    return Math.sqrt(ss);
+  }
+
+  // The fields where a probe is not 0.
+  function probeFieldsOf(probe) {
+    const out = [];
+    for (let f = 0; f < outField; f++) if (probe[f * F] !== 0) out.push(f);
+    return out;
+  }
+
   function cueNorm(v) {
     let ss = 0;
     for (let j = 0; j < cueEnd; j++) ss += v[j] * v[j];
@@ -219,11 +235,24 @@ export function init(params, cues, opts = {}, rng, { context = null } = {}) {
       learner.norms.push(cueNorm(trace));
       all.push(retrieval);
     });
-    // The trace that answered most strongly, for the worked numbers.
+    // For the worked numbers: the trace that added the most to the echo,
+    // its activation times its length. (A faint trace can be very similar
+    // to the probe, because the cosine ignores size, yet add almost nothing.)
     let top = -1;
+    let most = -1;
     detail.acts.forEach((a, i) => {
-      if (top < 0 || Math.abs(a) > Math.abs(detail.acts[top])) top = i;
+      const added = Math.abs(a) * fullNorm(learners[0].traces[i]);
+      if (added > most) {
+        most = added;
+        top = i;
+      }
     });
+    // The worked numbers follow one feature: the first feature of the
+    // outcome field.
+    const j = outField * F;
+    const topTrace = top >= 0 ? learners[0].traces[top] : null;
+    let topDot = 0;
+    if (topTrace) for (const f of probeFieldsOf(detail.probe)) for (let q = f * F; q < (f + 1) * F; q++) topDot += detail.probe[q] * topTrace[q];
     return {
       reinforced,
       magnitude: mag,
@@ -243,16 +272,29 @@ export function init(params, cues, opts = {}, rng, { context = null } = {}) {
         topSim: top >= 0 ? detail.sims[top] : 0,
         topAct: top >= 0 ? detail.acts[top] : 0,
         topNorm: top >= 0 ? learners[0].norms[top] : 0,
+        topDot,
+        j,
+        echoRawJ: detail.echo[j] * detail.echoMax,
+        echoJ: detail.echo[j],
+        eventJ: detail.event[j],
+        discrepancyJ: o.discrepancy ? detail.event[j] - detail.echo[j] : detail.event[j],
+        outcomeSum: detail.retrieval * F,
         storedCount: detail.stored.reduce((a, b) => a + b, 0),
         traces: learners[0].traces,
       },
     };
   }
 
+  // The mean and spread over learners of retrieval of the outcome.
+  function summary(present) {
+    const xs = retrievals(present);
+    return { mean: mean(xs), sd: sd(xs) };
+  }
+
   return {
     trial,
-    predict: (present) => mean(retrievals(present)),
-    spread: (present) => sd(retrievals(present)),
+    predict: (present) => summary(present).mean,
+    summary,
     state: () => ({}),
   };
 }

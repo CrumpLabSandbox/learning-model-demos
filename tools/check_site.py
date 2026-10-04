@@ -385,11 +385,61 @@ class Checker:
         page.close()
         ctx.close()
 
+    # -- an instance model (MINERVA-AL) -----------------------------------------
+    def memory_model(self, browser) -> None:
+        ctx = browser.new_context(viewport=DESKTOP)
+        page = self.open(ctx, "models/minerva-al.html#view=everything&preset=backward-blocking&t=45")
+        self.check("minerva: no preview notice (checked against the paper)", page.query_selector(".preview-note") is None)
+        self.check("minerva: the chart shows the spread across learners", len(page.query_selector_all("#chart path.spread")) >= 2)
+        self.check("minerva: the memory view draws", page.is_visible("#memory canvas") and "traces stored before this trial" in page.text_content(".mem-head"))
+        page.locator("#memory canvas").scroll_into_view_if_needed()
+        box = page.locator("#memory canvas").bounding_box()
+        page.mouse.move(box["x"] + box["width"] * 0.3, box["y"] + box["height"] * 0.4)
+        page.wait_for_timeout(100)
+        self.check("minerva: hovering a trace reads it out", "similarity" in page.text_content(".mem-readout"))
+        self.check("minerva: six equations on a trial with memory", len(page.query_selector_all("#eq-list .eq-card")) == 6)
+        self.check("minerva: the equations are not per cue", page.query_selector("#cue-chips [data-focus]") is None)
+        page.click('[data-act="reset"]')
+        page.click('[data-act="fwd"]')
+        page.wait_for_timeout(150)
+        self.check("minerva: trial 1 skips the comparison with an empty memory", len(page.query_selector_all("#eq-list .eq-card")) == 4)
+        badge = lambda: page.text_content('.card:has(h3:text("Backward blocking")) .badge')
+        before = badge()
+        page.click('[data-opt="discrepancy"]')
+        page.wait_for_function("b => [...document.querySelectorAll('.card h3')].find(h => h.textContent.startsWith('Backward blocking')).querySelector('.badge').textContent !== b", arg=before, timeout=8000)
+        self.check("minerva: storing the event itself loses backward blocking", before != badge(), f"{before} -> {badge()}")
+        page.click('[data-opt="discrepancy"]')
+        page.click('[data-act="start"]')
+        page.wait_for_timeout(300)
+        while page.query_selector('#build [data-act="next"]'):
+            page.click('#build [data-act="next"]')
+            page.wait_for_timeout(300)
+        self.check("minerva: build reaches the full model", page.query_selector('#build [data-act="done"]') is not None)
+        page.click('#build [data-act="done"]')
+        page.eval_on_selector("#p-learners", "el => { el.value = '5'; el.dispatchEvent(new Event('input', { bubbles: true })); }")
+        page.wait_for_timeout(300)
+        self.check("minerva: the learners slider reruns the model", "5" in page.text_content("#o-learners"))
+        page.click('.card:has(h3:text("Negative patterning")) [data-predict="1"]')
+        page.wait_for_timeout(1500)
+        self.check("minerva: predicting hides the memory view", page.is_hidden("#memory-panel"))
+        page.click('[data-pact="skip"]')
+        self.shot(page, "minerva-page", full=True)
+        self.clean(page, "minerva")
+        page.close()
+        page = self.open(ctx, "models/minerva-al.html#view=essentials")
+        self.check("minerva: essentials hides the advanced sliders", page.is_hidden("#p-k") and page.is_visible("#p-L"))
+        page.close()
+        ctx.close()
+
     # -- primer, warm-up, glossary, landing -----------------------------------
     def learning_pages(self, browser) -> None:
         ctx = browser.new_context(viewport=DESKTOP)
         page = self.open(ctx, "primer.html")
-        self.check("primer: 18 sections with widgets", len(page.query_selector_all("article section")) == 18 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
+        self.check("primer: 20 sections with widgets", len(page.query_selector_all("article section")) == 20 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
+        page.click('#vectors [data-vec="B"]')
+        self.check("primer: ticking B adds its features to the event", page.eval_on_selector_all("#vectors .vec-event .vec-cell.on", "c => c.length") == 16)
+        page.click('#echo [data-ec-probe="AB"]')
+        self.check("primer: the AB probe brings back the opposite of the outcome", "opposite of the outcome" in page.text_content("#echo .ec-say"))
         self.check("primer: states section runs SOP", len(page.query_selector_all("#states .st-chart path")) == 2)
         page.eval_on_selector("#ov-us", "el => { el.value = '30'; el.dispatchEvent(new Event('input', { bubbles: true })); }")
         self.check("primer: a long gap leaves nothing to add up", "almost nothing" in page.text_content("#overlap .ov-say"))
@@ -436,7 +486,7 @@ class Checker:
         # on <math>. Make every equation far too wide and check that each one
         # scrolls inside its own box instead of widening the page.
         phone = browser.new_context(viewport=PHONE)
-        for path in ("primer.html", "models/rescorla-wagner.html#view=everything", "models/mackintosh.html#view=everything&cue=B", "models/pearce-hall.html#view=everything&preset=extinction&t=25&cue=A", "models/sop.html#view=everything&t=9", "decks/reading-equations.html#5"):
+        for path in ("primer.html", "models/rescorla-wagner.html#view=everything", "models/mackintosh.html#view=everything&cue=B", "models/pearce-hall.html#view=everything&preset=extinction&t=25&cue=A", "models/sop.html#view=everything&t=9", "models/minerva-al.html#view=everything&t=30", "decks/reading-equations.html#5"):
             pg = self.open(phone, path)
             pg.add_style_tag(content="math { font-size: 2.4rem !important; max-width: none !important; overflow: visible !important; }")
             pg.wait_for_timeout(200)
@@ -449,7 +499,7 @@ class Checker:
         if self.built:
             page.wait_for_timeout(300)
             self.check("landing: shows the build version", "Site version" in page.text_content("#build-info"))
-        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8 and page.query_selector('.units a[href="models/sop.html#view=essentials"]') is not None)
+        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8 and page.query_selector('.units a[href="models/minerva-al.html#view=essentials"]') is not None and not page.query_selector_all(".units tr.soon"))
         page.close()
         ctx.close()
 
@@ -464,7 +514,7 @@ def run_checks(directory: Path, browsers: list[str]) -> bool:
                 print(f"\n== {name} ({'built site' if built else 'source'}, {base}) ==")
                 browser = getattr(pw, name).launch()
                 c = Checker(base, name, built)
-                for section in (c.pages, c.decks, c.model, c.attention_models, c.real_time_model, c.learning_pages):
+                for section in (c.pages, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.learning_pages):
                     print(f"- {section.__name__}")
                     c.run(section.__name__, section, browser)
                 browser.close()

@@ -636,3 +636,25 @@ math .case-cond { font-size: 0.8em; color: var(--muted); }
 .pill { display: inline-block; padding: 0.05em 0.6em; border-radius: 999px; font-weight: 600; font-size: 0.9em; }
 .pill.gain { background: color-mix(in srgb, var(--good) 22%, transparent); color: var(--good); }
 .pill.loss { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+
+/* Spread across simulated learners (MINERVA-AL): ±1 SD around the mean. */
+.chart .spread { opacity: 0.14; stroke: none; }
+.chart .spread.linked { opacity: 0.3; }
+
+/* Memory view (MINERVA-AL). */
+.mem-wrap { overflow: hidden; }
+.mem-canvas { display: block; touch-action: pan-y; }
+.mem-key { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; }
+.mem-key .key { display: inline-flex; align-items: center; gap: 0.35rem; }
+.mem-swatch { display: inline-block; width: 14px; height: 10px; border-radius: 2px; border: 1px solid var(--border); }
+.mem-readout { min-height: 1.5em; font-variant-numeric: tabular-nums; }
+
+/* Primer: events as vectors (MINERVA-AL). */
+.vec-row { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; margin: 0.25rem 0 0.6rem; }
+.vec-field { display: flex; flex-direction: column; gap: 0.15rem; }
+.vec-name { font-size: 0.75rem; color: var(--muted); }
+.vec-cells { display: inline-flex; gap: 2px; }
+.vec-cell { display: inline-flex; align-items: center; justify-content: center; min-width: 2rem; height: 1.6rem; padding: 0 0.15rem; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--border); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.vec-cell.on { background: var(--accent); color: #fff; border-color: transparent; }
+.vec-cell.neg { background: var(--bad); color: #fff; border-color: transparent; }
+.toggle-inline { display: inline-flex; gap: 0.3rem; align-items: center; margin-right: 0.6rem; }

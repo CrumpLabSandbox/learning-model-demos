@@ -57,6 +57,10 @@ export const phenomena = [
         why: "On the first trial the US arrives with all its elements inactive, so they go to A1 at the same moments as A's: a big overlap and a big gain. As V_A grows, A calls up the US into A2 before it arrives. Those elements cannot go to A1, so there is less to gain and more to lose. Learning levels off where the gain and the loss balance.",
         tryThis: "Step to trial 1, then trial 30, and compare the green and red areas in Inside the trial. Then switch off 'Associative activation': nothing calls up the US, and V climbs in a straight line.",
       },
+      'minerva-al': {
+        why: "On trial 1 memory is empty, so the echo is noise and the whole event is stored. On each later trial A brings back the earlier traces of A with the outcome, so the echo holds more of the outcome. As the outcome becomes expected, less of it is new, and each new trace is fainter. Retrieval rises fast and levels off near 1.",
+        tryThis: "Open the memory view and step through the first trials: the first traces are bright, the later ones pale, because less was surprising. Then lower the learning rate L and watch the curve rise more slowly.",
+      },
     },
   },
   {
@@ -89,6 +93,10 @@ export const phenomena = [
       sop: {
         why: "On A− trials no US arrives, so nothing is in A1 alongside A and there is no gain. But A still calls up the US into A2 while A itself is in A1, so A loses strength. Once A no longer calls up the US, the loss stops, so V settles near 0.",
         tryThis: "Step to trial 21 and look at the dashed US line in Inside the trial: the US is called up although it never arrives. Then switch off 'Inhibitory learning': extinction cannot happen.",
+      },
+      'minerva-al': {
+        why: "On A− trials A brings back the outcome, but it does not come, so each trial stores A together with the opposite of the outcome. Later, A brings back both kinds of trace, and the outcome and its opposite cancel in the echo. Nothing is erased: the old traces are all still in memory.",
+        tryThis: "Step to trial 25 and look at the memory view: the new trace's outcome features are red (negative). Then compare with Rescorla-Wagner, where extinction erases the strength.",
       },
     },
   },
@@ -129,6 +137,10 @@ export const phenomena = [
         why: "A's salience p1 is higher, so its elements reach A1 sooner and A calls up the US sooner: the chart of what each cue calls up shows A ahead. The V lines tell a different story. A faint cue needs a bigger V to call up the US as strongly, so B's V ends higher. That is why the check reads what each cue calls up.",
         tryThis: "Compare the prediction chart with the chart of what each cue calls up. Then set the two saliences equal and the lines become one.",
       },
+      'minerva-al': {
+        why: "Salience multiplies a cue's features. B's features are only 0.1, so the probe for B is mostly the context, and B's traces stand out less from the rest of memory. B's retrieval rises more slowly. Both end near 1.",
+        tryThis: "Set the two saliences equal (Everything view) and the lines become one.",
+      },
     },
   },
   {
@@ -162,6 +174,10 @@ export const phenomena = [
       sop: {
         why: "By the compound trials A calls up the US into A2 before it arrives, so few US elements are left to be felt in A1 with B: B gains little. And B is in A1 while the US is in A2, so B also loses. The gain and the loss nearly cancel. This is blocking without any shared error term. D's partner C is new, so the US is felt in full and D gains.",
         tryThis: "Step to trial 21, focus on B, and open Inside the trial: the green and red areas are about the same size. Then look at D on trial 22.",
+      },
+      'minerva-al': {
+        why: "By the compound trials A already brings back the outcome. The most surprising thing on an AB trial is B, so each trace stores B strongly and the outcome only weakly. B later brings back those traces, and with them little outcome. D's partner C was new, so the CD traces hold more outcome.",
+        tryThis: "Switch off 'Store the discrepancy': each trial stores the whole event, expected or not, and blocking disappears.",
       },
     },
   },
@@ -201,6 +217,10 @@ export const phenomena = [
         why: "AB+(2) doubles the US intensity, so its elements reach A1 faster than A can call them up into A2. More of the US is felt in A1 at the same moments as B, so B gains. With the same US as before, A calls up enough of it to block D.",
         tryThis: "Change AB+(2) to AB+ in the design, and B is blocked like D.",
       },
+      'minerva-al': {
+        why: "The AB+(2) trials store an outcome of size 2. D's probe matches those traces through the context they share, and their large outcome features come back in D's echo too. So D is not blocked in this design, and there is nothing for B to be unblocked from. With AB+ in place of AB+(2), B and D are both blocked.",
+        tryThis: "Change AB+(2) to AB+ in the design: B and D both end near 0.4. The paper does not simulate unblocking.",
+      },
     },
   },
   {
@@ -235,6 +255,10 @@ export const phenomena = [
         why: "A and B both call up the US, so together they reach the point where gain and loss balance sooner than C does alone. Each ends with only part of the strength C gets.",
         tryThis: "Raise A's salience. B gets a smaller share.",
       },
+      'minerva-al': {
+        why: "Every trace that holds B also holds A, so a probe with B alone only partly matches them, and they answer more weakly (similarity about 0.8, cubed about 0.5). The outcome comes back less clearly for B than for C, whose traces match its probe fully. The paper's Table 8 shows the same.",
+        tryThis: "Lower A's salience (Everything view): A's features become fainter in the traces, B's probe matches them better, and the overshadowing of B shrinks.",
+      },
     },
   },
   {
@@ -267,6 +291,10 @@ export const phenomena = [
       sop: {
         why: "On AX− trials A calls up the US into A2. X is in A1 at the same moments, while the US is in A2, so X loses strength and goes below zero. The loss stops once X's negative link cancels A's, so that together they no longer call up the US.",
         tryThis: "Switch off 'Inhibitory learning' and X never moves. SOP needs a US in A2 to make an inhibitor.",
+      },
+      'minerva-al': {
+        why: "A brings back the outcome on AX− trials, but it does not come, so each AX trace stores A, X, and the opposite of the outcome. X brings back those traces, and with them the opposite of the outcome: retrieval goes below zero. The paper's Table 2 shows the same.",
+        tryThis: "Switch off 'Store the discrepancy': the AX traces then hold no outcome at all, rather than its opposite, and X does not go below zero.",
       },
     },
   },
@@ -309,6 +337,10 @@ export const phenomena = [
         why: "During pre-exposure the context Z and A are both in A1, so Z gains a link to A. When conditioning starts, Z calls up A into A2 before A appears. Those elements cannot go to A1, so A is less active than B and learns more slowly. The context primes A, and a primed cue is learned about slowly.",
         tryThis: "Compare A's solid line on trial 31 with B's on trial 32 in Inside the trial. Then switch off 'Cues link to each other': Z cannot call up A, and the effect disappears.",
       },
+      'minerva-al': {
+        why: "Each pre-exposure trial leaves a trace of A with nothing after it. During conditioning A brings back those traces too, and they water down the outcome in the echo, so A's retrieval rises more slowly than B's, which has no such traces. The paper calls this proactive interference.",
+        tryThis: "Step to the first conditioning trial with A and look at the memory view: the pre-exposure traces light up in the similarity bars. Then lower L and watch the effect grow, as in the paper's Table 6.",
+      },
     },
   },
   {
@@ -342,6 +374,10 @@ export const phenomena = [
       sop: {
         why: "B is absent in the second phase, so B's elements are never in A1, and B learns nothing. Learning in SOP needs the cue itself to be in A1.",
         tryThis: "Dickinson and Burke (1996) changed SOP so that a cue called up into A2 can also learn, which gives backward blocking. That version is not on this page.",
+      },
+      'minerva-al': {
+        why: "In the second phase A brings back B from the AB traces, but B is not there, so each A trace stores the opposite of B. Later, B's probe matches those traces negatively. Cubing keeps the sign, so they count against B's echo, taking away some of the outcome that the AB traces brought back. B ends below D.",
+        tryThis: "Look at the memory view after the second phase: the A traces have red (negative) features in B's field. Then switch off 'Store the discrepancy' and backward blocking disappears.",
       },
     },
   },
@@ -381,6 +417,10 @@ export const phenomena = [
         why: "The prediction for AB is V_A + V_B: SOP adds up its cues' links, as Rescorla-Wagner does, so the compound always calls up more of the US than either part.",
         tryThis: "Try any settings. Later versions of SOP let a compound activate elements of its own, so that AB is more than A plus B. They are not on this page.",
       },
+      'minerva-al': {
+        why: "A, B, and AB each bring back the traces most like them, and cubing makes close matches count far more than loose ones. AB brings back mostly the AB− traces, which hold the opposite of the outcome; A brings back mostly the A+ traces. The compound is remembered as its own pattern, not as A plus B.",
+        tryThis: "Step to an AB− trial late in training and look at the memory view: the AB traces have the longest activation bars. Even with the similarity exponent at 1 (Everything view), AB is still told apart from A and B, because each compound is stored as its own pattern.",
+      },
     },
   },
   {
@@ -414,6 +454,10 @@ export const phenomena = [
       sop: {
         why: "With only 5 moments between B's trials, the last US is still in A2 when the next trial starts, and so are B's own elements. Fewer US elements can go to A1, so B gains less; the lingering US in A2 costs B some strength; and B itself is less active. With 200 moments between A's trials, everything has faded back to inactive.",
         tryThis: "Step to trial 12 and open Inside the trial: the dashed lines start high. Then raise 'Decay from A2' (Everything view): A2 fades within the short gap, and the massed trials catch up.",
+      },
+      'minerva-al': {
+        why: "MINERVA-AL stores each trial as one event, with no time inside it or between trials, so the timing in square brackets makes no difference. The paper notes that the model cannot model timing.",
+        tryThis: "Compare with SOP, the one model here where time matters.",
       },
     },
   },
@@ -449,6 +493,10 @@ export const phenomena = [
         why: "A's elements are still in A1 when the US arrives, so they overlap the US in A1. B ends 20 moments before the US. By then B's elements have decayed to A2, so there is almost no overlap and almost no learning.",
         tryThis: "Edit the design to bring B's US closer, such as US 15-16, and watch B's line rise.",
       },
+      'minerva-al': {
+        why: "Each trial is one event, so a gap between the cue and the outcome cannot matter: they are stored in the same trace either way.",
+        tryThis: "Compare with SOP, where the cue fades before a late outcome arrives.",
+      },
     },
   },
   {
@@ -483,6 +531,10 @@ export const phenomena = [
         why: "On A's trials the US comes first. By the time A appears, most US elements have left A1 for A2. A is in A1 while the US is in A2, so on every trial the loss beats the gain, and A becomes an inhibitor.",
         tryThis: "Edit the design so that A starts sooner after the US, such as CS 4-13. The US is still in A1 when A appears, and A gains strength instead: timing decides whether a backward cue excites or inhibits.",
       },
+      'minerva-al': {
+        why: "Each trial is one event, so the order of the cue and the outcome inside a trial is lost: a backward pairing is stored like an ordinary A+ trial.",
+        tryThis: "Compare with SOP, where the order matters.",
+      },
     },
   },
   {
@@ -516,6 +568,10 @@ export const phenomena = [
       sop: {
         why: "On the outcome-alone trials the context Z is in A1 at the same moments as the US, so Z gains a link to it. Z is always there, so during conditioning it keeps calling up the US into A2. When B's US arrives, fewer of its elements can go to A1: B gains less and loses more.",
         tryThis: "Watch Z's line on the prediction chart during the outcome-alone trials. Then switch off 'Associative activation': Z can no longer call up the US, and the effect disappears.",
+      },
+      'minerva-al': {
+        why: "The outcome-alone trials store the context with the outcome. B's probe includes the context, so it matches those traces partly, and they help B bring back the outcome rather than hinder it. B learns no more slowly than A did.",
+        tryThis: "Compare with Rescorla-Wagner, where the context gains strength and blocks B.",
       },
     },
   },
