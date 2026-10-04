@@ -316,6 +316,19 @@ class Checker:
         self.check("glossary: search filters", "prediction-error" in shown and len(shown) < 8, ",".join(shown))
         page.close()
 
+        # Safari draws equations wider than Chromium and ignores width limits
+        # on <math>. Make every equation far too wide and check that each one
+        # scrolls inside its own box instead of widening the page.
+        phone = browser.new_context(viewport=PHONE)
+        for path in ("primer.html", "models/rescorla-wagner.html#view=everything", "decks/reading-equations.html#5"):
+            pg = self.open(phone, path)
+            pg.add_style_tag(content="math { font-size: 2.4rem !important; max-width: none !important; overflow: visible !important; }")
+            pg.wait_for_timeout(200)
+            width = pg.evaluate("document.documentElement.scrollWidth")
+            self.check(f"{path}: oversized equations stay inside the page", width <= PHONE["width"] + 1, f"page is {width}px wide; too wide: {self.too_wide(pg, PHONE['width'])}")
+            pg.close()
+        phone.close()
+
         page = self.open(ctx, "index.html")
         if self.built:
             page.wait_for_timeout(300)

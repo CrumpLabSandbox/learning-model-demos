@@ -576,3 +576,6 @@ a.btn { display: inline-block; text-decoration: none; color: inherit; }
 a.btn.primary { color: #fff; }
 .table-scroll { overflow-x: auto; max-width: 100%; }
 .load-warning { position: sticky; top: 0; z-index: 20; background: var(--hl); border-bottom: 2px solid var(--hl-ring); padding: 0.75rem 16px; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+/* Safari ignores max-width and overflow on <math> itself, so a long
+   equation must scroll inside its container instead of widening the page. */
+div:has(> math), .fx-math, .big-math, .build-math { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
