@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why blocking happens, five ways · Learning Model Demos</title>
+  <meta name="description" content="One finding, five explanations: how each learning model on this site produces blocking, and which part of each model does it.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">Learning Model Demos</a>
+    <nav aria-label="Pages">
+      <a href="../index.html#start">Start here</a>
+      <a href="../warm-up.html">Maths warm-up</a>
+      <a href="../primer.html">Reading the equations</a>
+      <a href="../models/rescorla-wagner.html">Rescorla-Wagner</a>
+      <a href="../models/mackintosh.html">Mackintosh</a>
+      <a href="../models/pearce-hall.html">Pearce-Hall</a>
+      <a href="../models/sop.html">SOP</a>
+      <a href="../models/minerva-al.html">MINERVA-AL</a>
+      <a href="../compare.html">Compare</a>
+      <a href="../index.html#tutorials" aria-current="page">Tutorials</a>
+      <a href="../glossary.html">Glossary</a>
+    </nav>
+  </header>
+  <main class="page">
+    <article class="prose tutorial" id="tutorial">
+      <p class="kicker">Tutorial · about 15 minutes</p>
+
+      <h1>Why blocking happens, five ways</h1>
+      <p class="lede">Blocking is one of the most famous findings in learning. Every model on this site produces it, but each for a different reason. Seeing the five reasons side by side is a good way to see what each model is really claiming.</p>
+
+      <h2>The finding</h2>
+      <p>Kamin (1969) first trained rats with a noise, A, followed by a mild shock. Then he trained a compound of the noise and a light, AB, followed by the same shock. A comparison cue, D, was trained with a new partner, C. Here is the design, in this site's notation:</p>
+      <div class="design-text">Pretraining: 20 A+
+Compound: 20 AB+, 20 CD+</div>
+      <div data-check="blockingPredict"></div>
+      <p>The rats learned little about B. A <a href="../glossary.html#blocking">blocked</a> it. Here is what the five models say, run just now:</p>
+      <div data-verdicts="blocking"></div>
+
+      <h2><span class="step-no-big">1</span>Rescorla-Wagner: a shared error</h2>
+      <figure data-mini data-model="rescorla-wagner" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="Rescorla-Wagner: B (with the pretrained A) and D (with a new cue C)."></figure>
+      <p>All the cues present share one <a href="../glossary.html#prediction-error">prediction error</a>, λ − ΣV. By the compound trials A already predicts the outcome, so ΣV is close to λ and the error is close to zero. B learns from that same tiny error. <strong>The term that blocks B is ΣV.</strong></p>
+      <p class="small"><a href="../models/rescorla-wagner.html#preset=blocking">Try it</a>: switch off "Summed error" and blocking disappears.</p>
+
+      <h2><span class="step-no-big">2</span>Mackintosh: attention moves to the better predictor</h2>
+      <figure data-mini data-model="mackintosh" data-series="alpha" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="Mackintosh: attention to B and to D."></figure>
+      <p>Each cue learns from its own error, so B is not blocked by sharing A's error. Instead, A predicts the outcome better than B does, so <a href="../glossary.html#attention">attention</a> to B falls, and with little attention B learns little. D's partner C is new too, so D keeps its attention. <strong>The term that blocks B is attention, α.</strong></p>
+      <p class="small"><a href="../models/mackintosh.html#preset=blocking">Try it</a>: switch off "Attention changes".</p>
+
+      <h2><span class="step-no-big">3</span>Pearce-Hall: no surprise, no attention</h2>
+      <figure data-mini data-model="pearce-hall" data-series="alpha" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="Pearce-Hall: attention to B and to D."></figure>
+      <p>Pearce and Hall make the opposite claim about attention: we attend to cues whose consequences are still uncertain. On the first compound trial B is new and learns. But A already predicts the outcome, so there is no surprise, and attention to B collapses. <strong>Blocking comes from attention again, for the opposite reason.</strong></p>
+
+      <h2><span class="step-no-big">4</span>SOP: the gain and the loss cancel</h2>
+      <figure data-mini data-model="sop" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-trial="21" data-cue="B" data-caption="SOP, inside trial 21 (the first AB trial), following B: the green gain and the red loss have different shapes but about the same area."></figure>
+      <p>In SOP a cue gains strength when it and the US are both in primary activity (A1), and loses strength when it is active while the US is in secondary activity (A2). A trained A calls the US up into A2 before it arrives, so little of the US reaches A1: B gains little and loses about as much. <strong>Blocking comes from timing in memory, with no error term at all.</strong></p>
+
+      <h2><span class="step-no-big">5</span>MINERVA-AL: store only the surprise</h2>
+      <figure data-mini data-model="minerva-al" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="MINERVA-AL: retrieval of the outcome given B and given D, averaged over 25 simulated learners. Both start above zero before their own trials, because their probes share the context with every trace."></figure>
+      <p>MINERVA-AL has no strengths. Each trial is stored as a <a href="../glossary.html#trace">trace</a>: what happened minus what memory expected. On AB trials A already brings back the outcome, so each trace stores B strongly and the outcome only faintly. Later, B brings back those faint traces. <strong>Blocking comes from <a href="../glossary.html#discrepancy-encoding">discrepancy encoding</a>.</strong></p>
+      <figure data-mini data-model="minerva-al" data-options="discrepancy:0" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="The same model storing every event as it is (MINERVA 2): no blocking."></figure>
+
+      <h2>Five answers to one question</h2>
+      <div class="table-scroll"><table class="symbol-guide small">
+        <thead><tr><th class="left">Model</th><th class="left">Why B learns little</th><th class="left">The part that does it</th></tr></thead>
+        <tbody>
+          <tr><td>Rescorla-Wagner</td><td>B shares A's error, which is already near zero</td><td>ΣV, the summed prediction</td></tr>
+          <tr><td>Mackintosh</td><td>B predicts worse than A, so B loses attention</td><td>α, attention to the best predictor</td></tr>
+          <tr><td>Pearce-Hall</td><td>Nothing is surprising, so B loses attention</td><td>α, attention to the uncertain</td></tr>
+          <tr><td>SOP</td><td>The US is already in A2, so gain and loss cancel</td><td>retrieval into A2</td></tr>
+          <tr><td>MINERVA-AL</td><td>An expected outcome is stored faintly</td><td>discrepancy encoding</td></tr>
+        </tbody>
+      </table></div>
+      <p>The models agree on blocking but disagree about other experiments. Unblocking, latent inhibition, and backward blocking pull them apart: see the <a href="../index.html#phenomena">table on the start page</a>.</p>
+      <div data-check="blockingWho"></div>
+      <p class="small muted">Next: <a href="../index.html#tutorials">all tutorials</a> · <a href="../compare.html">compare the models</a> · <a href="../glossary.html">glossary</a></p>
+    </article>
+  </main>
+  <script type="module">
+    import { mountTutorial } from '../js/ui/tutorial.js';
+    mountTutorial(document.getElementById('tutorial'));
+  </script>
+</body>
+</html>

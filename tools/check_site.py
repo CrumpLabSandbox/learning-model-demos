@@ -98,7 +98,7 @@ class Checker:
     # -- every page ----------------------------------------------------------
     def pages(self, browser) -> None:
         pages = sorted(p.relative_to(ROOT).as_posix() for p in ROOT.glob("*.html")) + sorted(
-            f"{d}/{p.name}" for d in ("decks", "models") for p in (ROOT / d).glob("*.html")
+            f"{d}/{p.name}" for d in ("decks", "models", "tutorials") for p in (ROOT / d).glob("*.html")
         )
         for size_name, size in (("desktop", DESKTOP), ("phone", PHONE)):
             ctx = browser.new_context(viewport=size)
@@ -431,6 +431,60 @@ class Checker:
         page.close()
         ctx.close()
 
+    # -- comparison page and tutorials -----------------------------------------
+    def comparison(self, browser) -> None:
+        ctx = browser.new_context(viewport=DESKTOP)
+        page = self.open(ctx, "compare.html#preset=blocking", wait=900)
+        cards = page.query_selector_all(".cmp-card")
+        self.check("compare: one panel per model", len(cards) == 5, f"{len(cards)} panels")
+        self.check("compare: every panel draws its lines", all(c.query_selector("path.series") for c in cards))
+        self.check("compare: every panel has a verdict", len(page.query_selector_all(".cmp-card .badge")) == 5)
+        page.click('#cmp-stepper [data-act="start"]')
+        page.click('#cmp-stepper [data-act="fwd"]')
+        page.wait_for_timeout(150)
+        self.check("compare: one stepper moves every chart", "Trial 1 of 60" in page.text_content("#cmp-label") and all("Trial 1" in r.text_content() for r in page.query_selector_all(".cmp-card .chart-readout")))
+        page.locator("#cmp-chart-2 svg").scroll_into_view_if_needed()
+        box = page.locator("#cmp-chart-2 svg").bounding_box()
+        page.mouse.click(box["x"] + box["width"] * 0.55, box["y"] + box["height"] / 2)
+        page.wait_for_timeout(150)
+        texts = [r.text_content().split("·")[0] for r in page.query_selector_all(".cmp-card .chart-readout")]
+        self.check("compare: clicking one chart moves them all", len(set(texts)) == 1 and "Trial 1 " not in texts[0], "; ".join(texts))
+        page.click('[data-model="sop"]')
+        page.wait_for_timeout(300)
+        self.check("compare: unticking a model removes its panel", len(page.query_selector_all(".cmp-card")) == 4)
+        page.select_option("#cmp-preset", "negative-patterning")
+        page.wait_for_timeout(600)
+        self.check("compare: only MINERVA-AL shows negative patterning", page.text_content('[data-model-card="minerva-al"] .badge').strip().startswith("✓") and page.text_content('[data-model-card="rescorla-wagner"] .badge').strip().startswith("✗"))
+        page.click(".cmp-own summary")
+        page.fill("#cmp-design", "Training: 10 A+, 10 B-")
+        page.wait_for_timeout(800)
+        self.check("compare: a custom design runs without verdicts", len(page.query_selector_all(".cmp-card")) == 4 and not page.query_selector_all(".cmp-card .badge") and page.text_content("#cmp-error") == "")
+        self.shot(page, "compare-page", full=True)
+        self.clean(page, "compare")
+        page.close()
+
+        for path in sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "tutorials").glob("*.html")):
+            page = self.open(ctx, path, wait=1200)
+            name = path.split("/")[-1].removesuffix(".html")
+            figs = len(page.query_selector_all("figure[data-mini]"))
+            drawn = len(page.query_selector_all("figure[data-mini] svg"))
+            self.check(f"{name}: every chart draws", figs > 0 and drawn == figs, f"{drawn} of {figs}")
+            strips = page.query_selector_all("[data-verdicts]")
+            self.check(f"{name}: every verdict strip covers five models", all(len(s.query_selector_all(".verdict")) == 5 for s in strips))
+            first = page.query_selector("[data-check] [data-opt='0']")
+            if first:
+                first.click()
+                self.check(f"{name}: a check question answers", "Yes" in page.text_content("[data-check] .check-why"))
+            self.clean(page, name)
+            page.close()
+
+        page = self.open(ctx, "index.html")
+        rows = page.query_selector_all(".matrix tbody tr")
+        self.check("landing: the phenomenon table covers every phenomenon and model", len(rows) == 14 and all(len(r.query_selector_all("td")) == 5 for r in rows))
+        self.check("landing: four tutorials", len(page.query_selector_all("#tutorials .entry-card")) == 4)
+        page.close()
+        ctx.close()
+
     # -- primer, warm-up, glossary, landing -----------------------------------
     def learning_pages(self, browser) -> None:
         ctx = browser.new_context(viewport=DESKTOP)
@@ -499,7 +553,7 @@ class Checker:
         if self.built:
             page.wait_for_timeout(300)
             self.check("landing: shows the build version", "Site version" in page.text_content("#build-info"))
-        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8 and page.query_selector('.units a[href="models/minerva-al.html#view=essentials"]') is not None and not page.query_selector_all(".units tr.soon"))
+        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-cards .entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8 and page.query_selector('.units a[href="models/minerva-al.html#view=essentials"]') is not None and not page.query_selector_all(".units tr.soon"))
         page.close()
         ctx.close()
 
@@ -514,7 +568,7 @@ def run_checks(directory: Path, browsers: list[str]) -> bool:
                 print(f"\n== {name} ({'built site' if built else 'source'}, {base}) ==")
                 browser = getattr(pw, name).launch()
                 c = Checker(base, name, built)
-                for section in (c.pages, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.learning_pages):
+                for section in (c.pages, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.comparison, c.learning_pages):
                     print(f"- {section.__name__}")
                     c.run(section.__name__, section, browser)
                 browser.close()

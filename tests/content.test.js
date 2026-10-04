@@ -12,9 +12,13 @@ import * as mkSpec from '../content/equations/mackintosh.js';
 import * as phSpec from '../content/equations/pearce-hall.js';
 import * as sopSpec from '../content/equations/sop.js';
 import * as malSpec from '../content/equations/minerva-al.js';
+import { checks as tutorialChecks } from '../content/tutorials/checks.js';
+import { phenomena } from '../content/phenomena/index.js';
+import { MODELS } from '../js/core/registry.js';
 
 const root = new URL('..', import.meta.url).pathname;
-const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'models/rescorla-wagner.html', ...readdirSync(join(root, 'decks')).map((f) => `decks/${f}`)];
+const inDir = (d) => readdirSync(join(root, d)).filter((f) => f.endsWith('.html')).map((f) => `${d}/${f}`);
+const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'compare.html', ...inDir('models'), ...inDir('decks'), ...inDir('tutorials')];
 const read = (p) => readFileSync(join(root, p), 'utf8');
 const ids = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
 
@@ -76,7 +80,7 @@ test('every model page has an overview deck and a row in the units table', () =>
 });
 
 test('every check question has exactly one right answer and explains every option', () => {
-  for (const [name, c] of Object.entries({ ...warmupChecks, ...primerChecks })) {
+  for (const [name, c] of Object.entries({ ...warmupChecks, ...primerChecks, ...tutorialChecks })) {
     assert.equal(c.options.filter((o) => o.correct).length, 1, name);
     for (const o of c.options) assert.ok(o.why.length > 15, `${name}: ${o.text}`);
   }
@@ -97,4 +101,22 @@ test('every deck has slides, titles, and a way back', () => {
     assert.ok(slides.length >= 5, `${page} has ${slides.length} slides`);
     assert.match(html, /data-back="[^"]+"/);
   }
+});
+
+test('tutorials use only checks, phenomena, and models that exist', () => {
+  const modelIds = new Set(MODELS.map((m) => m.id));
+  for (const page of inDir('tutorials')) {
+    const html = read(page);
+    for (const m of html.matchAll(/data-check="(\w+)"/g)) assert.ok(tutorialChecks[m[1]], `${page}: check ${m[1]}`);
+    for (const m of html.matchAll(/data-verdicts="([a-z-]+)"/g)) assert.ok(phenomena.some((p) => p.id === m[1]), `${page}: phenomenon ${m[1]}`);
+    for (const m of html.matchAll(/data-model="([a-z-]+)"/g)) assert.ok(modelIds.has(m[1]), `${page}: model ${m[1]}`);
+    assert.ok(read('index.html').includes(`href="${page}"`), `the landing page lists ${page}`);
+  }
+});
+
+test('every page carries the same navigation', () => {
+  const labels = (html) => [...(html.match(/<nav aria-label="Pages">([\s\S]*?)<\/nav>/)?.[1] ?? '').matchAll(/>([^<]+)<\/a>/g)].map((m) => m[1]);
+  const want = labels(read('index.html'));
+  assert.ok(want.length >= 10);
+  for (const page of pages.filter((p) => !p.startsWith('decks/'))) assert.deepEqual(labels(read(page)), want, page);
 });

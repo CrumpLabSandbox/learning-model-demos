@@ -18,6 +18,7 @@ python3 tools/site_tool.py build       # build the deployable site into _site/
 python3 tools/site_tool.py serve       # build and serve at http://localhost:8000/learning-model-demos/
 python3 tools/site_tool.py serve --source   # serve the source folders instead, no build
 python3 tools/site_tool.py check       # build, serve, and run the browser checks (tools/check_site.py)
+node tools/matrix.mjs                  # rewrite the phenomenon table on the landing page after changing a model or phenomenon
 ```
 
 The browser checks need `pip install -r requirements-dev.txt` (Playwright). They load every page under the same `/learning-model-demos/` prefix GitHub Pages uses, fail on any console error, failed request, unstamped asset, or sideways scrolling on a phone, and exercise the decks, model page, predict-first, primer, warm-up, and glossary. Screenshots go to `_check/<browser>/` and a summary to `_check/report.md`. Run the checks and look at the screenshots before pushing any change to pages, styles, or scripts. Add a check to `tools/check_site.py` for every new interactive feature.
@@ -33,13 +34,16 @@ Every page that runs a module loads `js/load-guard.js` first, and its mount func
 ## Layout
 
 ```
-index.html                    landing page: three entry points by background, every unit, and the build version
+index.html                    landing page: entry points, every unit, the phenomenon table, tutorials, and the build version
+compare.html                  one design through several models, as small multiples (js/ui/compare.js)
+tutorials/<name>.html         guided tutorials across models (js/ui/tutorial.js; checks in content/tutorials/checks.js)
 warm-up.html                  maths warm-up for students who need basic maths support
 primer.html                   how to read the equations: widgets, checks, notation map
 glossary.html                 plain-language glossary, rendered from content/glossary.js
 decks/<unit>.html             overview slides for each unit (js/ui/deck.js)
 models/<model>.html           one page per model; each just calls mountModelPage()
-js/core/                      no DOM: design parser, runner, rng, phenomenon checks, sketch comparison, URL state, formatting
+js/core/                      no DOM: design parser, runner, rng, phenomenon checks, sketch comparison, URL state, formatting,
+                              registry (every model in course order), matrix (the phenomenon-by-model table)
 js/models/<model>.js          one module per model, common interface (see js/core/runner.js)
 js/ui/                        DOM: page.js wires everything; chart, equation, arithmetic, table, highlight, primer,
                               warmup, glossary, deck, minichart (model-drawn charts for slides),
@@ -55,6 +59,7 @@ content/glossary.js           every technical term: plain definition, example, l
 tests/                        node:test files
 tools/site_tool.py            build, serve under the GitHub Pages prefix, and check (Python)
 tools/check_site.py           browser checks with Playwright, run by site_tool.py check
+tools/matrix.mjs              writes the phenomenon table into index.html
 css/site.css                  one stylesheet; colour tokens on :root with dark-mode overrides
 ```
 
@@ -63,7 +68,7 @@ css/site.css                  one stylesheet; colour tokens on :root with dark-m
 1. `js/models/<id>.js`: export `id`, `name`, `year`, `citation`, `salienceKey(cue)`, `options`, `parameters(cues, opts, { context })`, and `init(params, cues, opts, rng, { context })` returning `{ trial, predict, state }`. `trial()` gets `{ cues, reinforced, magnitude, timing }`; trial-level models ignore `timing`. `state()` returns per-cue maps (such as `{ V, alpha }`); the runner turns each into `run.stateSeries`. A parameter with `advanced: true` is hidden in Essentials. Wrap the per-trial math in `// #region update` and `// #endregion`; the page shows that region as the code reading. Export `status = 'preview'` until tests reproduce the published simulations; the page then shows a notice. A model that runs moment by moment exports `realTime = true` and keeps `moments` on each trial record (see `js/models/sop.js`); the page then adds the Inside the trial view. If its V is not what the animal does, export `responseKey` naming a per-cue `state()` series; checks that compare responses (`h.response`) read it. A model that simulates many learners gives the learner a `summary(cues)` returning `{ mean, sd }`; the chart then draws the spread. An instance model exports `memory = true` and keeps learner 1's traces on each trial record (see `js/models/minerva-al.js`); the page then adds the Memory view. `predictionTitle` renames the chart's y axis.
 2. `content/equations/<id>.js`: export `symbols`, `roles`, `equations(opts)`, `arithmetic(opts)`, `tableColumns(opts, cues)`, `absentNote(cue, rec)`, `codeNames`, `stages`, and `intro`, and optionally `charts` (extra charts of `stateSeries`, such as attention). Each symbol's `value(rec, cue)` must read from the trial record, never recompute, and has a `primer` anchor and either a `render` or a `display(opts)` text. Equation nodes: symbols, `mul`, `add`, `sub`, `neg`, `paren`, `abs`, `cases`, `clamp`, `const`, `sumPresent`, `sumEach`, `sumOthers`, `sumMoments`, `sumOver` (Σ over a named index, value from the record), `frac`, `sqrt`, `pow` (see `js/ui/equation.js`). An equation with `when(rec)` is shown only on trials where it applies. A symbol with no `render` can give `mathml`. A spec whose equations are not about one cue sets `cueless` (with `cuelessNote`). `$` in a title or words is the focus cue.
 3. Add a `models['<id>']` entry with `why` and `tryThis` to each phenomenon in `content/phenomena/index.js`, written from what the model actually does with its defaults, and add the model's expected results to `tests/phenomena.test.js`.
-4. `models/<id>.html`: copy an existing model page and change the imports, `defaultPreset`, and `overviewUrl`. Add the page to every page's navigation and to the landing page's units table.
+4. `models/<id>.html`: copy an existing model page and change the imports, `defaultPreset`, and `overviewUrl`. Add the page to every page's navigation and to the landing page's units table. Add the model to `js/core/registry.js` and run `node tools/matrix.mjs`; the comparison page and the table then include it.
 5. `decks/<id>.html`: an overview deck. Add glossary entries for new terms and primer sections for new notation.
 6. Tests: hand-worked single trials, analytic results, published results, and the check that every displayed equation evaluates to the number the model used (see `tests/mackintosh.test.js`). Add the page to the attention or model checks in `tools/check_site.py`.
 
@@ -75,7 +80,8 @@ The audience runs from students new to the area who find maths stressful to stud
 - Every technical term used anywhere goes in `content/glossary.js`. Link the first use on a page to `glossary.html#<id>`.
 - On model pages, mark anything beyond the essentials with the class `advanced`; Essentials view hides it.
 - Check questions have exactly one right answer, an explanation for every option, and, on the warm-up, a hint. Wrong answers are never scolded.
-- Every page uses the same navigation: Start here, Maths warm-up, Reading the equations, the model pages (Rescorla-Wagner, Mackintosh, Pearce-Hall, SOP, MINERVA-AL), Glossary.
+- Every page uses the same navigation: Start here, Maths warm-up, Reading the equations, the model pages (Rescorla-Wagner, Mackintosh, Pearce-Hall, SOP, MINERVA-AL), Compare, Tutorials, Glossary. `tests/content.test.js` checks it.
+- A tutorial is prose with live pieces: `data-mini` charts (any model, with `data-options` and `data-params`), `data-widget` primer widgets, `data-check` questions, and `data-verdicts` strips that run one phenomenon through every model. List each tutorial in the landing page's tutorial section.
 - `tests/content.test.js` fails on any broken link between pages, sections, or glossary entries.
 
 ## Conventions

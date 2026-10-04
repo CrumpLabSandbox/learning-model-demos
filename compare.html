@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Glossary · Learning Model Demos</title>
-  <meta name="description" content="Plain-language definitions of every technical word used on the learning model demos site.">
+  <title>Compare models · Learning Model Demos</title>
+  <meta name="description" content="Run one experiment through several learning models side by side, and see which model explains it and why.">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/load-guard.js"></script>
 </head>
@@ -20,21 +20,22 @@
       <a href="models/pearce-hall.html">Pearce-Hall</a>
       <a href="models/sop.html">SOP</a>
       <a href="models/minerva-al.html">MINERVA-AL</a>
-      <a href="compare.html">Compare</a>
+      <a href="compare.html" aria-current="page">Compare</a>
       <a href="index.html#tutorials">Tutorials</a>
-      <a href="glossary.html" aria-current="page">Glossary</a>
+      <a href="glossary.html">Glossary</a>
     </nav>
   </header>
   <main class="page">
     <div class="prose">
-      <h1>Glossary</h1>
-      <p>Every technical word on this site, in plain language, with an example. If a word on another page confuses you, look it up here.</p>
+      <h1>Compare the models</h1>
+      <p>Pick an experiment and see what each model predicts, side by side. Click any chart, or use the stepper, to move every chart to the same trial. Each panel says whether that model shows the effect and why.</p>
+      <p class="small muted">Not sure which experiment to try? The <a href="index.html#phenomena">table on the start page</a> shows which model explains what.</p>
     </div>
-    <div class="prose" id="glossary"></div>
+    <div id="compare"></div>
   </main>
   <script type="module">
-    import { mountGlossary } from './js/ui/glossary.js';
-    mountGlossary(document.getElementById('glossary'));
+    import { mountCompare } from './js/ui/compare.js';
+    mountCompare(document.getElementById('compare'));
   </script>
 </body>
 </html>
