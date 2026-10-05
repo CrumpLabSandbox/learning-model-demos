@@ -40,7 +40,7 @@ Every push also runs the checks in Chromium, Firefox, and WebKit (Safari's engin
 
 ## Credit and licence
 
-Developed by [Matthew J. C. Crump](https://www.crumplab.com), Brooklyn College of CUNY.
+Developed by [Matthew J. C. Crump](https://www.crumplab.com), Brooklyn College of CUNY using Claude Code.
 
 - Text, slides, figures, and teaching content: [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0). See [LICENSE-CONTENT](LICENSE-CONTENT).
 - Code (`js/`, `css/`, `tools/`, `tests/`): MIT License. See [LICENSE](LICENSE).
