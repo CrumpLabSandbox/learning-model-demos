@@ -54,7 +54,7 @@ class Checker:
         def on_response(r):
             if r.status >= 400 and r.url.startswith(self.base.split(BASE)[0]):
                 problems.append(f"HTTP {r.status}: {r.url}")
-            if self.built and re.search(r"\.(js|css)(\?|$)", r.url) and "v=" not in r.url and r.request.resource_type in ("script", "stylesheet"):
+            if self.built and re.search(r"\.(js|css|woff2)(\?|$)", r.url) and "v=" not in r.url and r.request.resource_type in ("script", "stylesheet", "font"):
                 problems.append(f"not version-stamped: {r.url}")
 
         page.on("response", on_response)
@@ -554,6 +554,17 @@ class Checker:
             page.wait_for_timeout(300)
             self.check("landing: shows the build version", "Site version" in page.text_content("#build-info"))
         self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-cards .entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8 and page.query_selector('.units a[href="models/minerva-al.html#view=essentials"]') is not None and not page.query_selector_all(".units tr.soon"))
+        lines = page.eval_on_selector_all(".hero .hero-chart path.mini-line", "els => els.map(e => e.getAttribute('d').length)")
+        self.check("landing: the hero chart is drawn by the model", len(lines) == 3 and all(n > 100 for n in lines), f"lines: {lines}")
+        page.close()
+
+        # The look: self-hosted fonts load, and the header marks where you are.
+        page = self.open(ctx, "models/sop.html")
+        page.evaluate("document.fonts.ready")
+        fonts = page.evaluate("['Figtree', 'Bricolage Grotesque'].map(f => [...document.fonts].some(ff => ff.family.replace(/\"/g, '') === f && ff.status === 'loaded'))")
+        self.check("look: Figtree and Bricolage Grotesque load", all(fonts), f"loaded: {fonts}")
+        current = page.eval_on_selector_all(".site-header nav a[aria-current]", "els => els.map(e => [e.textContent, getComputedStyle(e).backgroundColor])")
+        self.check("look: the header marks the current page", len(current) == 1 and current[0][0] == "SOP" and current[0][1] not in ("rgba(0, 0, 0, 0)", "transparent"), f"{current}")
         page.close()
         ctx.close()
 

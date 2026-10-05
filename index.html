@@ -6,30 +6,43 @@
   <title>Learning Model Demos</title>
   <meta name="description" content="Interactive demos of associative learning models, from Rescorla-Wagner to MINERVA-AL, with overview slides, a maths warm-up, and a guide to reading the equations for students new to the area.">
   <link rel="stylesheet" href="css/site.css">
+  <script src="js/load-guard.js"></script>
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="index.html">Learning Model Demos</a>
+    <a class="brand" href="index.html"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6"/><path class="c1" d="M4.5 18.5C7.5 10 11.5 7 19.5 6"/><path class="c2" d="M4.5 18.5c5-3 9.5-4 15-4.2"/></svg>Learning Model Demos</a>
     <nav aria-label="Pages">
-      <a href="#start">Start here</a>
-      <a href="warm-up.html">Maths warm-up</a>
-      <a href="primer.html">Reading the equations</a>
-      <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
-      <a href="models/mackintosh.html">Mackintosh</a>
-      <a href="models/pearce-hall.html">Pearce-Hall</a>
-      <a href="models/sop.html">SOP</a>
-      <a href="models/minerva-al.html">MINERVA-AL</a>
-      <a href="compare.html">Compare</a>
-      <a href="#tutorials">Tutorials</a>
-      <a href="glossary.html">Glossary</a>
+      <div class="nav-group" role="group" aria-label="Getting started">
+        <a href="#start">Start here</a>
+        <a href="warm-up.html">Maths warm-up</a>
+        <a href="primer.html">Reading the equations</a>
+      </div>
+      <div class="nav-group" role="group" aria-label="Models">
+        <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
+        <a href="models/mackintosh.html">Mackintosh</a>
+        <a href="models/pearce-hall.html">Pearce-Hall</a>
+        <a href="models/sop.html">SOP</a>
+        <a href="models/minerva-al.html">MINERVA-AL</a>
+      </div>
+      <div class="nav-group" role="group" aria-label="More">
+        <a href="compare.html">Compare</a>
+        <a href="#tutorials">Tutorials</a>
+        <a href="glossary.html">Glossary</a>
+      </div>
     </nav>
   </header>
   <main class="page">
-    <div class="prose">
-      <h1>Learning Model Demos</h1>
-      <p class="lede">How do people and animals learn what predicts what? Psychologists answer with models: exact rules that a computer can run. This site lets you run those models one step at a time and see why they behave as they do.</p>
-      <p>You do not need any background in learning theory, and you do not need to like maths. Start wherever you are comfortable, and go back a level whenever you need to.</p>
-    </div>
+    <section class="hero">
+      <div class="prose">
+        <h1>Learning Model Demos</h1>
+        <p class="lede">How do people and animals learn what predicts what? Psychologists answer with models: exact rules that a computer can run. This site lets you run those models one step at a time and see why they behave as they do.</p>
+        <p>You do not need any background in learning theory, and you do not need to like maths. Start wherever you are comfortable, and go back a level whenever you need to.</p>
+      </div>
+      <div class="hero-fig">
+        <p class="kicker">Live: <a href="glossary.html#blocking">blocking</a>, run by Rescorla-Wagner</p>
+        <figure class="hero-chart" data-mini data-model="rescorla-wagner" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="A,B,D" data-caption="A is trained first. Then B is trained alongside A, which already predicts the outcome, so B learns little. D, trained with a new partner, learns. Press Play on any model page to watch it happen."></figure>
+      </div>
+    </section>
 
     <section id="start" class="start-section">
       <h2>Where to start</h2>
@@ -150,5 +163,10 @@
       <p class="small muted" id="build-info"></p>
     </section>
   </main>
+  <script type="module">
+    import { mountMinis } from './js/ui/minichart.js';
+    mountMinis(document.querySelector('.hero'));
+    document.documentElement.setAttribute('data-ready', '');
+  </script>
 </body>
 </html>

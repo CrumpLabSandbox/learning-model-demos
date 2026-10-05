@@ -115,8 +115,22 @@ test('tutorials use only checks, phenomena, and models that exist', () => {
 });
 
 test('every page carries the same navigation', () => {
-  const labels = (html) => [...(html.match(/<nav aria-label="Pages">([\s\S]*?)<\/nav>/)?.[1] ?? '').matchAll(/>([^<]+)<\/a>/g)].map((m) => m[1]);
+  // Each group's name and its links, in order.
+  const labels = (html) => {
+    const nav = html.match(/<nav aria-label="Pages">([\s\S]*?)<\/nav>/)?.[1] ?? '';
+    return [...nav.matchAll(/<div class="nav-group"[^>]*aria-label="([^"]+)">([\s\S]*?)<\/div>/g)]
+      .map((g) => [g[1], ...[...g[2].matchAll(/>([^<]+)<\/a>/g)].map((m) => m[1])]);
+  };
   const want = labels(read('index.html'));
-  assert.ok(want.length >= 10);
+  assert.equal(want.length, 3);
+  assert.ok(want.flat().length >= 13);
   for (const page of pages.filter((p) => !p.startsWith('decks/'))) assert.deepEqual(labels(read(page)), want, page);
+});
+
+test('the navigation marks the page you are on, and only that page', () => {
+  for (const page of pages.filter((p) => !p.startsWith('decks/') && p !== 'index.html')) {
+    const current = [...read(page).matchAll(/<a href="([^"]+)" aria-current="page">/g)].map((m) => normalize(join(dirname(page), m[1])));
+    const want = page.startsWith('tutorials/') ? 'index.html#tutorials' : page;
+    assert.deepEqual(current, [want], page);
+  }
 });

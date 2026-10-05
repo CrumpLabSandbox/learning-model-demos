@@ -6,10 +6,10 @@
     python3 tools/site_tool.py check     build, serve, and test it in a real browser
 
 The source folders still work as they are with any static server. The build
-copies only the site files and stamps every script and stylesheet address
-with a version (?v=...), so a browser can never mix a cached old module with
-a new one after a deploy. It also refuses to build if any import or link
-points at a file that does not exist.
+copies only the site files and stamps every script, stylesheet, and font
+address with a version (?v=...), so a browser can never mix a cached old module with
+a new one after a deploy. It also refuses to build if any import, link, or
+stylesheet url() points at a file that does not exist.
 
 `serve` uses the same /learning-model-demos/ path prefix as GitHub Pages, so
 what works here works there.
@@ -36,7 +36,7 @@ OUT = ROOT / "_site"
 BASE = "/learning-model-demos/"
 
 # What gets deployed. Everything else (tests, tools, plan, notes) stays out.
-SITE_DIRS = ["css", "js", "content", "decks", "models", "tutorials"]
+SITE_DIRS = ["css", "fonts", "js", "content", "decks", "models", "tutorials"]
 SITE_ROOT_GLOBS = ["*.html", ".nojekyll"]
 
 # Relative module specifiers in JavaScript: import ... from './x.js',
@@ -46,6 +46,8 @@ JS_SPEC = re.compile(r"""((?:\bfrom|\bimport)\s*\(?\s*)(['"])(\.{1,2}/[^'"?#]+?\
 HTML_ASSET = re.compile(r"""(\b(?:href|src)=)(["'])((?!https?:|//|#|mailto:)[^"'?#]+?\.(?:css|js))\2""")
 # Inline <script type="module"> blocks in HTML.
 MODULE_BLOCK = re.compile(r"(<script\s+type=\"module\"[^>]*>)(.*?)(</script>)", re.S)
+# Local files in stylesheets, such as fonts: url(../fonts/x.woff2).
+CSS_URL = re.compile(r"""(\burl\()(['"]?)((?!data:|https?:|//|#)[^'")?#]+)\2(\))""")
 # Local page links in HTML.
 HTML_LINK = re.compile(r"""\bhref=(["'])((?!https?:|//|#|mailto:)[^"'#?]+?\.html)(?:[#?][^"']*)?\1""")
 
@@ -84,6 +86,16 @@ def stamp_js(text: str, version: str, here: Path, problems: list[str], rel: str)
     return JS_SPEC.sub(repl, text)
 
 
+def stamp_css(text: str, version: str, here: Path, problems: list[str], rel: str) -> str:
+    def repl(m: re.Match) -> str:
+        path = m.group(3)
+        if not (here.parent / path).resolve().is_file():
+            problems.append(f"{rel}: references {path}, which does not exist")
+        return f"{m.group(1)}{m.group(2)}{path}?v={version}{m.group(2)}{m.group(4)}"
+
+    return CSS_URL.sub(repl, text)
+
+
 def stamp_html(text: str, version: str, here: Path, problems: list[str], rel: str) -> str:
     def asset(m: re.Match) -> str:
         path = m.group(3)
@@ -111,6 +123,8 @@ def build(out: Path = OUT, quiet: bool = False) -> str:
         dest.parent.mkdir(parents=True, exist_ok=True)
         if src.suffix == ".js":
             dest.write_text(stamp_js(src.read_text(), version, src, problems, str(rel)))
+        elif src.suffix == ".css":
+            dest.write_text(stamp_css(src.read_text(), version, src, problems, str(rel)))
         elif src.suffix == ".html":
             dest.write_text(stamp_html(src.read_text(), version, src, problems, str(rel)))
         else:
@@ -148,6 +162,7 @@ class SiteHandler(http.server.SimpleHTTPRequestHandler):
         ".css": "text/css",
         ".json": "application/json",
         ".svg": "image/svg+xml",
+        ".woff2": "font/woff2",
     }
 
     def __init__(self, *args, cache: bool = False, **kwargs):
