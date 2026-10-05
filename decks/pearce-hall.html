@@ -7,8 +7,10 @@
   <meta name="description" content="Overview slides for the Pearce-Hall model: attention follows surprise, excitatory and inhibitory strength, and how it differs from Mackintosh.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
+  <script src="../js/site-status.js"></script>
 </head>
 <body class="deck-page">
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="../about.html#status">What this means</a></div>
   <main class="deck" data-title="Pearce-Hall overview" data-back="../models/pearce-hall.html#view=essentials" data-back-label="Open the model">
     <section class="slide" data-title="Pearce-Hall: attention to the uncertain">
       <div class="kicker">Overview · model 3</div>
@@ -94,6 +96,10 @@
       <p class="sub">New notation here: γ (gamma), |x| (absolute value), and V̄ (V-bar). See <a href="../primer.html#absolute">Reading the equations, sections 13 to 15</a>.</p>
     </section>
   </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
   <script type="module">
     import { mountDeck } from '../js/ui/deck.js';
     mountDeck(document.querySelector('.deck'));

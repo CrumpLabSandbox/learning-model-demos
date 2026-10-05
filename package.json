@@ -2,6 +2,8 @@
   "name": "learning-model-demos",
   "private": true,
   "description": "Interactive browser demos of associative learning models. Static site, no build step, no dependencies.",
+  "author": "Matthew J. C. Crump",
+  "license": "MIT AND CC-BY-4.0",
   "type": "module",
   "scripts": {
     "test": "node --test",

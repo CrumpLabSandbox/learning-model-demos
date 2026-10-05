@@ -7,8 +7,10 @@
   <meta name="description" content="Overview slides for MINERVA-AL: learning as remembering. Every trial is stored as a trace, and expectations come from recalling similar traces.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
+  <script src="../js/site-status.js"></script>
 </head>
 <body class="deck-page">
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="../about.html#status">What this means</a></div>
   <main class="deck" data-title="MINERVA-AL overview" data-back="../models/minerva-al.html#view=essentials" data-back-label="Open the model">
     <section class="slide" data-title="MINERVA-AL: learning as remembering">
       <div class="kicker">Overview · model 5</div>
@@ -103,6 +105,10 @@
       <p class="sub">New notation here: vectors, features, similarity, and the echo. See <a href="../primer.html#vectors">Reading the equations, sections 18 and 19</a>.</p>
     </section>
   </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
   <script type="module">
     import { mountDeck } from '../js/ui/deck.js';
     mountDeck(document.querySelector('.deck'));

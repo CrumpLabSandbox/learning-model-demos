@@ -7,6 +7,7 @@
   <meta name="description" content="A gentle warm-up on the small amount of maths learning models use: decimals, numbers below zero, gaps, taking part of a number, adding up, and reading a graph.">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/load-guard.js"></script>
+  <script src="js/site-status.js"></script>
 </head>
 <body>
   <header class="site-header">
@@ -31,6 +32,7 @@
       </div>
     </nav>
   </header>
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="about.html#status">What this means</a></div>
   <main class="page primer" id="warmup">
     <div class="primer-layout">
       <nav class="toc" aria-label="On this page">
@@ -135,6 +137,10 @@
       </article>
     </div>
   </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
   <script type="module">
     import { mountWarmup } from './js/ui/warmup.js';
     mountWarmup(document.getElementById('warmup'));

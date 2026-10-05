@@ -7,8 +7,10 @@
   <meta name="description" content="Overview slides for Wagner's SOP model: elements that are inactive, in A1, or in A2; learning from what is active at the same moments; and why timing matters.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
+  <script src="../js/site-status.js"></script>
 </head>
 <body class="deck-page">
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="../about.html#status">What this means</a></div>
   <main class="deck" data-title="SOP overview" data-back="../models/sop.html#view=essentials" data-back-label="Open the model">
     <section class="slide" data-title="SOP: what is active, moment by moment">
       <div class="kicker">Overview · model 4</div>
@@ -111,6 +113,10 @@
       <p class="sub">New notation here: proportions such as p<sub>A1</sub>, probabilities such as p<sub>1</sub>, and Σ over moments. See <a href="../primer.html#states">Reading the equations, sections 16 and 17</a>.</p>
     </section>
   </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
   <script type="module">
     import { mountDeck } from '../js/ui/deck.js';
     mountDeck(document.querySelector('.deck'));

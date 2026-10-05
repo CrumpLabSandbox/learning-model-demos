@@ -371,6 +371,13 @@ Notes from building it:
 - The fonts cover Latin only; Greek letters in running text use the system font. Equations are unaffected, since MathML uses its own math font.
 - Styling the current page exposed a bug: the MINERVA-AL page also marked Pearce-Hall as current. A content test now checks that each page marks only itself.
 
+### Status, credit, and licence
+
+- [x] A thin "In development" strip on every page and deck, linking to a status note; switched off by one line (`IN_DEVELOPMENT` in `js/site-status.js`)
+- [x] Footer on every page: developed by Matthew J. C. Crump, Brooklyn College of CUNY, with both licences
+- [x] About page: what "in development" means, who made the site, and how to reuse it, with a credit line
+- [x] Licences: CC BY 4.0 for text, slides, figures, and teaching content (`LICENSE-CONTENT`); MIT for the code (`LICENSE`); fonts under the SIL OFL
+
 ### Later
 
 - Mirror on Coolify following the coolify-deploy skill.
