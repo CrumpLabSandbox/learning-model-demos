@@ -355,6 +355,22 @@ Notes from building it:
 - `js/core/registry.js` lists the models in course order; the comparison page, the table, the tutorials' verdict strips, and the tests all read it.
 - Navigation now includes Compare and Tutorials (the landing page's tutorial section). A content test checks that every page has the same navigation.
 
+### Visual refresh: graph paper
+
+- [x] Colour kept for data: the interface (links, buttons, current page, step numbers, focus) is drawn in ink (`--ui`), so the only blue on a model page is cue A
+- [x] Self-hosted type pair: Figtree for text and controls, Bricolage Grotesque for headings; the build stamps and checks font addresses
+- [x] Sticky header in three groups with the current page marked; one sideways-scrolling row on phones
+- [x] Working panels lifted with a soft shadow; segmented Essentials/Everything switch; check questions on a solid panel
+- [x] Landing hero with a live blocking chart on graph paper; graph paper behind the decks; centred tutorial column
+- [x] Softer blue-black dark mode
+
+Notes from building it:
+
+- The review found that one blue served links, buttons, the scrubber, and cue A's line, so students could not tell controls from data at a glance. That was the main reason for the change, beyond looks.
+- Atkinson Hyperlegible was tried first for its legibility, but it draws every zero with a slash ("2Ø A+"), which reads badly on a site full of numbers.
+- The fonts cover Latin only; Greek letters in running text use the system font. Equations are unaffected, since MathML uses its own math font.
+- Styling the current page exposed a bug: the MINERVA-AL page also marked Pearce-Hall as current. A content test now checks that each page marks only itself.
+
 ### Later
 
 - Mirror on Coolify following the coolify-deploy skill.

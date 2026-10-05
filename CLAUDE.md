@@ -5,7 +5,8 @@ Interactive browser demos of associative learning models for teaching. The plan 
 ## Ground rules
 
 - Static site. Plain HTML, CSS, and JavaScript ES modules, with no runtime dependencies and no npm packages. The source folders run as they are on any static server.
-- The deployed site is built by `tools/site_tool.py` (Python standard library only). The build copies the site files, stamps every script and stylesheet address with a version so browsers never mix cached old files with new ones, and fails on any broken import or link. Never hand-edit `_site/`.
+- The deployed site is built by `tools/site_tool.py` (Python standard library only). The build copies the site files, stamps every script, stylesheet, and font address (including `url()` in CSS) with a version so browsers never mix cached old files with new ones, and fails on any broken import, link, or `url()`. Never hand-edit `_site/`.
+- Fonts are self-hosted in `fonts/` (SIL Open Font License, licences beside them): Figtree for text and controls, Bricolage Grotesque (`--display`) for h1, h2, and slide titles. Nothing loads from another server.
 - Every model is implemented from its original paper, with the citation at the top of the model file. Any choice the paper leaves open is stated in a comment and on the page.
 - A model is not used in class until tests reproduce known analytic results or published simulations.
 - Model files contain only the math. They never touch the DOM, so Node tests import exactly the code the browser runs.
@@ -61,6 +62,7 @@ tools/site_tool.py            build, serve under the GitHub Pages prefix, and ch
 tools/check_site.py           browser checks with Playwright, run by site_tool.py check
 tools/matrix.mjs              writes the phenomenon table into index.html
 css/site.css                  one stylesheet; colour tokens on :root with dark-mode overrides
+fonts/                        self-hosted woff2 files (Latin and Latin Extended) and their OFL licences
 ```
 
 ## Adding a model
@@ -80,12 +82,13 @@ The audience runs from students new to the area who find maths stressful to stud
 - Every technical term used anywhere goes in `content/glossary.js`. Link the first use on a page to `glossary.html#<id>`.
 - On model pages, mark anything beyond the essentials with the class `advanced`; Essentials view hides it.
 - Check questions have exactly one right answer, an explanation for every option, and, on the warm-up, a hint. Wrong answers are never scolded.
-- Every page uses the same navigation: Start here, Maths warm-up, Reading the equations, the model pages (Rescorla-Wagner, Mackintosh, Pearce-Hall, SOP, MINERVA-AL), Compare, Tutorials, Glossary. `tests/content.test.js` checks it.
+- Every page uses the same navigation, in three `nav-group`s: Getting started (Start here, Maths warm-up, Reading the equations), Models (Rescorla-Wagner, Mackintosh, Pearce-Hall, SOP, MINERVA-AL), and More (Compare, Tutorials, Glossary). The page you are on carries `aria-current="page"` (tutorials mark Tutorials). `tests/content.test.js` checks both.
 - A tutorial is prose with live pieces: `data-mini` charts (any model, with `data-options` and `data-params`), `data-widget` primer widgets, `data-check` questions, and `data-verdicts` strips that run one phenomenon through every model. List each tutorial in the landing page's tutorial section.
 - `tests/content.test.js` fails on any broken link between pages, sections, or glossary entries.
 
 ## Conventions
 
+- The look is graph paper: a cool, faintly gridded ground (`--paper-grid`, behind the landing hero and the decks) with the interface drawn in ink. Colour is for data. Links, buttons, the current page, step numbers, and focus rings use `--ui` (with `--on-ui` for text on it); `--accent` is only for data views (the memory heatmap, feature vectors). Never style a control with a cue or role colour. Panels you work in get `--shadow`; everything else stays flat.
 - Symbol roles: `experimenter` (set by the design), `modeller` (a parameter), `computed` (calculated by the model). Each has its own colour token.
 - Cue colours follow the validated categorical palette in fixed order by the cue's position in the design. Never colour text with a cue colour; put a swatch beside it.
 - Anything that shows a symbol, value, or line for a symbol carries `data-sym` and, where it belongs to a cue, `data-cue`. `js/ui/highlight.js` links them on hover.
