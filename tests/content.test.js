@@ -18,7 +18,7 @@ import { MODELS } from '../js/core/registry.js';
 
 const root = new URL('..', import.meta.url).pathname;
 const inDir = (d) => readdirSync(join(root, d)).filter((f) => f.endsWith('.html')).map((f) => `${d}/${f}`);
-const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'compare.html', ...inDir('models'), ...inDir('decks'), ...inDir('tutorials')];
+const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'compare.html', 'about.html', ...inDir('models'), ...inDir('decks'), ...inDir('tutorials')];
 const read = (p) => readFileSync(join(root, p), 'utf8');
 const ids = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
 
@@ -128,9 +128,27 @@ test('every page carries the same navigation', () => {
 });
 
 test('the navigation marks the page you are on, and only that page', () => {
-  for (const page of pages.filter((p) => !p.startsWith('decks/') && p !== 'index.html')) {
-    const current = [...read(page).matchAll(/<a href="([^"]+)" aria-current="page">/g)].map((m) => normalize(join(dirname(page), m[1])));
-    const want = page.startsWith('tutorials/') ? 'index.html#tutorials' : page;
-    assert.deepEqual(current, [want], page);
+  for (const page of pages.filter((p) => !p.startsWith('decks/'))) {
+    const html = read(page);
+    const nav = html.match(/<nav aria-label="Pages">([\s\S]*?)<\/nav>/)[1];
+    const targets = [...nav.matchAll(/<a href="([^"]+)"/g)].map((m) => normalize(join(dirname(page), m[1])));
+    const current = [...nav.matchAll(/<a href="([^"]+)" aria-current="page">/g)].map((m) => normalize(join(dirname(page), m[1])));
+    // Tutorials mark Tutorials; a page with its own link marks it; others (the landing and About pages) mark nothing.
+    const want = page.startsWith('tutorials/') ? ['index.html#tutorials'] : targets.includes(page) ? [page] : [];
+    assert.deepEqual(current, want, page);
+  }
+});
+
+test('every page shows the development strip, the credit, and the licence', () => {
+  const flag = read('js/site-status.js').match(/var IN_DEVELOPMENT = (true|false);/);
+  assert.ok(flag, 'js/site-status.js sets IN_DEVELOPMENT to true or false');
+  for (const page of pages) {
+    const html = read(page);
+    const pre = page.includes('/') ? '../' : '';
+    assert.ok(html.includes(`<script src="${pre}js/site-status.js"></script>`), `${page} loads js/site-status.js`);
+    assert.equal(html.match(/class="dev-strip"/g)?.length, 1, `${page} has one development strip`);
+    assert.ok(html.includes(`href="${pre}about.html#status"`), `${page}: the strip links to the status note`);
+    const footer = html.match(/<footer class="site-footer">([\s\S]*?)<\/footer>/)?.[1] ?? '';
+    assert.ok(footer.includes('Matthew J. C. Crump') && footer.includes('creativecommons.org/licenses/by/4.0/') && footer.includes('LICENSE'), `${page} credits the developer and names both licences`);
   }
 });

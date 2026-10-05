@@ -7,8 +7,10 @@
   <meta name="description" content="Overview slides for the maths warm-up: what you will practise, why, and how the page works.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
+  <script src="../js/site-status.js"></script>
 </head>
 <body class="deck-page">
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="../about.html#status">What this means</a></div>
   <main class="deck" data-title="Maths warm-up overview" data-back="../warm-up.html" data-back-label="Go to the warm-up">
     <section class="slide" data-title="Maths warm-up: what to expect">
       <div class="kicker">Overview · maths warm-up</div>
@@ -81,6 +83,10 @@
       <p class="sub">After it, the <a href="reading-equations.html">reading-equations overview</a> shows how these pieces appear in real model equations.</p>
     </section>
   </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
   <script type="module">
     import { mountDeck } from '../js/ui/deck.js';
     mountDeck(document.querySelector('.deck'));

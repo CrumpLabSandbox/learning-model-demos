@@ -7,8 +7,10 @@
   <meta name="description" content="Overview slides for the Rescorla-Wagner model: the puzzle it solved, learning from surprise, what it explains, and what it gets wrong.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
+  <script src="../js/site-status.js"></script>
 </head>
 <body class="deck-page">
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="../about.html#status">What this means</a></div>
   <main class="deck" data-title="Rescorla-Wagner overview" data-back="../models/rescorla-wagner.html#view=essentials" data-back-label="Open the model">
     <section class="slide" data-title="Rescorla-Wagner: learning from surprise">
       <div class="kicker">Overview · model 1</div>
@@ -95,6 +97,10 @@
       <p class="sub">Essentials view shows the main parts first. Switch to Everything any time for the full trial table, code, and all settings.</p>
     </section>
   </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
   <script type="module">
     import { mountDeck } from '../js/ui/deck.js';
     mountDeck(document.querySelector('.deck'));

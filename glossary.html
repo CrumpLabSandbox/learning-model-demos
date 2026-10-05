@@ -7,6 +7,7 @@
   <meta name="description" content="Plain-language definitions of every technical word used on the learning model demos site.">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/load-guard.js"></script>
+  <script src="js/site-status.js"></script>
 </head>
 <body>
   <header class="site-header">
@@ -31,6 +32,7 @@
       </div>
     </nav>
   </header>
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="about.html#status">What this means</a></div>
   <main class="page">
     <div class="prose">
       <h1>Glossary</h1>
@@ -38,6 +40,10 @@
     </div>
     <div class="prose" id="glossary"></div>
   </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
   <script type="module">
     import { mountGlossary } from './js/ui/glossary.js';
     mountGlossary(document.getElementById('glossary'));

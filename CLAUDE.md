@@ -41,8 +41,10 @@ tutorials/<name>.html         guided tutorials across models (js/ui/tutorial.js;
 warm-up.html                  maths warm-up for students who need basic maths support
 primer.html                   how to read the equations: widgets, checks, notation map
 glossary.html                 plain-language glossary, rendered from content/glossary.js
+about.html                    in-development status, credit, and how to reuse the site (licences)
 decks/<unit>.html             overview slides for each unit (js/ui/deck.js)
 models/<model>.html           one page per model; each just calls mountModelPage()
+js/site-status.js             IN_DEVELOPMENT: true shows the development strip on every page; false hides it
 js/core/                      no DOM: design parser, runner, rng, phenomenon checks, sketch comparison, URL state, formatting,
                               registry (every model in course order), matrix (the phenomenon-by-model table)
 js/models/<model>.js          one module per model, common interface (see js/core/runner.js)
@@ -63,6 +65,7 @@ tools/check_site.py           browser checks with Playwright, run by site_tool.p
 tools/matrix.mjs              writes the phenomenon table into index.html
 css/site.css                  one stylesheet; colour tokens on :root with dark-mode overrides
 fonts/                        self-hosted woff2 files (Latin and Latin Extended) and their OFL licences
+LICENSE, LICENSE-CONTENT      MIT for the code (js/, css/, tools/, tests/); CC BY 4.0 for everything else
 ```
 
 ## Adding a model
@@ -84,6 +87,7 @@ The audience runs from students new to the area who find maths stressful to stud
 - Check questions have exactly one right answer, an explanation for every option, and, on the warm-up, a hint. Wrong answers are never scolded.
 - Every page uses the same navigation, in three `nav-group`s: Getting started (Start here, Maths warm-up, Reading the equations), Models (Rescorla-Wagner, Mackintosh, Pearce-Hall, SOP, MINERVA-AL), and More (Compare, Tutorials, Glossary). The page you are on carries `aria-current="page"` (tutorials mark Tutorials). `tests/content.test.js` checks both.
 - A tutorial is prose with live pieces: `data-mini` charts (any model, with `data-options` and `data-params`), `data-widget` primer widgets, `data-check` questions, and `data-verdicts` strips that run one phenomenon through every model. List each tutorial in the landing page's tutorial section.
+- Every page and deck loads `js/site-status.js` right after `js/load-guard.js` (or on its own, if it runs no module), carries one `dev-strip` (after the header; first in the body on decks) linking to `about.html#status`, and ends with the same `site-footer`: the credit (Matthew J. C. Crump, Brooklyn College of CUNY) and both licences. `tests/content.test.js` and the browser checks enforce it. To take the site out of development, set `IN_DEVELOPMENT` to `false`; nothing else changes.
 - `tests/content.test.js` fails on any broken link between pages, sections, or glossary entries.
 
 ## Conventions

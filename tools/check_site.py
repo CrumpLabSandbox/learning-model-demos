@@ -24,6 +24,8 @@ from site_tool import BASE, ROOT, serve_in_background  # tools/ is on sys.path
 OUT = ROOT / "_check"
 DESKTOP = {"width": 1366, "height": 860}
 PHONE = {"width": 390, "height": 780}
+# Whether the site is marked as in development (js/site-status.js).
+IN_DEVELOPMENT = "IN_DEVELOPMENT = true" in (ROOT / "js/site-status.js").read_text()
 
 
 class Checker:
@@ -108,12 +110,32 @@ class Checker:
                 self.clean(page, label)
                 if "load-guard.js" in (ROOT / path).read_text():
                     self.check(f"{label}: finished starting", page.evaluate("document.documentElement.hasAttribute('data-ready')"))
+                if size_name == "desktop":
+                    self.check(f"{label}: development strip matches js/site-status.js", page.is_visible(".dev-strip") == IN_DEVELOPMENT)
+                    self.check(f"{label}: footer credits the developer", "Matthew J. C. Crump" in (page.text_content(".site-footer") or ""))
                 if size_name == "phone":
                     width = page.evaluate("document.documentElement.scrollWidth")
                     self.check(f"{label}: no sideways scrolling", width <= size["width"] + 1, f"page is {width}px wide; too wide: {self.too_wide(page, size['width'])}")
                 self.shot(page, f"{size_name}-{path.replace('/', '-').removesuffix('.html')}", full=(size_name == "desktop"))
                 page.close()
             ctx.close()
+
+    def dev_toggle(self, browser) -> None:
+        """Turning IN_DEVELOPMENT off in js/site-status.js hides the strip everywhere."""
+        ctx = browser.new_context(viewport=DESKTOP)
+        for flag in ("true", "false"):
+            page = ctx.new_page()
+            body = (ROOT / "js/site-status.js").read_text().replace(f"IN_DEVELOPMENT = {str(IN_DEVELOPMENT).lower()}", f"IN_DEVELOPMENT = {flag}")
+            assert f"IN_DEVELOPMENT = {flag}" in body
+            # Playwright passes the request too if the handler takes two arguments, so bind body in a closure.
+            serve = (lambda b: lambda route: route.fulfill(content_type="text/javascript", body=b))(body)
+            page.route(re.compile(r".*/js/site-status\.js(\?.*)?$"), serve)
+            for path in ("models/sop.html", "decks/sop.html"):
+                page.goto(self.base + path)
+                page.wait_for_timeout(300)
+                self.check(f"development strip with IN_DEVELOPMENT = {flag}: {path}", page.is_visible(".dev-strip") == (flag == "true"))
+            page.close()
+        ctx.close()
 
     # -- decks ---------------------------------------------------------------
     def decks(self, browser) -> None:
@@ -579,7 +601,7 @@ def run_checks(directory: Path, browsers: list[str]) -> bool:
                 print(f"\n== {name} ({'built site' if built else 'source'}, {base}) ==")
                 browser = getattr(pw, name).launch()
                 c = Checker(base, name, built)
-                for section in (c.pages, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.comparison, c.learning_pages):
+                for section in (c.pages, c.dev_toggle, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.comparison, c.learning_pages):
                     print(f"- {section.__name__}")
                     c.run(section.__name__, section, browser)
                 browser.close()
