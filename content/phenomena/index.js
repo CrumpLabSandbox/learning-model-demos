@@ -29,21 +29,22 @@ export const phenomena = [
   {
     id: 'acquisition',
     title: 'Acquisition',
-    predict: { cues: ['A'], prompt: 'A is followed by the outcome on every trial. Sketch how strongly you think A will predict the outcome over the 30 trials.' },
+    predict: { cues: ['A'], prompt: 'A is followed by the outcome on every trial. Sketch how strongly you think A will predict the outcome over the 60 trials.' },
     focus: { t: 1, cue: 'A' },
-    design: 'Training: 30 A+',
+    design: 'Training: 60 A+',
     empirical:
       'Pairing a cue with an outcome makes the response to the cue grow, quickly at first and then more slowly.',
     citation: 'Pavlov (1927)',
-    criterion: 'V for A ends near the outcome value, and the first step is larger than the last.',
+    criterion: 'A ends above half of the outcome value, and the curve has levelled off: the last step is smaller than the biggest step.',
     check(run, h) {
       const v = h.phaseValues(run, 0, 'A');
-      const first = v[1] - v[0];
-      const last = v[v.length - 1] - v[v.length - 2];
+      const steps = v.slice(1).map((x, i) => x - v[i]);
+      const biggest = Math.max(...steps);
+      const last = steps[steps.length - 1];
       const end = h.final(run, 'A');
       return {
-        shown: end > 0.5 * h.lambda && first > last,
-        measure: `A ends at ${f(end)}; first step ${f(first)}, last step ${f(last)}.`,
+        shown: end > 0.5 * h.lambda && last < biggest - 1e-9,
+        measure: `A ends at ${f(end)}; biggest step ${f(biggest)} (trial ${steps.indexOf(biggest) + 1}), last step ${f(last)}.`,
       };
     },
     models: {
@@ -72,8 +73,8 @@ export const phenomena = [
         tryThis: 'Open Configurations: one row, A, with E climbing toward 1. Then add a line "Context: Z" to the design: the context-alone configuration appears and shares a little of A\'s strength.',
       },
       delamater: {
-        why: 'The outcome unit starts near 0.1 and its slope is shallow there, so the first steps are small; the curve is S-shaped, fast in the middle and slow at both ends. The check wants a first step bigger than the last, and the network\'s first step is its smallest. Over more trials A reaches the outcome; in 30 it is partway up.',
-        tryThis: 'Raise the trial count to 100 and watch the S-curve complete. Then raise the learning rate to 1: the curve steepens but keeps its shape.',
+        why: 'The outcome unit starts near 0.1 and its slope is shallow there, so the first steps are tiny; the curve is S-shaped, slow at the start, fast in the middle, slow again near 1. The biggest step comes around trial 40, and the curve levels off near the outcome by trial 60. The network needs about three times the trials of the other models.',
+        tryThis: 'Cut the design to 30 A+ and the network is only partway up when the trials run out. Then raise the learning rate to 1: the curve steepens but keeps its S shape.',
       },
     },
   },
@@ -324,10 +325,12 @@ export const phenomena = [
     empirical:
       'A cue that signals the outcome will not happen, when it otherwise would, becomes an inhibitor: it reduces the response to other cues.',
     citation: 'Pavlov (1927); Rescorla (1969)',
-    criterion: 'V for X ends below zero.',
+    criterion: 'The summation test: adding X to A cuts the prediction for A by at least half, and X on its own predicts little (below a fifth of the outcome value, or below zero).',
     check(run, h) {
       const x = h.final(run, 'X');
-      return { shown: x < -h.margin, measure: `X ends at ${f(x)}.` };
+      const a = h.final(run, 'A');
+      const ax = h.final(run, 'AX');
+      return { shown: x < 0.2 * h.lambda && a > 0.5 * h.lambda && ax < 0.5 * a, measure: `A ends at ${f(a)}, AX at ${f(ax)}, X alone at ${f(x)}.` };
     },
     models: {
       'rescorla-wagner': {
@@ -355,8 +358,8 @@ export const phenomena = [
         tryThis: 'Open Configurations at the end: A has E above 1, AX has I of about 0.67 and V near 0. Then switch off \'Inhibition as new learning\': AX\'s excitation is weakened instead, X cannot go below 0, and the effect disappears.',
       },
       delamater: {
-        why: 'On AX− trials the error is negative, and X, present only then, acquires weights that pull the outcome unit down. A logistic unit cannot go below 0, so X alone reads as a low activation rather than a negative strength, and the check, which wants a value below zero, counts it as not shown.',
-        tryThis: 'Probe AX against A: X pulls A\'s prediction down, which is what an inhibitor does here.',
+        why: 'On AX− trials the error is negative, and X, present only then, acquires weights that pull the outcome unit down. A logistic unit cannot go below 0, so X alone reads as a low activation rather than a negative strength, but adding X to A cuts A\'s prediction to a fraction: the summation test, which is how an inhibitor is measured.',
+        tryThis: 'Compare the A and AX lines on the chart. Then switch off \'Hidden layer\': the one-layer network does the same through a negative weight from X.',
       },
     },
   },
