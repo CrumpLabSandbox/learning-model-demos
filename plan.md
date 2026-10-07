@@ -378,6 +378,15 @@ Notes from building it:
 - [x] About page: what "in development" means, who made the site, and how to reuse it, with a credit line
 - [x] Licences: CC BY 4.0 for text, slides, figures, and teaching content (`LICENSE-CONTENT`); MIT for the code (`LICENSE`); fonts under the SIL OFL
 
+### Next: an experiments lane (planned, not started)
+
+A separate section of the site with demo online behavioural experiments: reproductions of procedures used with humans, so students can run a task themselves, see their own data, and later connect it to a model page. Decisions so far, from discussion on 2026-10-07:
+
+- Built with jsPsych. The site has no npm packages and no build step, so jsPsych's built files are vendored into the repository (for example `vendor/jspsych/`, MIT, with its licence beside it) and the build stamps them like any other script. This is the one exception to "no runtime dependencies" and is written down here on purpose.
+- An open educational resource: nothing is stored anywhere. Each run's data can be downloaded (CSV or JSON) and plotted on the page. A future, IRB-approved version could add storage; this one does not.
+- First experiments: reproductions of example experiments from Matthew Crump's papers on the streamed-trials procedure (contingency learning). Rescorla-Wagner is the model most relevant to that literature; other models may apply. Some experiments closely follow existing phenomena on the site but differ in important ways, so the lane starts as its own section, and links to individual phenomena and model pages come later.
+- Next step: Matthew uploads the papers; Claude reads the designs (stimuli, timing, trial and block structure, instructions, dependent measures, scoring) and proposes a plan for the lane: where it sits in the navigation, how each experiment is described and run, the data format, download and plotting, and how it is tested in CI like the rest of the site.
+
 ### Later
 
 - Mirror on Coolify following the coolify-deploy skill.
