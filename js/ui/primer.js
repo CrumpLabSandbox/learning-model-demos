@@ -616,6 +616,117 @@ const widgets = {
     draw();
   },
 
+  // The 2 × 2 contingency table and ΔP, with editable cells.
+  contingency(el) {
+    const cells = { a: 17, b: 13, c: 3, d: 27 };
+    const presets = [
+      ['ΔP 0.47, rare', { a: 17, b: 13, c: 3, d: 27 }],
+      ['ΔP 0, rare', { a: 6, b: 24, c: 6, d: 24 }],
+      ['ΔP 0, common', { a: 24, b: 6, c: 24, d: 6 }],
+      ['ΔP −0.47', { a: 8, b: 22, c: 22, d: 8 }],
+    ];
+    const cell = (k, label) => `<td><label class="ct-cell"><span class="small muted">${label}</span><input type="number" min="0" max="999" data-ct="${k}" value="${cells[k]}" aria-label="cell ${k}: ${label}"></label></td>`;
+    el.innerHTML =
+      `<div class="btn-row">${presets.map(([t], i) => `<button class="btn" data-ct-preset="${i}">${t}</button>`).join('')}</div>` +
+      `<div class="widget-grid"><table class="cells-table ct-table"><thead><tr><th></th><th>Outcome</th><th>No outcome</th></tr></thead><tbody>` +
+      `<tr><th scope="row">Cue present</th>${cell('a', 'a')}${cell('b', 'b')}</tr>` +
+      `<tr><th scope="row">Cue absent</th>${cell('c', 'c')}${cell('d', 'd')}</tr></tbody></table>` +
+      `<div class="ct-out" aria-live="polite"></div></div>`;
+    const draw = () => {
+      const { a, b, c, d } = cells;
+      const pc = a + b ? a / (a + b) : null;
+      const pn = c + d ? c / (c + d) : null;
+      const dp = pc === null || pn === null ? null : pc - pn;
+      const n = a + b + c + d;
+      el.querySelector('.ct-out').innerHTML =
+        `<div class="ct-line">${math(mi('P'), mo('('), mi('O'), mo('|'), mi('C'), mo(')'), mo('='), row(mn(String(a)), mo('/'), mn(String(a + b))), mo('='), mn(pc === null ? '?' : ex(pc)))}</div>` +
+        `<div class="ct-line">${math(mi('P'), mo('('), mi('O'), mo('|'), mo('~'), mi('C'), mo(')'), mo('='), row(mn(String(c)), mo('/'), mn(String(c + d))), mo('='), mn(pn === null ? '?' : ex(pn)))}</div>` +
+        `<div class="ct-line ct-dp">${math(mi('Δ'), mi('P'), mo('='), mn(pc === null ? '?' : ex(pc)), mo('−'), mn(pn === null ? '?' : ex(pn)), mo('='), mn(dp === null ? '?' : se(Number(dp.toFixed(4)))))}</div>` +
+        `<p class="small ct-say">${
+          dp === null
+            ? 'ΔP needs the cue to be present on some frames and absent on others.'
+            : `${n} frames. The outcome came on ${Math.round(((a + c) / n) * 100)}% of them. ${
+                Math.abs(dp) < 0.05 ? 'The cue makes no difference: the outcome is about as likely with it as without it.' : dp > 0 ? 'The outcome is more likely when the cue is there.' : 'The outcome is less likely when the cue is there.'
+              }${a + c > 0 && Math.abs(dp) < 0.05 && a > 0 ? ` Notice that the cue and the outcome still came together ${a} times.` : ''}`
+        }</p>`;
+    };
+    el.addEventListener('input', (ev) => {
+      const k = ev.target.dataset.ct;
+      if (!k) return;
+      cells[k] = Math.max(0, Math.min(999, Number.parseInt(ev.target.value, 10) || 0));
+      draw();
+    });
+    el.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-ct-preset]');
+      if (!b) return;
+      Object.assign(cells, presets[Number(b.dataset.ctPreset)][1]);
+      for (const k of ['a', 'b', 'c', 'd']) el.querySelector(`[data-ct="${k}"]`).value = cells[k];
+      draw();
+    });
+    draw();
+  },
+
+  // Signal detection: two Gaussian curves (weak and strong streams), a
+  // sensitivity slider that pulls them apart, and a criterion slider.
+  criterion(el) {
+    el.innerHTML =
+      `<div class="widget-grid"><div>` +
+      slider({ id: 'sd-d', label: 'Sensitivity d′: how far apart the two kinds of stream feel', min: 0, max: 3, step: 0.1, value: 1.5 }) +
+      slider({ id: 'sd-c', label: 'Criterion: feel more than this and say "strong"', min: -2, max: 3.5, step: 0.1, value: 0.75 }) +
+      `</div><div class="sd-out" aria-live="polite"></div></div><div class="sd-chart"></div>`;
+    // Standard normal CDF (Abramowitz & Stegun 7.1.26).
+    const Phi = (z) => {
+      const t = 1 / (1 + 0.3275911 * Math.abs(z));
+      const y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-z * z / 2);
+      return z >= 0 ? 0.5 + y / 2 : 0.5 - y / 2;
+    };
+    const pdf = (z) => Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI);
+    let d = 1.5;
+    let c = 0.75;
+    const chart = el.querySelector('.sd-chart');
+    const draw = () => {
+      const W = Math.max(300, chart.clientWidth || 600);
+      const H = 190;
+      const m = { l: 10, r: 10, t: 14, b: 30 };
+      const lo = -3;
+      const hi = 6;
+      const x = (z) => m.l + ((z - lo) / (hi - lo)) * (W - m.l - m.r);
+      const y = (p) => m.t + (1 - p / 0.42) * (H - m.t - m.b);
+      const curve = (mu) => {
+        const pts = [];
+        for (let z = lo; z <= hi + 1e-9; z += 0.05) pts.push(`${x(z).toFixed(1)},${y(pdf(z - mu)).toFixed(1)}`);
+        return pts.join(' ');
+      };
+      const area = (mu) => {
+        const pts = [`${x(c).toFixed(1)},${y(0).toFixed(1)}`];
+        for (let z = c; z <= hi + 1e-9; z += 0.05) pts.push(`${x(z).toFixed(1)},${y(pdf(z - mu)).toFixed(1)}`);
+        pts.push(`${x(hi).toFixed(1)},${y(0).toFixed(1)}`);
+        return pts.join(' ');
+      };
+      const hits = 1 - Phi(c - d);
+      const fa = 1 - Phi(c);
+      chart.innerHTML =
+        `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="sd-svg" role="img" aria-label="Two overlapping curves for weak and strong streams, with a criterion line">` +
+        `<line x1="${m.l}" x2="${W - m.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--axis)"/>` +
+        `<polygon class="sd-area weak" points="${area(0)}"/><polygon class="sd-area strong" points="${area(d)}"/>` +
+        `<polyline class="sd-curve weak" points="${curve(0)}"/><polyline class="sd-curve strong" points="${curve(d)}"/>` +
+        `<line class="sd-crit" x1="${x(c)}" x2="${x(c)}" y1="${m.t}" y2="${y(0)}"/>` +
+        `<text class="tick" x="${x(0)}" y="${H - 10}" text-anchor="middle">weak streams</text><text class="tick" x="${x(d)}" y="${H - 10}" text-anchor="middle">strong streams</text>` +
+        `<text class="value-label" x="${x(c) + 5}" y="${m.t + 12}">criterion</text>` +
+        `<text class="tick" x="${x(c) + 5}" y="${y(0) - 6}">→ "strong"</text><text class="tick" x="${x(c) - 5}" y="${y(0) - 6}" text-anchor="end">"weak" ←</text>` +
+        `</svg>`;
+      el.querySelector('.sd-out').innerHTML =
+        `<p><strong>Hits:</strong> strong streams called strong, ${Math.round(hits * 100)}%.<br><strong>False alarms:</strong> weak streams called strong, ${Math.round(fa * 100)}%.</p>` +
+        `<p class="small muted">${d < 0.3 ? 'With the curves on top of each other, the person cannot tell the streams apart: hits and false alarms are the same whatever the criterion.' : c < d / 2 - 0.5 ? 'A low criterion: nearly everything is called strong, including most weak streams.' : c > d / 2 + 0.5 ? 'A high criterion: only the most convincing streams are called strong, and many strong ones are missed.' : 'A middling criterion: the two kinds of error are about balanced.'} Moving the criterion changes the answers; only the sensitivity changes what is seen.</p>`;
+    };
+    wireSliders(el, ['sd-d', 'sd-c'], (v) => {
+      d = v['sd-d'];
+      c = v['sd-c'];
+      draw();
+    });
+    whenResized(chart, draw);
+  },
+
   notation(el) {
     el.innerHTML =
       `<div class="table-wrap" style="max-height:none"><table class="symbol-guide notation"><thead><tr><th>Idea</th><th>This site</th><th>Original paper</th><th>Other forms you may meet</th></tr></thead><tbody>` +

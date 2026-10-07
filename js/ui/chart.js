@@ -146,9 +146,12 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
     const band = (p, sign) => series[p].map((v, i) => v + sign * (src.spread?.[p]?.[i] ?? 0));
     const shown = isSketching ? [] : probes.flatMap((p) => (src.spread?.[p] ? [...band(p, 1), ...band(p, -1)] : series[p]));
     const sketched = sketchCues.flatMap((c) => Object.values(pr.sketches[c] ?? {}));
+    // Reference lines, such as the contingency ΔP, are drawn on the
+    // prediction chart only, and hidden while a student sketches.
+    const refs = !isSketching && source === predictionSource ? model.reference ?? [] : [];
     const lambda = src.floor ?? 1;
-    let lo = Math.min(0, ...shown, ...sketched);
-    let hi = Math.max(lambda, src.ceiling ?? 0.2, ...shown, ...sketched);
+    let lo = Math.min(0, ...shown, ...sketched, ...refs.map((r) => r.value));
+    let hi = Math.max(lambda, src.ceiling ?? 0.2, ...shown, ...sketched, ...refs.map((r) => r.value));
     // While sketching, use a range that gives nothing away: room above λ and
     // the same distance below zero, whatever the model will do.
     if (isSketching) {
@@ -190,6 +193,15 @@ export function createChart(container, { onSelect, onSketch = () => {}, onSketch
     for (const v of ticks) {
       parts.push(`<line class="${Math.abs(v) < 1e-9 ? 'zero' : 'grid'}" x1="${m.left}" x2="${m.left + iw}" y1="${y(v)}" y2="${y(v)}"/>`);
       parts.push(`<text class="tick" x="${m.left - 6}" y="${y(v) + 4}" text-anchor="end">${signed(String(v))}</text>`);
+    }
+    // Reference lines: dashed ink across the phase they belong to, or the
+    // whole run, labelled at their right end.
+    for (const r of refs) {
+      const ph = r.phase ? run.phases[r.phase - 1] : null;
+      const x0 = ph ? x(ph.start - 1) : m.left;
+      const x1 = ph ? x(ph.end) : m.left + iw;
+      parts.push(`<line class="ref-line" x1="${x0}" x2="${x1}" y1="${y(r.value)}" y2="${y(r.value)}"><title>${esc(r.label)}</title></line>`);
+      parts.push(`<text class="ref-label" x="${x1 - 4}" y="${y(r.value) - 5}" text-anchor="end">${esc(r.label)}</text>`);
     }
     // x ticks.
     for (const v of intTicks(n, iw)) {

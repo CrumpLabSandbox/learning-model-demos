@@ -12,8 +12,14 @@
 //             is loaded; each model maps it to its own parameter (salienceKey)
 //   focus     the trial and cue to show first: { t } or { phase }, and { cue }
 //   predict   the lines a student sketches before running it, and the prompt
+//   reference optional lines to draw on the chart for comparison, such as
+//             the contingency ΔP: [{ value, label, phase? }], phase 1-based
 //   models    per model: why the model does or does not show it (naming the
 //             responsible term) and something to try
+//
+// A design with a random order is one particular stream of frames. A check
+// whose result should not depend on the order averages over several streams
+// with h.overSeeds, as the experiments average over many streams.
 
 import { fmt } from '../../js/core/format.js';
 
@@ -572,6 +578,178 @@ export const phenomena = [
       'minerva-al': {
         why: "The outcome-alone trials store the context with the outcome. B's probe includes the context, so it matches those traces partly, and they help B bring back the outcome rather than hinder it. B learns no more slowly than A did.",
         tryThis: "Compare with Rescorla-Wagner, where the context gains strength and blocks B.",
+      },
+    },
+  },
+
+  // ---- Human contingency judgement: the streamed-trial unit ---------------
+  // Frames of a stream are trials; the context Z stands for the stream, so
+  // `+` is an outcome with no cue and `-` is a frame with nothing on it.
+  {
+    id: 'contingency',
+    title: 'Contingency (ΔP)',
+    predict: {
+      cues: ['A', 'B'],
+      prompt: 'Two streams of 60 frames. In the first, the outcome follows A on 17 of the 30 frames with A and comes on 3 of the 30 frames without it (ΔP = 0.47). In the second, the outcome follows B on 6 of 30 frames with B and on 6 of 30 without (ΔP = 0). Sketch A and B.',
+    },
+    focus: { t: 60, cue: 'A' },
+    design: 'Positive: 17 A+, 13 A-, 3 +, 27 -, random\nZero: 6 B+, 24 B-, 6 +, 24 -, random\nContext: Z',
+    reference: [
+      { value: 0.467, label: 'ΔP = 0.47', phase: 1 },
+      { value: 0, label: 'ΔP = 0', phase: 2 },
+    ],
+    empirical:
+      "People's ratings of how strongly a cue is related to an outcome rise with the contingency ΔP. In the streamed-trial procedure a 12-second stream of 60 frames was enough: streams with ΔP = 0.47 were rated higher than streams with ΔP = 0.",
+    citation: 'Crump, Hannah, Allan & Hord (2007)',
+    criterion: 'A (ΔP = 0.47) ends above B (ΔP = 0). The dashed lines show each ΔP, so you can also see how close the model comes to it.',
+    check(run, h) {
+      const a = h.phaseEnd(run, 0, 'A');
+      const b = h.final(run, 'B');
+      return { shown: a - b > h.margin, measure: `A ends at ${f(a)} (ΔP 0.47); B ends at ${f(b)} (ΔP 0).` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: 'The context Z is on every frame, so on frames without A it is the only cue and learns how often the outcome comes without A, P(O | no A). On frames with A, A and Z share the error, so between them they learn P(O | A). A is left with the difference: ΔP. With these frame counts V_A levels off near 0.47 and V_B near 0. The term that does this is ΣV with the context in it.',
+        tryThis: 'Delete the Context line. Frames without a cue then teach nothing, A climbs toward P(O | A) = 0.57 instead of ΔP, and B toward 0.2. Then put it back and lower β to 0.1 to watch A approach the dashed line more slowly.',
+      },
+      mackintosh: {
+        why: "Each cue learns from its own error, λ − V_A, so A heads for how often the outcome follows it, P(O | A) = 0.57, not ΔP, and B heads for P(O | B) = 0.2 rather than 0. The context's strength does not enter the error. A still ends above B, so the model tells the two streams apart, but it is tracking pairings, not contingency.",
+        tryThis: "Compare B's end with the dashed ΔP = 0 line: B sits above it. Then open the same preset on the Rescorla-Wagner page, where B falls to the line.",
+      },
+      'pearce-hall': {
+        why: 'A gains excitatory strength Sαλ on each of its 17 reinforced frames and inhibitory strength on its 13 frames without the outcome, when A and the context together predict more than came. B gains on 6 frames and loses on 24, so its net strength V − V̄ stays near 0. A ends above B, and above ΔP, because excitation does not use the shared error.',
+        tryThis: 'Watch the attention chart. With a probabilistic outcome the surprise never goes away, so attention stays high for both cues throughout, unlike acquisition.',
+      },
+      sop: {
+        why: "A gains strength on each A+ frame, when A and the US are in A1 together, and loses a little on A- frames, when A is in A1 while the US it calls up sits in A2. Frames without A teach A nothing. B has fewer pairings than A, so it ends lower, but SOP has no record of frames without B, so B ends well above 0 even though its ΔP is 0. The context Z turns inhibitory over the many frames with nothing on them.",
+        tryThis: 'SOP treats each frame as a well-spaced trial here. Add a line "Timing: ITI 2" to run the frames close together, as in a real stream, and see how much carries over from one frame to the next.',
+      },
+      'minerva-al': {
+        why: "Every frame is stored as a trace. A's probe shares the context with every trace, so it brings back the outcome at the stream's base rate, and A's own traces add to that: A+ traces store the outcome, A- traces store the opposite of what was expected. B's traces hold little outcome beyond what the context already brought back, so retrieval for B stays near 0.",
+        tryThis: 'Open the memory view on a B+ frame late in the second stream: the new trace stores little of the outcome, because the context had already brought back about that much.',
+      },
+    },
+  },
+  {
+    id: 'outcome-density',
+    title: 'Outcome density',
+    predict: {
+      cues: ['A', 'B'],
+      prompt: 'Two streams with no contingency at all (ΔP = 0). In the first the outcome is rare: it comes on 6 of 30 frames with A and 6 of 30 without. In the second it is common: on 24 of 30 frames with B and 24 of 30 without. Sketch A and B.',
+    },
+    focus: { t: 60, cue: 'B' },
+    design: 'Low density: 6 A+, 24 A-, 6 +, 24 -, random\nHigh density: 24 B+, 6 B-, 24 +, 6 -, random\nContext: Z',
+    reference: [{ value: 0, label: 'ΔP = 0 in both streams' }],
+    empirical:
+      'Two streams with no contingency are rated differently: when the outcome is common (P(O) = 0.8) the cue is rated higher than when it is rare (P(O) = 0.2). The signal detection analysis places this effect in the decision, not in what was learned.',
+    citation: 'Crump et al. (2007); Allan, Hannah, Crump & Siegel (2008)',
+    criterion: 'Averaged over 8 streams of each kind, B (common outcome) ends above A (rare outcome), though both have ΔP = 0.',
+    check(run, h) {
+      const [b, a] = h.overSeeds(8, (r) => [h.final(r, 'B'), h.phaseEnd(r, 0, 'A')]);
+      return { shown: b - a > h.margin, measure: `Averaged over 8 streams: B (common) ends at ${f(b)}, A (rare) at ${f(a)}.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: 'The context Z soaks up the base rate of the outcome, so whatever the density, V_A and V_B both head for ΔP = 0. Early in the common-outcome stream B is briefly above zero, before Z has caught up, but averaged over streams the two cues end in the same place. The model predicts no outcome density effect once learning has settled. The papers find the effect in the decision criterion, which the model does not have.',
+        tryThis: 'Lower β to 0.15. Learning is slower, the context lags further behind, and B now ends above A: the effect appears before the model reaches its asymptote, and disappears after.',
+      },
+      mackintosh: {
+        why: 'Each cue learns from its own error toward how often the outcome follows it: B toward P(O | B) = 0.8 and A toward P(O | A) = 0.2. Mackintosh cannot tell a dense outcome from a contingent one, so it shows the effect, but for a reason that would also make it rate a zero-contingency cue as a strong predictor.',
+        tryThis: 'Compare with the Contingency preset: B here (ΔP = 0, dense) ends above A there (ΔP = 0.47, sparse). The model ranks density above contingency.',
+      },
+      'pearce-hall': {
+        why: 'B gains excitatory strength Sαλ on each of its 24 reinforced frames whatever the context predicts, and inhibitory strength on its 6 frames without the outcome, when B and the context over-predict. The inhibition nearly balances the excitation, and the net strength V − V̄ for B ends only a little above A. The effect is small, and depends on the order of frames.',
+        tryThis: "Switch off 'Inhibitory learning'. B then keeps all of its excitation and ends far above A: the inhibitory term is what holds the effect down.",
+      },
+      sop: {
+        why: 'B is paired with the US on 24 frames and A on 6, and the frames without a cue take nothing from either, so B gains much more than A. SOP counts pairings, and a dense outcome means many pairings.',
+        tryThis: "Watch Z's line. The context sits in A1 while the US it has called up sits in A2 on frame after frame, so the context becomes an inhibitor.",
+      },
+      'minerva-al': {
+        why: "In the dense stream the context alone brings back the outcome, because most traces hold it. B's probe includes the context, so B's echo holds the outcome too, and the echo is scaled to its largest feature. B retrieves the outcome strongly though B adds nothing to the context's prediction. This is the model's base-rate behaviour: a cue in a trained context retrieves what the context retrieves.",
+        tryThis: 'Open the memory view on a frame with B and look at the probe: the context features are part of it, and the traces they match are most of memory.',
+      },
+    },
+  },
+  {
+    id: 'one-phase-blocking',
+    title: 'One-phase blocking',
+    predict: {
+      cues: ['B', 'D'],
+      prompt: 'Two streams of 48 frames, each with two cues. B appears with the companion A, which predicts the outcome perfectly (A: ΔP = 1). D appears with the companion C, which predicts nothing (C: ΔP = 0). B and D each have ΔP = 0.5 with the outcome. Sketch B and D.',
+    },
+    focus: { t: 96, cue: 'D' },
+    design: 'Companion predicts: 18 AB+, 6 A+, 6 B-, 18 -, random\nCompanion useless: 9 CD+, 9 D+, 3 C+, 3 +, 3 CD-, 3 D-, 9 C-, 9 -, random\nContext: Z',
+    reference: [{ value: 0.5, label: 'ΔP = 0.5 for B and for D' }],
+    empirical:
+      'A target cue with ΔP = 0.5 is rated lower when its companion cue predicts the outcome perfectly than when the companion predicts nothing. In the streamed-trial version, the target was rated about −16 with a perfect companion and about +25 with a useless one.',
+    citation: 'Hannah, Crump, Allan & Siegel (2009), after Tangen & Allan (2004)',
+    criterion: 'Averaged over 8 streams of each kind, D (useless companion) ends above B (perfect companion), though both have ΔP = 0.5.',
+    check(run, h) {
+      const [d, b] = h.overSeeds(8, (r) => [h.final(r, 'D'), h.phaseEnd(r, 0, 'B')]);
+      return { shown: d - b > h.margin, measure: `Averaged over 8 streams: D ends at ${f(d)}, B at ${f(b)}.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: 'A is followed by the outcome on every frame it appears on, so A soon predicts it, and on AB+ frames the shared error λ − ΣV is already near zero: B gains little. On B− frames B loses. B settles near its contingency given A, which is 0. C predicts nothing, so on CD frames the error is still there and D learns its own ΔP of 0.5. The term that does this is ΣV: B shares the error with a cue that has used it up.',
+        tryThis: "Switch off 'Summed error'. B and D then each learn from their own error and end in the same place.",
+      },
+      mackintosh: {
+        why: 'B learns from its own error at first, but A predicts the outcome better than B does, so attention to B falls toward its minimum and B stops learning. D and its companion C are equally good predictors, so D keeps more of its attention. The gap is small and depends on the order of frames; blocking in Mackintosh comes from attention, not from a shared error.',
+        tryThis: "Switch off 'Attention changes' and the gap closes. Compare with Rescorla-Wagner, where B falls much further.",
+      },
+      'pearce-hall': {
+        why: 'Once A predicts the outcome, AB+ frames hold no surprise, so attention to B falls and B gains little, while B− frames add inhibition. The CD frames stay surprising, because C predicts nothing, so attention to D stays up and D keeps learning.',
+        tryThis: 'Compare α_B and α_D on the attention chart during their streams.',
+      },
+      sop: {
+        why: "A calls up the US into A2 before it arrives on AB frames, so fewer US elements reach A1 with B and B gains less, while B's time in A1 with the US in A2 costs it strength. C calls up little, so the US is felt in full with D. SOP shows the effect strongly, as it does for two-phase blocking.",
+        tryThis: "Switch off 'Associative activation': nothing calls up the US, and B and D learn alike.",
+      },
+      'minerva-al': {
+        why: 'On AB frames A and the context already bring back the outcome, so each new trace stores the outcome only faintly with B, and B− frames store the opposite of the expected outcome with B. CD traces store the outcome in full, because C brings back little. B later retrieves little outcome, D retrieves much.',
+        tryThis: "Switch off 'Store the discrepancy': every trace then holds the whole frame, and the gap between B and D shrinks.",
+      },
+    },
+  },
+  {
+    id: 'probabilistic-blocking',
+    title: 'Probabilistic blocking',
+    predict: {
+      cues: ['B', 'D'],
+      prompt: 'First, A alone is followed by the outcome on 3 frames in 4. Then B is added to A, and D is added to a new cue C. Each compound is followed by the outcome on 3 frames in 4, and each companion alone on 1 frame in 4, so B and D both have ΔP = 0.5 with the outcome. Sketch B and D.',
+    },
+    focus: { t: 128, cue: 'B' },
+    design: 'Single cue: 24 A+, 8 A-, 24 E+, 8 E-, random\nCompound: 12 AB+, 4 AB-, 4 A+, 12 A-, 12 CD+, 4 CD-, 4 C+, 12 C-, random\nContext: Z',
+    reference: [{ value: 0.5, label: 'ΔP = 0.5 for B and for D', phase: 2 }],
+    empirical:
+      'In a two-phase design with probabilistic outcomes, the added cue B is rated lower when its companion was trained alone first than when, as for D, the companion is new. The effect grows with how often the companion was followed by the outcome in the first phase. People show an effect of the same size in the backward order, with the single-cue phase second.',
+    citation: 'Shanks (1985); Hannah et al. (2009), Experiment 3',
+    criterion: 'Averaged over 8 streams, D ends above B, though both have ΔP = 0.5 in the compound phase. E is the control\'s own first-phase companion; it never appears again.',
+    check(run, h) {
+      const [d, b] = h.overSeeds(8, (r) => [h.final(r, 'D'), h.final(r, 'B')]);
+      return { shown: d - b > h.margin, measure: `Averaged over 8 streams: D ends at ${f(d)}, B at ${f(b)}.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: "After the first phase A predicts about 0.4, so B starts the compound phase with a smaller error than D and gains more slowly. But A alone is followed by the outcome on only 1 frame in 4 in the compound phase, so A's strength falls, the error on AB frames returns, and B catches up. At asymptote B and D both reach their contingency given the companion, 0.5. The model predicts only a small, passing effect, and none at all in the backward order.",
+        tryThis: 'Change the first phase to "32 A+, 32 E+" so A predicts the outcome perfectly at first. The effect grows a little, and still fades as A- frames pull A down. Then swap the two phases: nothing changes for B after its last frame.',
+      },
+      mackintosh: {
+        why: "Each cue learns from its own error, so B and D both head for how often the outcome follows them, and A's history does not enter B's error. Attention to B can even rise, because B predicts the outcome better than A does during the compound phase, where A alone is followed by it only 1 frame in 4. The model shows no blocking here.",
+        tryThis: "Watch α_B and α_D on the attention chart: B's attention is as high as D's or higher.",
+      },
+      'pearce-hall': {
+        why: "A predicts the outcome after the first phase, so the first AB frames are less surprising than the first CD frames, and attention to B falls sooner than attention to D. B's excitatory strength grows more slowly as a result. The gap is modest and depends on the order of frames.",
+        tryThis: 'Compare α_B and α_D on the attention chart in the first compound frames.',
+      },
+      sop: {
+        why: "A calls up the US into A2 on AB frames, so fewer US elements reach A1 with B, and B's time in A1 while the US is in A2 costs it strength. C has no history, so the US is felt in full with D. The model shows a clear effect in this order. In the backward order it would show none: absent cues do not change.",
+        tryThis: 'Step to the first compound frame and open Inside the trial for B, then for D.',
+      },
+      'minerva-al': {
+        why: 'In the first phase the context and A are stored with the outcome, so on AB frames A brings the outcome back and the trace stores it only faintly with B. C is new, so CD traces store the outcome in full. The effect is modest with probabilistic outcomes, because the A+ and A− frames in the compound phase also store traces that weaken what A brings back.',
+        tryThis: "Swap the two phases. MINERVA-AL is the one model here that can change B while B is absent, as in backward blocking, but with these probabilistic frames the backward effect is small.",
       },
     },
   },

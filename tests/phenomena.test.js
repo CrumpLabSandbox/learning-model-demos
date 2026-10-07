@@ -15,21 +15,28 @@ import { runModel } from '../js/core/runner.js';
 const expected = {
   'rescorla-wagner': {
     model: rw,
-    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'us-preexposure'],
+    shows: [
+      'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'us-preexposure',
+      'contingency', 'one-phase-blocking', 'probabilistic-blocking',
+    ],
   },
   mackintosh: {
     model: mk,
-    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'us-preexposure'],
+    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'us-preexposure', 'contingency', 'outcome-density', 'one-phase-blocking'],
   },
   'pearce-hall': {
     model: ph,
-    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition', 'us-preexposure'],
+    shows: [
+      'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition', 'us-preexposure',
+      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
+    ],
   },
   sop: {
     model: sop,
     shows: [
       'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition',
       'trial-spacing', 'cs-us-interval', 'backward-conditioning', 'us-preexposure',
+      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
     ],
   },
   'minerva-al': {
@@ -37,6 +44,7 @@ const expected = {
     shows: [
       'acquisition', 'extinction', 'salience', 'blocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition',
       'backward-blocking', 'negative-patterning',
+      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
     ],
   },
 };
@@ -62,14 +70,19 @@ for (const [id, { model, shows }] of Object.entries(expected)) {
   }
 }
 
+// The build-stage tests below are about the classic conditioning phenomena.
+// The streamed-trial presets (human contingency judgement) are checked per
+// model above and in tests/contingency.test.js.
+const streamed = new Set(['contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking']);
+const classic = (ids) => ids.filter((id) => !streamed.has(id)).sort();
 const shownWith = (model, options) =>
-  phenomena.filter((p) => evaluatePhenomenon(model, p, { options }).shown).map((p) => p.id).sort();
+  phenomena.filter((p) => !streamed.has(p.id) && evaluatePhenomenon(model, p, { options }).shown).map((p) => p.id).sort();
 
 test('Rescorla-Wagner build stages unlock the expected phenomena', () => {
   assert.deepEqual(shownWith(rw, { useAlpha: false, summedError: false }), ['acquisition', 'extinction']);
   assert.deepEqual(shownWith(rw, { useAlpha: true, summedError: false }), ['acquisition', 'extinction', 'salience']);
   for (const id of timing) assert.ok(!expected['rescorla-wagner'].shows.includes(id));
-  assert.deepEqual(shownWith(rw, { useAlpha: true, summedError: true }), [...expected['rescorla-wagner'].shows].sort());
+  assert.deepEqual(shownWith(rw, { useAlpha: true, summedError: true }), classic(expected['rescorla-wagner'].shows));
 });
 
 test('Mackintosh: how the attention rule is written changes what the model predicts', () => {
@@ -85,7 +98,7 @@ test('Pearce-Hall build stages unlock the expected phenomena', () => {
   const base = ['acquisition', 'blocking', 'overshadowing', 'salience', 'unblocking', 'us-preexposure'];
   assert.deepEqual(shownWith(ph, { attention: false, inhibition: false }), base);
   assert.deepEqual(shownWith(ph, { attention: true, inhibition: false }), [...base, 'latent-inhibition'].sort());
-  assert.deepEqual(shownWith(ph, { attention: true, inhibition: true }), [...expected['pearce-hall'].shows].sort());
+  assert.deepEqual(shownWith(ph, { attention: true, inhibition: true }), classic(expected['pearce-hall'].shows));
 });
 
 test('SOP build stages unlock the expected phenomena', () => {
@@ -94,8 +107,8 @@ test('SOP build stages unlock the expected phenomena', () => {
     'acquisition', 'blocking', 'cs-us-interval', 'overshadowing', 'salience', 'trial-spacing', 'unblocking', 'us-preexposure',
   ]);
   const three = shownWith(sop, { retrieval: true, inhibition: true, links: false });
-  assert.deepEqual(three, [...expected.sop.shows].filter((id) => id !== 'latent-inhibition').sort());
-  assert.deepEqual(shownWith(sop, { retrieval: true, inhibition: true, links: true }), [...expected.sop.shows].sort());
+  assert.deepEqual(three, classic(expected.sop.shows).filter((id) => id !== 'latent-inhibition'));
+  assert.deepEqual(shownWith(sop, { retrieval: true, inhibition: true, links: true }), classic(expected.sop.shows));
 });
 
 test('timing in a design changes nothing for the trial-by-trial models', () => {
@@ -108,5 +121,5 @@ test('timing in a design changes nothing for the trial-by-trial models', () => {
 
 test('MINERVA-AL: storing the discrepancy is what produces cue competition and retrospective revaluation', () => {
   assert.deepEqual(shownWith(mal, { discrepancy: false }), ['acquisition', 'extinction', 'latent-inhibition', 'negative-patterning']);
-  assert.deepEqual(shownWith(mal, { discrepancy: true }), [...expected['minerva-al'].shows].sort());
+  assert.deepEqual(shownWith(mal, { discrepancy: true }), classic(expected['minerva-al'].shows));
 });

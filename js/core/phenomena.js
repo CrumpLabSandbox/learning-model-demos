@@ -19,7 +19,24 @@ export function evaluatePhenomenon(model, phenomenon, { params = {}, options = {
   // models; a model can name a different per-cue series (SOP: how much of
   // the US the cue calls up).
   const response = (r, label) => (r.responseKey && r.stateSeries[r.responseKey]?.[label]) || r.series[label];
-  const helpers = { at, final, phaseEnd, phaseValues, response, lambda, margin: 0.05 * Math.max(lambda, 0.2) };
+  // A design with a random order is one particular sequence. A check that
+  // should not depend on the order can average a measurement over several
+  // sequences (seeds 1..n), as the experiments average over many streams.
+  // measure(run) returns a number or a list of numbers; the result is the
+  // mean, or the list of means.
+  const overSeeds = (n, measure) => {
+    let sum = null;
+    let list = false;
+    for (let s = 1; s <= n; s++) {
+      const v = measure(s === seed ? run : runModel(model, { design, params: run.params, options, seed: s }));
+      list = Array.isArray(v);
+      const vals = list ? v : [v];
+      sum = sum ? sum.map((x, i) => x + vals[i]) : vals;
+    }
+    const means = sum.map((x) => x / n);
+    return list ? means : means[0];
+  };
+  const helpers = { at, final, phaseEnd, phaseValues, response, lambda, margin: 0.05 * Math.max(lambda, 0.2), overSeeds };
   const result = phenomenon.check(run, helpers);
   return { ...result, run };
 }

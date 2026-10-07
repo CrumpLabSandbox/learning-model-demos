@@ -37,6 +37,7 @@ Every page that runs a module loads `js/load-guard.js` first, and its mount func
 ```
 index.html                    landing page: entry points, every unit, the phenomenon table, tutorials, and the build version
 compare.html                  one design through several models, as small multiples (js/ui/compare.js)
+stream.html                   streamed trials: watch a stream of cue-outcome frames, judge it, see ΔP and every model's value (js/ui/stream.js)
 tutorials/<name>.html         guided tutorials across models (js/ui/tutorial.js; checks in content/tutorials/checks.js)
 warm-up.html                  maths warm-up for students who need basic maths support
 primer.html                   how to read the equations: widgets, checks, notation map
@@ -46,7 +47,8 @@ decks/<unit>.html             overview slides for each unit (js/ui/deck.js)
 models/<model>.html           one page per model; each just calls mountModelPage()
 js/site-status.js             IN_DEVELOPMENT: true shows the development strip on every page; false hides it
 js/core/                      no DOM: design parser, runner, rng, phenomenon checks, sketch comparison, URL state, formatting,
-                              registry (every model in course order), matrix (the phenomenon-by-model table)
+                              registry (every model in course order), matrix (the phenomenon-by-model table),
+                              contingency (the 2 × 2 table, ΔP, and stream frames)
 js/models/<model>.js          one module per model, common interface (see js/core/runner.js)
 js/ui/                        DOM: page.js wires everything; chart, equation, arithmetic, table, highlight, primer,
                               warmup, glossary, deck, minichart (model-drawn charts for slides),
@@ -55,7 +57,9 @@ js/ui/                        DOM: page.js wires everything; chart, equation, ar
                               widget-kit (sliders, number lines, check questions)
                               mathml.js has string helpers for hand-written MathML
 content/equations/<model>.js  equation spec per model: symbols, equations, words, table columns, build stages
-content/phenomena/index.js    phenomenon presets: design, empirical result, citation, check, predict prompt, per-model notes
+content/phenomena/index.js    phenomenon presets: design, empirical result, citation, check, predict prompt, per-model notes,
+                              optional reference lines (such as ΔP) for the chart
+content/streams.js            stream presets for the streamed-trial page: the papers' contingency matrices as designs
 content/primer/               primer content: worked fixed points, check questions, notation map
 content/warmup/               warm-up check questions (each with a hint)
 content/glossary.js           every technical term: plain definition, example, links
@@ -85,8 +89,8 @@ The audience runs from students new to the area who find maths stressful to stud
 - Every technical term used anywhere goes in `content/glossary.js`. Link the first use on a page to `glossary.html#<id>`.
 - On model pages, mark anything beyond the essentials with the class `advanced`; Essentials view hides it.
 - Check questions have exactly one right answer, an explanation for every option, and, on the warm-up, a hint. Wrong answers are never scolded.
-- Every page uses the same navigation, in three `nav-group`s: Getting started (Start here, Maths warm-up, Reading the equations), Models (Rescorla-Wagner, Mackintosh, Pearce-Hall, SOP, MINERVA-AL), and More (Compare, Tutorials, Glossary). The page you are on carries `aria-current="page"` (tutorials mark Tutorials). `tests/content.test.js` checks both.
-- A tutorial is prose with live pieces: `data-mini` charts (any model, with `data-options` and `data-params`), `data-widget` primer widgets, `data-check` questions, and `data-verdicts` strips that run one phenomenon through every model. List each tutorial in the landing page's tutorial section.
+- Every page uses the same navigation, in three `nav-group`s: Getting started (Start here, Maths warm-up, Reading the equations), Models (Rescorla-Wagner, Mackintosh, Pearce-Hall, SOP, MINERVA-AL), and More (Compare, Streamed trials, Tutorials, Glossary). The page you are on carries `aria-current="page"` (tutorials mark Tutorials). `tests/content.test.js` checks both.
+- A tutorial is prose with live pieces: `data-mini` charts (any model, with `data-options`, `data-params`, `data-ref`, and `data-seed`), `data-widget` primer widgets, `data-check` questions, and `data-verdicts` strips that run one phenomenon through every model. List each tutorial in the landing page's tutorial section.
 - Every page and deck loads `js/site-status.js` right after `js/load-guard.js` (or on its own, if it runs no module), carries one `dev-strip` (after the header; first in the body on decks) linking to `about.html#status`, and ends with the same `site-footer`: the credit (Matthew J. C. Crump, Brooklyn College of CUNY) and both licences. `tests/content.test.js` and the browser checks enforce it. To take the site out of development, set `IN_DEVELOPMENT` to `false`; nothing else changes.
 - `tests/content.test.js` fails on any broken link between pages, sections, or glossary entries.
 
@@ -96,8 +100,8 @@ The audience runs from students new to the area who find maths stressful to stud
 - Symbol roles: `experimenter` (set by the design), `modeller` (a parameter), `computed` (calculated by the model). Each has its own colour token.
 - Cue colours follow the validated categorical palette in fixed order by the cue's position in the design. Never colour text with a cue colour; put a swatch beside it.
 - Anything that shows a symbol, value, or line for a symbol carries `data-sym` and, where it belongs to a cue, `data-cue`. `js/ui/highlight.js` links them on hover.
-- Phenomenon badges are computed by running the design, never typed by hand. A phenomenon sets salience with `salience: { A: 0.5 }`, never with a model's parameter name.
-- A design can name its context cue with `Context: Z`; it is added to every trial.
+- Phenomenon badges are computed by running the design, never typed by hand. A phenomenon sets salience with `salience: { A: 0.5 }`, never with a model's parameter name. A design with a `random` order is one particular sequence; a check whose answer should not depend on the order averages over several sequences with `h.overSeeds(8, measure)`, and its criterion text says so. A phenomenon can draw dashed reference lines on the chart with `reference: [{ value, label, phase? }]`; mini charts take the same as `data-ref`.
+- A design can name its context cue with `Context: Z`; it is added to every trial. With a context, `+` is the outcome alone and `-` is a trial with nothing on it, so a 2 × 2 contingency table is `17 A+, 13 A-, 3 +, 27 -` (see `js/core/contingency.js`).
 - Timing is in moments: `20 A+ [CS 1-10, US 9-10, ITI 100]` for one trial type, or a `Timing:` line for all. `+` on its own is the US alone. Defaults are `DEFAULT_TIMING` in `js/core/design.js`.
 - Each phenomenon has a `predict` prompt naming lines that the chart plots. While a student sketches, anything that would give the answer away carries the `spoiler` class and is hidden.
 - Each symbol in an equation spec has a `primer` anchor pointing at the primer section that explains it.

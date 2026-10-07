@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Judging Contingency Overview · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for the human contingency judgement unit: the 2 × 2 table and ΔP, streamed trials, what people do, what the models say, and where the decision begins.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+  <script src="../js/site-status.js"></script>
+</head>
+<body class="deck-page">
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="../about.html#status">What this means</a></div>
+  <main class="deck" data-title="Judging contingency overview" data-back="../stream.html" data-back-label="Try a streamed trial">
+    <section class="slide" data-title="Judging contingency: people as learners">
+      <div class="kicker">Overview · people</div>
+      <h1>Judging contingency: people as learners</h1>
+      <p class="sub">The models on this site were built for animals. This unit asks what they make of people judging what goes with what, using a line of experiments where a whole block of trials flashes by in seconds.</p>
+      <aside class="notes">Sources: Crump, Hannah, Allan &amp; Hord (2007); Allan, Hannah, Crump &amp; Siegel (2008); Hannah, Crump, Allan &amp; Siegel (2009); Siegel, Allan, Hannah &amp; Crump (2009). The unit has three parts: the streamed-trial page (do the task), four phenomenon presets on every model page, and a tutorial.</aside>
+    </section>
+    <section class="slide" data-title="The question people answer">
+      <h2>The question people answer</h2>
+      <p>Does eating shrimp go with a rash? Does the fertiliser go with growth? Does this square go with that circle?</p>
+      <p>In the lab: watch a cue and an outcome come and go, many times. Then rate how strongly they are related, from −100 to +100.</p>
+      <p class="big">The animal's version is conditioning. The human version is <a href="../glossary.html#contingency-judgement">contingency judgement</a>.</p>
+    </section>
+    <section class="slide" data-title="Four numbers">
+      <h2>Four numbers</h2>
+      <div class="two-col">
+        <div class="widget" data-widget="contingency"></div>
+        <div>
+          <p>Everything the person saw is in four counts: together (a), cue alone (b), outcome alone (c), neither (d).</p>
+          <p><a href="../glossary.html#delta-p">ΔP</a> is the chance of the outcome with the cue minus the chance without it. Pairings are not the same as contingency: try the second preset.</p>
+        </div>
+      </div>
+      <aside class="notes">Students often weight cell a (pairings) too heavily and ignore cell d. The second preset (6, 24, 6, 24) has six pairings and ΔP = 0, which makes the point. The ΔP rule is from Allan (1980).</aside>
+    </section>
+    <section class="slide" data-title="Streamed trials">
+      <h2>Streamed trials</h2>
+      <p>Old procedure: one trial every few seconds, so a block took minutes and a person gave only a few ratings.</p>
+      <p>Streamed trials: 60 frames in about 12 seconds, each frame a square or not and a circle or not, then one rating. Dozens of ratings per person.</p>
+      <p class="sub">The same two findings came out: ratings follow ΔP, and the outcome density effect.</p>
+      <p><a class="btn primary" href="../stream.html">Try a stream yourself</a></p>
+      <aside class="notes">Crump et al. (2007) used 100 ms frames with 100 ms black gaps. The site's page defaults to a slower pace and grey gaps, with the paper's settings available in the options.</aside>
+    </section>
+    <section class="slide" data-title="What people do">
+      <h2>What people do</h2>
+      <ul>
+        <li><strong>Ratings follow ΔP.</strong> A stream with ΔP = 0.47 is rated above a stream with ΔP = 0.</li>
+        <li><strong><a href="../glossary.html#outcome-density">Outcome density</a>.</strong> Two streams with ΔP = 0 are rated −30 when the outcome is rare and +6 when it is common.</li>
+        <li><strong><a href="../glossary.html#cue-interaction">Cue interaction</a>.</strong> A target with ΔP = 0.5 is rated −16 beside a companion that predicts perfectly and +25 beside one that predicts nothing.</li>
+        <li><strong>Two-phase blocking</strong>, forward and backward, about equal in size, with probabilistic outcomes.</li>
+      </ul>
+    </section>
+    <section class="slide" data-title="Rescorla-Wagner learns ΔP">
+      <h2>Rescorla-Wagner learns ΔP</h2>
+      <div class="two-col">
+        <figure data-mini data-model="rescorla-wagner" data-design="Positive: 17 A+, 13 A-, 3 +, 27 -, random|Zero: 6 B+, 24 B-, 6 +, 24 -, random|Context: Z" data-lines="A,B" data-ref="0.467=ΔP 0.47@1;0=ΔP 0@2" data-caption="Two streams through Rescorla-Wagner, with each stream's ΔP as a dashed line."></figure>
+        <div>
+          <p>Treat the stream itself as a cue, the context. On frames without the square, the context learns the outcome's base rate. On frames with it, the two share the error.</p>
+          <p>What is left for the square is the difference: ΔP. This is why the model was taken up for human judgements.</p>
+        </div>
+      </div>
+      <aside class="notes">Chapman &amp; Robbins (1990) derived the asymptote. The algebra is the fixed-point method from section 11 of the equations guide: set both changes to zero and solve. Without the context, the model learns P(O | cue) instead, which the tutorial shows.</aside>
+    </section>
+    <section class="slide" data-title="Where the models agree and disagree">
+      <h2>Where the models agree and disagree</h2>
+      <table class="sym-table">
+        <tr><td></td><td><strong>People</strong></td><td><strong>Models</strong></td></tr>
+        <tr><td style="font-size:1em">Follow ΔP</td><td>yes</td><td>all five tell the streams apart</td></tr>
+        <tr><td style="font-size:1em">Outcome density</td><td>yes</td><td>Mackintosh, SOP, MINERVA-AL yes; Rescorla-Wagner, Pearce-Hall barely</td></tr>
+        <tr><td style="font-size:1em">One-phase blocking</td><td>yes</td><td>all five</td></tr>
+        <tr><td style="font-size:1em">Backward blocking</td><td>yes</td><td>only MINERVA-AL can touch an absent cue</td></tr>
+      </table>
+      <p class="sub">Results are for this site's default settings, averaged over several streams, and checked by automated tests.</p>
+    </section>
+    <section class="slide" data-title="A rating is a decision">
+      <h2>A rating is a decision</h2>
+      <div class="two-col">
+        <div class="widget" data-widget="criterion"></div>
+        <div>
+          <p>Ask for "strong" or "weak" instead of a rating, and <a href="../glossary.html#signal-detection">signal detection theory</a> can separate <a href="../glossary.html#sensitivity">sensitivity</a> from the <a href="../glossary.html#criterion">criterion</a>.</p>
+          <p>Outcome density and the companion cue moved the criterion. Sensitivity did not change.</p>
+          <p class="big">The models describe what is learned. The data say some famous effects live in how it is reported.</p>
+        </div>
+      </div>
+      <aside class="notes">Allan et al. (2008) for outcome density, sign, and payoffs; Siegel et al. (2009) for one-phase blocking. The point for students: a model of learning and a model of deciding are different things, and the data need both. Try moving only the criterion slider and watching hits and false alarms change together.</aside>
+    </section>
+    <section class="slide" data-title="Try these first">
+      <h2>Try these first</h2>
+      <ol class="path-steps">
+        <li>On the <strong>streamed-trial page</strong>, press <strong>Surprise me</strong> and rate three streams. Look at your ratings against ΔP.</li>
+        <li>On the Rescorla-Wagner page, load <strong>Contingency (ΔP)</strong> and delete the Context line.</li>
+        <li>Load <strong>Outcome density</strong> on the MINERVA-AL page and open the memory view on a frame late in the common-outcome stream.</li>
+      </ol>
+      <p><a class="btn primary" href="../stream.html">Open the streamed-trial page</a> <a class="btn" href="../tutorials/judging-contingency.html">Read the tutorial</a></p>
+      <p class="sub">New notation here: ΔP and the 2 × 2 table. See <a href="../primer.html#contingency">Reading the equations, sections 21 and 22</a>.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

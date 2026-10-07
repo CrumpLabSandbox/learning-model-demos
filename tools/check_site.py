@@ -236,7 +236,8 @@ class Checker:
         page.click('[data-opt="summedError"]')
         page.click('[data-act="start"]')
         page.wait_for_timeout(200)
-        self.check("model: build stage 1 shows two phenomena", page.text_content("#build").count("✓") == 2)
+        build = page.text_content("#build")
+        self.check("model: build stage 1 shows acquisition and extinction but not blocking", "✓ Acquisition" in build and "✓ Extinction" in build and "✗ Blocking" in build)
         page.click('[data-act="next"]')
         page.click('[data-act="next"]')
         page.wait_for_timeout(200)
@@ -502,8 +503,58 @@ class Checker:
 
         page = self.open(ctx, "index.html")
         rows = page.query_selector_all(".matrix tbody tr")
-        self.check("landing: the phenomenon table covers every phenomenon and model", len(rows) == 14 and all(len(r.query_selector_all("td")) == 5 for r in rows))
-        self.check("landing: four tutorials", len(page.query_selector_all("#tutorials .entry-card")) == 4)
+        self.check("landing: the phenomenon table covers every phenomenon and model", len(rows) == 18 and all(len(r.query_selector_all("td")) == 5 for r in rows))
+        self.check("landing: five tutorials", len(page.query_selector_all("#tutorials .entry-card")) == 5)
+        page.close()
+        ctx.close()
+
+    # -- streamed trials -------------------------------------------------------
+    def streamed_trials(self, browser) -> None:
+        """Watch a stream (skipped to the end), judge it, and see the table, ΔP,
+        and every model's value for the same frames."""
+        ctx = browser.new_context(viewport=DESKTOP)
+        page = self.open(ctx, "stream.html#stream=positive-low&seed=11")
+        self.check("stream: an idle frame is drawn before starting", page.query_selector(".stream-stage .stream-frame") is not None and "60 frames" in page.text_content("#st-count"))
+        page.click("#st-start")
+        page.wait_for_timeout(1300)
+        self.check("stream: frames advance", re.match(r"Frame [2-9]|Frame 1\d", page.text_content("#st-count") or "") is not None, page.text_content("#st-count"))
+        page.click("#st-skip")
+        page.wait_for_timeout(200)
+        self.check("stream: skipping shows the rating slider", page.is_visible("#st-judge") and page.query_selector("#st-rating") is not None)
+        page.eval_on_selector("#st-rating", "el => { el.value = '40'; el.dispatchEvent(new Event('input', { bubbles: true })); }")
+        page.click("#st-submit")
+        page.wait_for_timeout(600)
+        result = page.text_content("#st-result") or ""
+        self.check("stream: the reveal shows the table, ΔP, and the rating", "17" in result and "0.467" in result and "Your rating" in result and "+40" in result, result[:200])
+        self.check("stream: every model reports a value for the same frames", len(page.query_selector_all("#st-result .models-table tbody tr")) == 5)
+        self.check("stream: the session log has one row", page.is_visible("#st-log") and len(page.query_selector_all("#st-log tbody tr")) == 1)
+        # Frequency estimates, on a two-cue stream.
+        page.click(".stream-options summary")
+        page.select_option("#st-ask", "frequency")
+        page.select_option("#st-preset", "companion-perfect")
+        page.click("#st-start")
+        page.click("#st-skip")
+        page.wait_for_timeout(200)
+        self.check("stream: frequency estimates ask for four counts", len(page.query_selector_all("#st-judge .freq-cell input")) == 4)
+        for k, v in (("a", "20"), ("b", "4"), ("c", "6"), ("d", "18")):
+            page.fill(f"#st-freq-{k}", v)
+        page.click("#st-submit")
+        page.wait_for_timeout(600)
+        result = page.text_content("#st-result") or ""
+        self.check("stream: estimates are turned into a ΔP", "Your estimates" in result and "you said 20" in result)
+        self.check("stream: the log grows and shows a scatter once ratings exist", len(page.query_selector_all("#st-log tbody tr")) == 2 and page.query_selector("#st-log .log-scatter") is not None)
+        page.click("#st-random")
+        page.wait_for_timeout(300)
+        self.check("stream: a random stream hides which one it is", "hidden" in (page.text_content("#st-which") or ""))
+        self.shot(page, "stream-page", full=True)
+        self.clean(page, "stream")
+        page.close()
+
+        # The model page draws the ΔP reference line for a contingency preset.
+        page = self.open(ctx, "models/rescorla-wagner.html#preset=contingency", wait=900)
+        labels = page.eval_on_selector_all("#chart .ref-label", "els => els.map(e => e.textContent)")
+        self.check("model page: the contingency preset draws ΔP reference lines", labels == ["ΔP = 0.47", "ΔP = 0"], str(labels))
+        self.check("model page: the outcome density card averages over streams", "Averaged over 8 streams" in (page.text_content("#cards") or ""))
         page.close()
         ctx.close()
 
@@ -511,7 +562,11 @@ class Checker:
     def learning_pages(self, browser) -> None:
         ctx = browser.new_context(viewport=DESKTOP)
         page = self.open(ctx, "primer.html")
-        self.check("primer: 20 sections with widgets", len(page.query_selector_all("article section")) == 20 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
+        self.check("primer: 22 sections with widgets", len(page.query_selector_all("article section")) == 22 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
+        page.click('#contingency [data-ct-preset="2"]')
+        self.check("primer: the contingency table recomputes ΔP", "0" in (page.text_content("#contingency .ct-dp") or "") and "24" in page.input_value('#contingency [data-ct="a"]'))
+        page.eval_on_selector("#sd-c", "el => { el.value = '-2'; el.dispatchEvent(new Event('input', { bubbles: true })); }")
+        self.check("primer: a low criterion calls nearly everything strong", "nearly everything" in page.text_content("#criterion .sd-out"))
         page.click('#vectors [data-vec="B"]')
         self.check("primer: ticking B adds its features to the event", page.eval_on_selector_all("#vectors .vec-event .vec-cell.on", "c => c.length") == 16)
         page.click('#echo [data-ec-probe="AB"]')
@@ -575,7 +630,7 @@ class Checker:
         if self.built:
             page.wait_for_timeout(300)
             self.check("landing: shows the build version", "Site version" in page.text_content("#build-info"))
-        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-cards .entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 8 and page.query_selector('.units a[href="models/minerva-al.html#view=essentials"]') is not None and not page.query_selector_all(".units tr.soon"))
+        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-cards .entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 9 and page.query_selector('.units a[href="models/minerva-al.html#view=essentials"]') is not None and not page.query_selector_all(".units tr.soon"))
         lines = page.eval_on_selector_all(".hero .hero-chart path.mini-line", "els => els.map(e => e.getAttribute('d').length)")
         self.check("landing: the hero chart is drawn by the model", len(lines) == 3 and all(n > 100 for n in lines), f"lines: {lines}")
         page.close()
@@ -601,7 +656,7 @@ def run_checks(directory: Path, browsers: list[str]) -> bool:
                 print(f"\n== {name} ({'built site' if built else 'source'}, {base}) ==")
                 browser = getattr(pw, name).launch()
                 c = Checker(base, name, built)
-                for section in (c.pages, c.dev_toggle, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.comparison, c.learning_pages):
+                for section in (c.pages, c.dev_toggle, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.comparison, c.streamed_trials, c.learning_pages):
                     print(f"- {section.__name__}")
                     c.run(section.__name__, section, browser)
                 browser.close()

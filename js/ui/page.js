@@ -228,6 +228,13 @@ export function mountModelPage({
     if (render) renderAll();
   }
 
+  // Reference lines the loaded preset asks for (such as ΔP), while the
+  // design is still the preset's.
+  function referenceLines() {
+    const p = phenomena.find((x) => x.id === state.presetId);
+    return p?.reference && p.design.trim() === state.designText.trim() ? p.reference : null;
+  }
+
   function recompute() {
     state.run = runModel(model, {
       design: state.design,
@@ -402,7 +409,7 @@ export function mountModelPage({
     }
     sk[t] = v;
     pr.lastT = t;
-    chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: pr });
+    chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: pr, reference: referenceLines() });
   }
 
   function revealPrediction() {
@@ -490,7 +497,7 @@ export function mountModelPage({
       state.predict.activeCue = cueBtn.dataset.sketchCue;
       state.predict.lastT = undefined;
       renderPredictBar();
-      chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: state.predict });
+      chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: state.predict, reference: referenceLines() });
       return;
     }
     const btn = ev.target.closest('[data-pact]');
@@ -525,7 +532,7 @@ export function mountModelPage({
     }
     pr.lastT = undefined;
     renderPredictBar();
-    chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: pr });
+    chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: pr, reference: referenceLines() });
   });
 
   // ---- Stepping -----------------------------------------------------------
@@ -875,7 +882,7 @@ export function mountModelPage({
 
   // ---- Render groups ------------------------------------------------------
   function renderTrialViews({ scrollTable = true } = {}) {
-    chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: state.predict });
+    chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: state.predict, reference: referenceLines() });
     for (const c of extraCharts) c.update({ run: state.run, t: state.t, revealed: state.revealed });
     renderStepper();
     renderEquations();

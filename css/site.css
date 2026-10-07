@@ -329,6 +329,8 @@ svg path.series.linked { stroke-width: 4; }
 .chart .series.compound { stroke: var(--ink-2); stroke-dasharray: 6 4; }
 .chart .end-label { fill: var(--ink); font-size: 12px; font-weight: 600; }
 .chart .leader { stroke: var(--axis); stroke-width: 1; }
+.chart .ref-line, .mini .mini-ref { stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 3 4; opacity: 0.8; }
+.chart .ref-label, .mini .mini-ref-label { fill: var(--ink-2); font-size: 11px; font-weight: 600; }
 .chart .cursor { stroke: var(--ink); stroke-width: 1.5; }
 .chart .hover-line { stroke: var(--muted); stroke-width: 1; }
 .chart .dot { stroke: var(--surface); stroke-width: 2; }
@@ -854,3 +856,59 @@ body.deck-page > .site-footer { width: 100%; padding-bottom: 5rem; }
 .about section { margin-top: 2rem; scroll-margin-top: 1rem; }
 .about ul { padding-left: 1.2rem; display: grid; gap: 0.4rem; }
 .credit-line { font-size: 0.95rem; }
+
+/* ---- Streamed trials ---------------------------------------------------- */
+/* The stage shows one frame at a time: a grey card with the outcome circle at
+   the top and the cue shapes at the bottom, as in the papers. Shapes take
+   their cue's chart colour; the outcome takes the experimenter's colour, as
+   in the deck diagrams. */
+.stream-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; margin-top: 1rem; }
+@media (max-width: 860px) { .stream-layout { grid-template-columns: 1fr; } }
+.stream-setup .field { display: block; margin: 0.4rem 0; }
+.stream-setup select { max-width: 100%; }
+.stream-options { margin: 0.6rem 0; }
+.stream-options summary { cursor: pointer; }
+.cells-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.3rem 0.8rem; }
+.cells-inputs input { width: 5rem; }
+.warn, .warn-inline { color: var(--bad); }
+.stream-stage { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; min-height: 300px; justify-content: center; }
+.stream-frame { max-width: 100%; height: auto; }
+.sf-card { fill: #b9bec5; stroke: var(--border); }
+.sf-card.blank { fill: #111; }
+.sf-outcome { fill: var(--role-experimenter); }
+.sf-cue { stroke: none; }
+.stream-legend { text-align: center; max-width: 34rem; margin: 0; }
+.stream-progress { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; align-items: center; margin-top: 0.6rem; }
+.stream-bar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+.stream-bar span { display: block; height: 100%; width: 0; background: var(--ui); transition: width 0.1s linear; }
+.stream-judge, .stream-result, .stream-log { margin-top: 1rem; }
+.judge-signal { display: flex; align-items: center; gap: 0.8rem; margin: 0.3rem 0 0.6rem; }
+.rating { display: grid; grid-template-columns: auto 1fr auto auto; gap: 0.6rem; align-items: center; margin: 0.5rem 0 0.8rem; }
+.rating input[type='range'] { width: 100%; }
+.rating output { font-family: var(--mono); font-variant-numeric: tabular-nums; min-width: 3.5rem; text-align: right; }
+.freq-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: 0.6rem; margin: 0.4rem 0 0.8rem; }
+.freq-cell { display: grid; justify-items: center; gap: 0.25rem; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); }
+.freq-cell input { width: 5rem; text-align: center; }
+.result-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 1rem 1.5rem; align-items: start; }
+@media (max-width: 860px) { .result-grid { grid-template-columns: 1fr; } }
+.cells-table { border-collapse: collapse; margin: 0.3rem 0 0.6rem; font-variant-numeric: tabular-nums; }
+.cells-table th, .cells-table td { border: 1px solid var(--border); padding: 0.3rem 0.7rem; text-align: center; }
+.cells-table th[scope='row'] { text-align: left; font-weight: 600; }
+.cells-table thead th { background: var(--surface-2); font-weight: 600; }
+.models-table .num, .stream-log .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.log-scatter { display: block; max-width: 100%; height: auto; }
+.log-dot { fill: var(--cue-1); stroke: var(--surface); stroke-width: 1.5; }
+
+/* Primer: the contingency table and the signal detection widget. */
+.ct-table input { width: 4.5rem; text-align: center; }
+.ct-cell { display: grid; justify-items: center; gap: 0.1rem; }
+.ct-line { font-size: 1.05rem; margin: 0.15rem 0; overflow-x: auto; }
+.ct-dp { font-weight: 600; }
+.sd-svg { display: block; max-width: 100%; height: auto; }
+.sd-curve { fill: none; stroke-width: 2.5; }
+.sd-curve.weak { stroke: var(--ink-2); }
+.sd-curve.strong { stroke: var(--cue-1); }
+.sd-area { opacity: 0.18; }
+.sd-area.weak { fill: var(--ink-2); }
+.sd-area.strong { fill: var(--cue-1); }
+.sd-crit { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 5 4; }

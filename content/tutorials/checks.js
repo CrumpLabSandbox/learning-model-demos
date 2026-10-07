@@ -66,4 +66,36 @@ export const checks = {
       { text: 'A copy of B', correct: false, why: 'A copy of B would make B stronger, not weaker. The trace stores the event minus the echo, and the event has no B.' },
     ],
   },
+  dpZero: {
+    q: 'The cue and the outcome came together on 6 frames, the cue alone on 24, the outcome alone on 6, and nothing on 24. How strongly are they related?',
+    options: [
+      { text: 'Not at all: ΔP = 0', correct: true, why: 'Right. With the cue the outcome came 6 times in 30 (0.2); without it, 6 times in 30 (0.2). The difference is 0. Six pairings did not make a contingency.' },
+      { text: 'Weakly: six pairings is something', correct: false, why: 'Six pairings feel like something, and that feeling is part of the outcome density story. But the outcome came just as often without the cue, so ΔP is 0.' },
+      { text: 'Strongly: a and d together are 30 of 60', correct: false, why: 'Cells a and d are the frames where the cue and outcome agreed, but so would they in a stream with no relationship at all. Compare the two rows: 6/30 − 6/30 = 0.' },
+    ],
+  },
+  odeWhere: {
+    q: 'In the signal detection experiments, what did a common outcome change?',
+    options: [
+      { text: 'The criterion: people said "strong" more readily', correct: true, why: 'Right. Sensitivity to the contingency was the same with a rare or a common outcome. What moved was the cut-off for saying "strong".' },
+      { text: 'Sensitivity: people saw the contingency more clearly', correct: false, why: 'That is the natural guess, but the data said otherwise: people told ΔP = 0.6 from ΔP = 0.4 equally well at both densities.' },
+      { text: 'Nothing: the effect disappeared with a yes-or-no answer', correct: false, why: 'The effect was still there in the yes-or-no answers. It was in the criterion, not in sensitivity.' },
+    ],
+  },
+  backwardWho: {
+    q: 'Why can Rescorla-Wagner show no blocking at all in the backward order?',
+    options: [
+      { text: 'A cue that is absent does not change', correct: true, why: 'Right. Only cues present on a trial are updated. B\'s last frame is in the first phase, so nothing in the second phase can touch V_B.' },
+      { text: 'The context takes all the error', correct: false, why: 'The context does learn, but that is not the reason. The rule updates only the cues present on a frame, and B is not there in the second phase.' },
+      { text: 'Probabilistic outcomes stop learning', correct: false, why: 'Learning continues with probabilistic outcomes; V just wanders around its fixed point. The problem is that B is absent.' },
+    ],
+  },
+  inputOutput: {
+    q: 'A model shows the outcome density effect in its learning. The signal detection data put the effect in the criterion. What follows?',
+    options: [
+      { text: 'The model is placing in the input something the data place in the output', correct: true, why: 'Right. A learning model describes what is taken in; a rating adds a decision about how to report it. The two can be modelled separately, and the data suggest they should be.' },
+      { text: 'The model is right and the signal detection analysis is wrong', correct: false, why: 'The two are not in competition over the same thing. The model has no decision stage at all, so it can only put the effect in learning. The data say that is the wrong place.' },
+      { text: 'The model should be discarded', correct: false, why: 'Too strong. The same model may describe the input well. Adding a decision stage is the usual response, not throwing the learning rule away.' },
+    ],
+  },
 };

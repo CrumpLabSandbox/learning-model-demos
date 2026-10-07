@@ -99,6 +99,21 @@ test('rejects malformed timing with a helpful message', () => {
   assert.throws(() => parseDesign('10 A+ [gap 4]'), /not a timing setting/);
   assert.throws(() => parseDesign('10 A+ [ITI 4-5]'), /one number/);
   assert.throws(() => parseDesign('10 A+ CS 1-4]'), /square brackets/);
-  assert.throws(() => parseDesign('10 -'), /nothing in it/);
+  assert.throws(() => parseDesign('10 -'), /no cues/);
   assert.throws(() => parseDesign('10 +'), /no cues/);
+});
+
+test('a bare "-" is a frame with nothing on it; with a context, the context is its only cue', () => {
+  const d = parseDesign('Stream: 2 A+, 1 A-, 1 +, 2 -\nContext: Z');
+  assert.deepEqual(d.cues, ['A', 'Z']);
+  assert.equal(d.totalTrials, 6);
+  const seq = expandDesign(d, makeRng(1));
+  const empty = seq.filter((t) => t.type.label === '-');
+  assert.equal(empty.length, 2);
+  assert.deepEqual(empty[0].cues, ['Z']);
+  assert.equal(empty[0].reinforced, undefined);
+  assert.equal(empty[0].type.reinforced, false);
+  assert.equal(empty[0].timing.cs, null);
+  assert.equal(empty[0].timing.us, null);
+  assert.deepEqual(parseDesign(formatDesign(d)), d);
 });
