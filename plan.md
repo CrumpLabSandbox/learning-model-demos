@@ -355,6 +355,29 @@ Notes from building it:
 - `js/core/registry.js` lists the models in course order; the comparison page, the table, the tutorials' verdict strips, and the tests all read it.
 - Navigation now includes Compare and Tutorials (the landing page's tutorial section). A content test checks that every page has the same navigation.
 
+### 7. Human contingency judgement: the streamed-trial unit
+
+People judge contingencies in experiments that are the human counterpart of conditioning, and the Rescorla-Wagner model has been applied to them since Dickinson, Shanks, and Evenden (1984). This unit brings the site's models to that task, using the streamed-trial studies (Crump, Hannah, Allan, & Hord, 2007; Allan, Hannah, Crump, & Siegel, 2008; Hannah, Crump, Allan, & Siegel, 2009; Siegel, Allan, Hannah, & Crump, 2009) as the source of the designs and the findings.
+
+- [x] The design format can write a 2 × 2 contingency table: with a context, `-` is a frame with nothing on it, so a stream is `17 A+, 13 A-, 3 +, 27 -, random` with `Context: Z`
+- [x] `js/core/contingency.js`: ΔP, the cells of a stream, designs from cells and from a contingency and an outcome density, and the frames a participant sees (the same sequence the models get, for the same seed)
+- [x] Four phenomenon presets, badges computed as always: contingency (ΔP 0.47 against 0), outcome density (ΔP 0 at P(O) 0.2 against 0.8), one-phase blocking (the Tangen and Allan matrices from Hannah et al., Table 3), and probabilistic two-phase blocking in the forward order (Hannah et al., Table 4b, with the control's own first-phase companion)
+- [x] Checks that should not depend on the order of frames average over eight streams (`h.overSeeds`); the criterion text says so
+- [x] Dashed reference lines on the charts for ΔP, from the phenomenon (`reference`) and on mini charts (`data-ref`)
+- [x] Streamed-trial page (`stream.html`): preset streams from the papers or custom cells, a random stream whose identity is hidden until judged, speed and blank options (gentle by default; the paper's 100 ms frames and black gaps are an option with a flashing warning), a rating or frequency estimates, then the table, ΔP, the judgement, every model's value for the same frames, and a session log with a ratings-against-ΔP scatter
+- [x] Primer sections 21 (the 2 × 2 table and ΔP, with an editable table) and 22 (sensitivity and criterion, with a two-curve signal detection widget); check questions for both
+- [x] Tutorial "Judging contingency: from ΔP to the learning rule", the overview deck, glossary entries, a landing page unit row and tutorial card, and Streamed trials in every page's navigation
+- [x] Tests: the papers' matrices and their ΔP values, the stream frames against the model sequence, the Rescorla-Wagner asymptote at ΔP with a context (Chapman & Robbins, 1990), every stream preset's claimed ΔP, and the per-model badges; browser checks for the page and the reference lines
+
+Notes from building it:
+
+- A random stream is one particular order of frames, and for the effects that live before the asymptote the order decides the answer: Rescorla-Wagner's outcome density difference ranged from −0.19 to +0.15 across twelve orders. Badges for those presets therefore average over eight streams, as the experiments averaged over many streams per condition. The contingency preset is robust to the order and uses the single run, so its numbers match the chart.
+- Two-phase blocking with probabilistic outcomes gives weak model predictions: averaged over streams, Rescorla-Wagner's forward effect is about 0.1, Mackintosh's is reversed, and in the backward order every model gives about 0, including MINERVA-AL with these frames. The forward order is a preset; the backward order is in the tutorial as prose and mini charts rather than a badge, because the results sit within noise of the margin for every model.
+- With the context as a cue, Rescorla-Wagner's V levels off at ΔP (Chapman & Robbins, 1990). The test checks the mean over the second half of a 600-frame stream, over four orders, because V wanders around its fixed point under a random order. Without the context the model learns P(O | A) instead; the tutorial shows both.
+- Rescorla-Wagner and Pearce-Hall barely show the outcome density effect; Mackintosh, SOP, and MINERVA-AL show it because a common outcome means many pairings. The signal detection papers place the effect, and one-phase blocking, in the decision criterion rather than in learning. The tutorial makes the input and output distinction the closing point, and the primer's section 22 gives the widget for it.
+- SOP treats each frame as a well-spaced trial under the default timing, and its context becomes a strong inhibitor over the many frames with nothing on them, so its cue strengths run above 1. This is the model's behaviour under the site's trial-structured context; the page says so, and a `Timing: ITI 2` line is offered as something to try.
+- The streamed-trial page flashes stimuli. The default is 500 ms frames with 150 ms gaps and a grey card between frames, and it follows `prefers-reduced-motion`; the paper's 100 ms frames with black gaps are an option with a warning. Nothing is saved between visits.
+
 ### Visual refresh: graph paper
 
 - [x] Colour kept for data: the interface (links, buttons, current page, step numbers, focus) is drawn in ink (`--ui`), so the only blue on a model page is cue A

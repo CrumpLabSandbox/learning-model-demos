@@ -1,3 +1,6 @@
 _site/
 _check/
 __pycache__/
+TrainingPapers/
+.DS_Store
+.claude/

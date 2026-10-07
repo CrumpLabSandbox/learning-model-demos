@@ -16,7 +16,7 @@ import { esc } from './equation.js';
 import { installHighlighting } from './highlight.js';
 
 // What each model's line measures, in plain words.
-const PLOTTED = {
+export const PLOTTED = {
   'rescorla-wagner': 'V: how strongly each cue predicts the outcome. It levels off at λ = 1.',
   mackintosh: 'V: how strongly each cue predicts the outcome, learned from its own error.',
   'pearce-hall': 'V − V̄: excitatory minus inhibitory strength.',
@@ -131,7 +131,7 @@ export function mountCompare(root) {
   function select(t) {
     const n = state.runs[0]?.run.trials.length ?? 0;
     state.t = Math.max(0, Math.min(n, t));
-    charts.forEach((c, i) => c.update({ run: state.runs[i].run, t: state.t, revealed: n }));
+    charts.forEach((c, i) => c.update({ run: state.runs[i].run, t: state.t, revealed: n, reference: state.runs[i].preset?.reference ?? null }));
     const scrub = $('cmp-scrub');
     scrub.max = String(n);
     scrub.value = String(state.t);

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Glossary · Learning Model Demos</title>
-  <meta name="description" content="Plain-language definitions of every technical word used on the learning model demos site.">
+  <title>Streamed Trials · Learning Model Demos</title>
+  <meta name="description" content="Be the participant in a contingency judgement experiment: watch a stream of cues and outcomes, rate the relationship, then see the 2 × 2 table, ΔP, and what every learning model made of the same frames.">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/load-guard.js"></script>
   <script src="js/site-status.js"></script>
@@ -27,27 +27,31 @@
       </div>
       <div class="nav-group" role="group" aria-label="More">
         <a href="compare.html">Compare</a>
-        <a href="stream.html">Streamed trials</a>
+        <a href="stream.html" aria-current="page">Streamed trials</a>
         <a href="index.html#tutorials">Tutorials</a>
-        <a href="glossary.html" aria-current="page">Glossary</a>
+        <a href="glossary.html">Glossary</a>
       </div>
     </nav>
   </header>
   <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="about.html#status">What this means</a></div>
   <main class="page">
     <div class="prose">
-      <h1>Glossary</h1>
-      <p>Every technical word on this site, in plain language, with an example. If a word on another page confuses you, look it up here.</p>
+      <h1>Streamed trials: be the participant</h1>
+      <p class="lede">In a <a href="glossary.html#contingency-judgement">contingency judgement</a> experiment, people watch a cue and an outcome come and go, then say how strongly the two are related. Here you can do the task yourself, the way it was run in the <a href="glossary.html#streamed-trial">streamed-trial</a> studies: a whole block of frames in a few seconds, then one judgement. Afterwards you see the answer, and what every model on this site made of the very same frames.</p>
+      <p class="small muted">Each frame shows a square (the cue) or not, and a circle (the outcome) or not. Some streams add a triangle as a second cue. New here? The <a href="decks/contingency.html">overview slides</a> explain the task first, and the <a href="tutorials/judging-contingency.html">tutorial</a> connects it to the models. <span class="warn-inline">The stream flashes; the default speed is gentle, and the options let you choose.</span></p>
     </div>
-    <div class="prose" id="glossary"></div>
+    <div id="stream"></div>
+    <div class="prose small muted" style="margin-top:1.5rem">
+      <p>The procedure follows Crump, Hannah, Allan &amp; Hord (2007), <em>Quarterly Journal of Experimental Psychology, 60</em>, 753–761, and Hannah, Crump, Allan &amp; Siegel (2009), <em>Canadian Journal of Experimental Psychology, 63</em>, 103–112. Their frames lasted 100 ms with 100 ms black gaps; the cell counts in the preset streams are theirs.</p>
+    </div>
   </main>
   <footer class="site-footer">
     <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
     <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
   </footer>
   <script type="module">
-    import { mountGlossary } from './js/ui/glossary.js';
-    mountGlossary(document.getElementById('glossary'));
+    import { mountStream } from './js/ui/stream.js';
+    mountStream(document.getElementById('stream'));
   </script>
 </body>
 </html>

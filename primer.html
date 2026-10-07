@@ -27,6 +27,7 @@
       </div>
       <div class="nav-group" role="group" aria-label="More">
         <a href="compare.html">Compare</a>
+        <a href="stream.html">Streamed trials</a>
         <a href="index.html#tutorials">Tutorials</a>
         <a href="glossary.html">Glossary</a>
       </div>
@@ -58,6 +59,8 @@
           <li><a href="#vectors">Events as lists of numbers</a></li>
           <li><a href="#echo">Similarity and the echo</a></li>
           <li><a href="#notation">Notation map</a></li>
+          <li><a href="#contingency">Contingency: the 2 × 2 table and ΔP</a></li>
+          <li><a href="#criterion">A judgement is a decision</a></li>
         </ol>
         <p class="small" style="margin:.75rem 0 0"><a href="decks/reading-equations.html">Overview slides for this page</a></p>
       </nav>
@@ -242,6 +245,23 @@
           <p>Different papers and textbooks write the same ideas in different ways. If a reading uses symbols you do not recognise, find the idea here.</p>
           <div class="widget" data-widget="notation"></div>
           <p class="small muted">For Rescorla-Wagner, the "original paper" column follows the 1972 chapter, which writes the compound of cues A and X as V<sub>AX</sub> and numbers the outcome with a subscript. The last column lists forms that are common across sources rather than any one book. When you quote a source, use its own symbols.</p>
+        </section>
+
+        <section id="contingency">
+          <h2>21. Contingency: the 2 × 2 table and ΔP</h2>
+          <p>Experiments with people usually ask for a judgement at the end: how strongly does the cue go with the outcome? The honest answer depends on four counts. Over a block of frames, how often did the cue and the outcome come together (<strong>a</strong>), the cue come alone (<strong>b</strong>), the outcome come alone (<strong>c</strong>), and neither come (<strong>d</strong>)? These four numbers are the <a href="glossary.html#contingency-table">2 × 2 contingency table</a>.</p>
+          <p>The usual measure of <a href="glossary.html#contingency">contingency</a> is <a href="glossary.html#delta-p">ΔP</a>: the chance of the outcome when the cue is there, minus the chance of the outcome when it is not. Each chance is a fraction of a row of the table. ΔP is 0 when the cue makes no difference, positive when the outcome is more likely with the cue, and negative when it is less likely. Notice that cell <strong>d</strong>, the frames with nothing on them, matters: the outcome's chance <em>without</em> the cue is c out of c + d.</p>
+          <div class="widget" data-widget="contingency"></div>
+          <div data-check="contingency"></div>
+          <p class="small muted">Why this is on a page about equations: with a <a href="glossary.html#context">context</a> cue on every frame, the Rescorla-Wagner rule levels off at ΔP (section 11 shows how to find where a rule levels off). The <a href="tutorials/judging-contingency.html">contingency tutorial</a> works it through, and the <a href="stream.html">streamed-trial page</a> lets you watch a stream and judge it yourself.</p>
+        </section>
+
+        <section id="criterion">
+          <h2>22. A judgement is a decision: sensitivity and criterion</h2>
+          <p>A model gives a number: how strongly the cue predicts the outcome. A person gives a response: a rating, or "strong" or "weak". Between the two sits a decision. <a href="glossary.html#signal-detection">Signal detection theory</a> separates two things that go into it. <a href="glossary.html#sensitivity">Sensitivity</a> is how far apart two kinds of stream feel, compared with how much the same kind of stream varies from one to the next. The <a href="glossary.html#criterion">criterion</a> is the cut-off: feel more than this, say "strong".</p>
+          <p>The two curves below are how a weak stream and a strong stream feel over many repetitions. Move the sensitivity to pull them apart. Move the criterion and watch both the hits (strong streams called strong) and the false alarms (weak streams called strong) change together, with the curves exactly where they were. That is what an <a href="glossary.html#outcome-density">outcome density</a> manipulation did in the streamed-trial studies: it moved the criterion and left the sensitivity alone.</p>
+          <div class="widget" data-widget="criterion"></div>
+          <div data-check="criterion"></div>
         </section>
       </article>
     </div>

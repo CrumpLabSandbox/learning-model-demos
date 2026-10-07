@@ -13,6 +13,9 @@
 //   data-trial="30"           for a model that runs moment by moment (SOP),
 //                             draw inside that trial instead, following the
 //                             cue in data-cue (default: the first cue)
+//   data-ref="0.467=ΔP 0.47@1;0=ΔP 0@2"
+//                             dashed reference lines: value=label, with an
+//                             optional @phase (1-based) to span one phase
 
 import { parseDesign } from '../core/design.js';
 import { runModel } from '../core/runner.js';
@@ -39,16 +42,25 @@ export function drawMiniTrial(el, { design, model = 'sop', trial, cue = null }) 
   el.innerHTML = svg + (el.dataset.caption ? `<figcaption>${el.dataset.caption}</figcaption>` : '');
 }
 
-export function drawMini(el, { design, lines, params = {}, options = {}, model = 'rescorla-wagner', labels = {}, seriesKey = null }) {
+export function parseRefs(text) {
+  if (!text) return [];
+  return text.split(';').map((item) => {
+    const [value, rest = ''] = item.split('=');
+    const [label, phase] = rest.split('@');
+    return { value: Number(value), label: label || value.trim(), phase: phase ? Number(phase) : null };
+  });
+}
+
+export function drawMini(el, { design, lines, params = {}, options = {}, model = 'rescorla-wagner', labels = {}, seriesKey = null, refs = [], seed = 1 }) {
   const d = parseDesign(design);
-  const run = runModel(MODELS[model], { design: d, params, options });
+  const run = runModel(MODELS[model], { design: d, params, options, seed });
   const show = lines ?? d.probes ?? d.cues;
   const series = seriesKey ? run.stateSeries[seriesKey] : run.series;
   const n = run.trials.length;
   const W = Math.max(260, Math.round(el.clientWidth || 480));
   const H = Math.round(Math.max(160, Math.min(260, W * 0.45)));
   const m = { l: 34, r: 70, t: 22, b: 24 };
-  const vals = show.flatMap((p) => series[p]);
+  const vals = [...show.flatMap((p) => series[p]), ...refs.map((r) => r.value)];
   const lo = Math.min(0, ...vals) < -0.05 ? Math.floor(Math.min(...vals) * 2) / 2 : 0;
   const hi = Math.max(1, Math.ceil(Math.max(...vals) * 2) / 2);
   const x = (i) => m.l + (i / n) * (W - m.l - m.r);
@@ -63,6 +75,13 @@ export function drawMini(el, { design, lines, params = {}, options = {}, model =
   for (let v = lo; v <= hi + 1e-9; v += 0.5) {
     out.push(`<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" class="${Math.abs(v) < 1e-9 ? 'mini-zero' : 'mini-grid'}"/>`);
     out.push(`<text class="mini-tick" x="${m.l - 5}" y="${y(v) + 4}" text-anchor="end">${String(v).replace('-', '−')}</text>`);
+  }
+  for (const r of refs) {
+    const ph = r.phase ? run.phases[r.phase - 1] : null;
+    const x0 = ph ? x(ph.start - 1) : m.l;
+    const x1 = ph ? x(ph.end) : W - m.r;
+    out.push(`<line class="mini-ref" x1="${x0}" x2="${x1}" y1="${y(r.value)}" y2="${y(r.value)}"/>`);
+    out.push(`<text class="mini-ref-label" x="${x1 - 3}" y="${y(r.value) - 4}" text-anchor="end">${esc(r.label)}</text>`);
   }
   const ends = [];
   show.forEach((p) => {
@@ -109,6 +128,8 @@ export function mountMinis(root) {
       labels,
       model: el.dataset.model ?? 'rescorla-wagner',
       seriesKey: el.dataset.series ?? null,
+      refs: parseRefs(el.dataset.ref),
+      seed: el.dataset.seed ? Number(el.dataset.seed) : 1,
     });
   };
   for (const el of figs) {

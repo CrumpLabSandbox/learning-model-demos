@@ -106,4 +106,20 @@ export const checks = {
       { text: '3 times as much', correct: false, why: 'The 3 is a power, not a multiplier: 0.5³ = 0.5 × 0.5 × 0.5 = 0.125, so trace 2 counts 1 / 0.125 = 8 times as much.' },
     ],
   },
+  contingency: {
+    q: 'In a 60-frame stream, the cue and outcome came together on 15 frames, the cue came alone on 15, the outcome came alone on 15, and nothing came on 15. What is ΔP?',
+    options: [
+      { text: '0', correct: true, why: 'Right. P(outcome | cue) = 15/30 = 0.5 and P(outcome | no cue) = 15/30 = 0.5, so ΔP = 0. The cue made no difference, though it was paired with the outcome 15 times.' },
+      { text: '0.5', correct: false, why: 'That is P(outcome | cue), the first half of ΔP. Subtract the outcome\'s chance without the cue, also 0.5, and the contingency is 0.' },
+      { text: '0.25', correct: false, why: 'That is the fraction of all frames with both cue and outcome, 15 of 60. ΔP compares two rows of the table: 15/30 − 15/30 = 0.' },
+    ],
+  },
+  criterion: {
+    q: 'A manipulation makes people call more streams "strong" without changing how well they tell strong streams from weak ones. In signal detection terms, what moved?',
+    options: [
+      { text: 'The criterion', correct: true, why: 'Right. A lower cut-off turns more streams of both kinds into "strong" responses. Sensitivity, the distance between the two curves, is unchanged. This is what outcome density did in the streamed-trial studies.' },
+      { text: 'Sensitivity', correct: false, why: 'A change in sensitivity would make the two kinds of stream easier or harder to tell apart. Here they are told apart just as well; only the cut-off moved.' },
+      { text: 'Both', correct: false, why: 'Both can move in general, but the question says telling them apart did not change. Only the criterion did.' },
+    ],
+  },
 };

@@ -12,7 +12,11 @@
 // - A trial type is one or more capital letters, one per cue, then `+` when
 //   the outcome occurs or `-` when it does not. `A+(0.5)` sets the outcome
 //   magnitude for that trial type. A bare `+` is the outcome on its own, with
-//   no cue (useful with a context).
+//   no cue, and a bare `-` is a trial on which nothing happens. With a
+//   context (see below) the context is the only cue on such a trial; without
+//   one they teach nothing and just take up a trial. The four together,
+//   `A+`, `A-`, `+`, `-`, are the four cells of a 2 × 2 contingency table
+//   (see js/core/contingency.js).
 // - Timing, for models that run moment by moment (SOP): an item can end with
 //   settings in square brackets, such as `20 A+ [CS 1-10, US 9-10, ITI 100]`.
 //   CS a-b says the cues are on from moment a to moment b of the trial, US
@@ -60,9 +64,6 @@ export function parseTrialType(text, line) {
   const [, letters, sign, mag] = m;
   if (letters !== letters.toUpperCase()) {
     throw new DesignError(`Cues are capital letters: write ${letters.toUpperCase()}${sign} instead of ${s}.`, line);
-  }
-  if (!letters && sign === '-') {
-    throw new DesignError('"-" on its own is a trial with nothing in it. Name a cue, such as A-.', line);
   }
   const cues = [...letters];
   if (new Set(cues).size !== cues.length) {
