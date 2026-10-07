@@ -508,11 +508,16 @@ class Checker:
         page.select_option("#preset", "negative-patterning")
         page.wait_for_timeout(1200)
         self.check("delamater: a one-outcome design hides the second outcome chart", page.is_hidden("#panel-out2"))
+        # Averaged over networks the one-layer version can look as if it solved
+        # negative patterning (each network gives up on a different element),
+        # so look at a single network, as the page's build-stage text says to.
+        page.eval_on_selector("#p-learners", "el => { el.value = '1'; el.dispatchEvent(new Event('input', { bubbles: true })); }")
+        page.wait_for_timeout(800)
         badge = lambda: page.text_content('.card:has(h3:text("Negative patterning")) .badge')
         before = badge()
         page.click('[data-opt="hidden"]')
         page.wait_for_timeout(1200)
-        self.check("delamater: without the hidden layer negative patterning fails", before != badge(), f"{before} -> {badge()}")
+        self.check("delamater: without the hidden layer a single network fails negative patterning", before.strip().startswith("✓") and badge().strip().startswith("✗"), f"{before} -> {badge()}")
         page.click('[data-opt="hidden"]')
         page.click('[data-act="start"]')
         page.wait_for_timeout(300)
