@@ -9,33 +9,33 @@
 // not from the summed error of all cues present as in Rescorla-Wagner.
 //
 // Attention (associability) α_A changes with experience. The 1975 paper
-// states the direction: α_A rises when A predicts the outcome better than
-// all the other cues present, |λ − V_A| < |λ − V_others|, and falls
-// otherwise. It does not give one formula for the size of the change, so
-// this module offers two explicit versions, and the page says which is in use:
+// (p. 288) gives the direction in two rules: Δα_A is positive when A
+// predicts the outcome better than all the other cues present,
+// |λ − V_A| < |λ − V_X| (Eq. 4), and negative when the others predict it at
+// least as well, |λ − V_A| ≥ |λ − V_X| (Eq. 5). V_X is the summed strength of
+// the other cues present. It then adds, as a further assumption, that the
+// size of the change is proportional to the discrepancy between the two
+// errors. The paper gives no step size and no bounds, so this module offers
+// two explicit versions, and the page says which is in use:
 //
-//   Continuous rule (default): Δα_A = θ_α (|λ − V_others| − |λ − V_A|),
-//     the form used in later formal treatments such as Le Pelley (2004).
-//   Direction rule (option): α_A moves a fixed fraction θ_α of the way up
-//     to 1 when A is the better predictor, and down to α_min otherwise. A tie
-//     counts as "not better", as in the 1975 wording. The step size is this
-//     site's choice.
+//   Continuous rule (default): Δα_A = θ_α (|λ − V_X| − |λ − V_A|), the
+//     proportional form Mackintosh suggests. A tie leaves α unchanged.
+//   Direction rule (option): α_A moves a fixed fraction θ_α of the way up to
+//     1 when A is the better predictor, and down to α_min otherwise, so a tie
+//     lowers α as Eq. 5 says. The step size is this site's choice.
 //
-// In both, α stays between α_min and 1. V_others is the summed strength of
-// the other cues present on the trial (0 when A is alone). Errors are
-// computed from the strengths before the trial; the new α applies from the
-// next trial on. Cues that are absent do not change.
-//
-// Le Pelley, M. E. (2004). The role of associative history in models of
-// associative learning: A selective review and a hybrid model. Quarterly
-// Journal of Experimental Psychology, 57B, 193-243.
+// The two differ exactly where the paper is ambiguous: Eq. 5 lowers α on a
+// tie, but a change proportional to the discrepancy is zero on a tie. In
+// both versions α stays between α_min and 1 (the paper has 0 < α < 1). λ is
+// 0 on a nonreinforced trial (footnote 2 allows 0 or a negative number).
+// Errors are computed from the strengths before the trial; the new α applies
+// from the next trial on. Cues that are absent do not change.
 
 export const id = 'mackintosh';
 export const name = 'Mackintosh';
 export const year = 1975;
 export const citation =
   'Mackintosh, N. J. (1975). A theory of attention: Variations in the associability of stimuli with reinforcement. Psychological Review, 82, 276–298.';
-export const status = 'preview';
 
 export const salienceKey = (cue) => `alpha0_${cue}`;
 

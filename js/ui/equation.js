@@ -108,7 +108,7 @@ function nodeMathML(node, ctx, mode, first = true) {
         '+',
       );
     case 'sumEach':
-      return join(ctx.present.map((c) => node.each(c)), '+');
+      return join(((node.over && ctx.rec && node.over(ctx.rec)) || ctx.present).map((c) => node.each(c)), '+');
     case 'sumOthers': {
       const others = ctx.present.filter((c) => c !== ctx.cue);
       if (!others.length) return mode === 'symbols' ? `<mn>0</mn><mtext class="case-cond"> (no other cues)</mtext>` : '<mn>0</mn>';
@@ -234,7 +234,7 @@ export function evaluate(node, ctx) {
     case 'abs':
       return Math.abs(evaluate(node.arg, ctx));
     case 'sumEach':
-      return ctx.present.reduce((s, c) => s + evaluate(node.each(c), ctx), 0);
+      return ((node.over && ctx.rec && node.over(ctx.rec)) || ctx.present).reduce((s, c) => s + evaluate(node.each(c), ctx), 0);
     case 'sumMoments':
     case 'sumOver':
       return ctx.spec.symbols[node.of].value(ctx.rec, ctx.cue);

@@ -22,12 +22,23 @@
 //   decay             A1 elements fall to A2 with probability pd1, and A2
 //                     elements fall back to inactive with probability pd2
 //                     (pd1 > pd2: A2 lingers)
-//   associative       a cue in A1 sends inactive elements of the nodes it is
+//   associative       a cue sends inactive elements of the nodes it is
 //   activation        linked to straight into A2, with probability
-//                     p2 = ρ Σ V p_A1 over the linked cues (kept between 0
-//                     and 1). This is how a cue "retrieves" the US: it
-//                     calls up the US's A2 state, not its A1 state.
-// Learning, for each cue and the US:
+//                     p2 = Σ V (r1 p_A1,cue + r2 p_A2,cue) over the linked
+//                     cues, kept between 0 and 1 (Mazur & Wagner, Eqs. 1.1
+//                     and 1.2). This is how a cue "retrieves" the US: it
+//                     calls up the US's A2 state, not its A1 state. r2 is
+//                     small (0.01 in the papers), so A1 does nearly all of it.
+//   distractor        the memory system holds only so much activity. When
+//   rules             presentation puts Δp_A1 of some node's elements into A1
+//                     on a moment, every node's decay from A1 is faster on
+//                     that moment, pd1' = pd1 + Δp_A1 / C1, and likewise
+//                     associative activation into A2 raises every node's
+//                     decay from A2, pd2' = pd2 + Δp_A2 / C2 (Eqs. 1.3 and
+//                     1.4). So a US coming on knocks the cue's elements out
+//                     of A1 faster, and a stimulus after the trial cuts the
+//                     trial's learning short.
+// Learning, for each cue and the US (Eqs. 1.5 to 1.7):
 //   ΔV = L⁺ Σ p_A1,cue p_A1,US − L⁻ Σ p_A1,cue p_A2,US,  summed over moments
 // Excitation when the cue and the US are both in A1; inhibition when the
 // cue is in A1 while the US is in A2. Learning slows as the cue comes to
@@ -37,13 +48,17 @@
 // Choices made here, where the papers leave room:
 // - Presentation acts before associative activation: p2 applies to the
 //   inactive elements that presentation did not take.
+// - The distractor increments Δp_A1 and Δp_A2 are the elements that
+//   presentation and associative activation move on that moment, summed over
+//   every node. Decay itself does not count, so that a stimulus left alone
+//   follows the papers' decay functions (Mazur & Wagner, Eqs. 1.9 and 1.10)
+//   exactly. The option "Activity limits" switches the distractor rules off.
 // - Learning uses the proportions after each moment's changes. The
 //   increments of all moments of a trial, including the interval after it,
-//   are added up and V changes once, at the end. So V is constant inside a
-//   trial, and the trial's learning is the area of overlap on the timeline.
-// - p2 = ρ Σ V p_A1, with ρ a parameter. Wagner (1981) says p2 grows with V
-//   and with p_A1 of the cue; ρ only sets the scale on which V is shown
-//   (here, near 1 after acquisition with the default settings).
+//   are added up and V changes once, at the end. Mazur and Wagner (1982)
+//   likewise apply a trial's changes only at the next presentation. So V is
+//   constant inside a trial, and the trial's learning is the area of
+//   overlap on the timeline.
 // - Every cue also links to every other cue, learned with the same rule.
 //   This is how a context comes to retrieve a cue that is often shown in it
 //   (latent inhibition by priming). The option "Cues link to each other"
@@ -51,19 +66,26 @@
 // - The size of the US, A+(2), multiplies its intensity p1 (up to 1): a
 //   bigger US activates its elements faster, before the cues can call them
 //   up into A2.
-// - The response is R = w1 p_A1,US + w2 p_A2,US. The trial's conditioned
-//   response is the mean of R over the moments the cue is on before the US
-//   arrives.
+// - The response is R = w1 p_A1,US + w2 p_A2,US (Wagner, 1981, Fig. 1.3).
+//   The trial's conditioned response is the mean of R over the moments the
+//   cue is on before the US arrives.
 // - Every node starts inactive. The context is on at every moment.
-// - The default values are chosen for this page, so that the classic
-//   effects appear with one set of numbers. They are not from the papers.
+// - The default values are this page's, chosen so that the classic effects
+//   appear with one set of numbers and V levels off near 1. The papers'
+//   simulations used p1,US = 0.6, p1,CS = 0.3 (0.1 for long cues), pd1 = 0.1,
+//   pd2 = 0.02, L⁺ = 0.1, L⁻ = 0.02, r1 = 1, r2 = 0.01, C1 = 2, C2 = 10,
+//   and tests/sop.test.js reproduces their figures with those values. Two
+//   relations the papers keep are kept here: pd1 = 5 pd2 and C2 = 5 C1. The
+//   papers also set L⁺ = 5 L⁻ so that a static context gains no net
+//   strength; here L⁻ is smaller than that, because the context on this
+//   page switches on and off with each trial and so turned inhibitory with
+//   the papers' ratio. r1 is 0.55 rather than 1 only to set the scale of V.
 
 export const id = 'sop';
 export const name = 'SOP';
 export const year = 1981;
 export const citation =
   'Wagner, A. R. (1981). SOP: A model of automatic memory processing in animal behavior. In N. E. Spear & R. R. Miller (Eds.), Information processing in animals: Memory mechanisms (pp. 5–47). Erlbaum.';
-export const status = 'preview';
 // Runs moment by moment: trial records carry the moments, for the timeline.
 export const realTime = true;
 // The phenomenon checks that compare responses read this per-cue series
@@ -93,6 +115,12 @@ export const options = [
     default: true,
     help: 'On: every cue also learns about every other cue, so a context can come to call up a cue shown in it. Off: cues learn only about the US.',
   },
+  {
+    key: 'distractors',
+    label: 'Activity limits (distractor rules)',
+    default: true,
+    help: 'On: memory holds only so much activity, so when a stimulus comes on, every node\'s elements fall out of A1 faster on that moment (and out of A2 when a cue calls something up). A US knocks the cue out of A1 sooner, and a stimulus after a trial cuts its learning short. Off: decay runs at fixed rates whatever else happens.',
+  },
 ];
 
 export function parameters(cues, opts = {}, { context = null } = {}) {
@@ -113,7 +141,10 @@ export function parameters(cues, opts = {}, { context = null } = {}) {
   ps.push({ key: 'Lm', sym: 'Lm', label: 'Inhibitory learning rate', min: 0, max: 0.2, step: 0.005, default: 0.02, role: 'modeller', active: opts.inhibition !== false });
   ps.push({ key: 'pd1', sym: 'pd1', label: 'Decay from A1 to A2', min: 0.01, max: 1, step: 0.01, default: 0.15, role: 'modeller', active: true, advanced: true });
   ps.push({ key: 'pd2', sym: 'pd2', label: 'Decay from A2 to inactive', min: 0.005, max: 1, step: 0.005, default: 0.03, role: 'modeller', active: true, advanced: true });
-  ps.push({ key: 'rho', sym: 'rho', label: 'Retrieval strength', min: 0, max: 2, step: 0.05, default: 0.55, role: 'modeller', active: opts.retrieval !== false, advanced: true });
+  ps.push({ key: 'r1', sym: 'r1', label: 'Retrieval by a cue in A1', min: 0, max: 2, step: 0.05, default: 0.55, role: 'modeller', active: opts.retrieval !== false, advanced: true });
+  ps.push({ key: 'r2', sym: 'r2', label: 'Retrieval by a cue in A2', min: 0, max: 0.5, step: 0.01, default: 0.01, role: 'modeller', active: opts.retrieval !== false, advanced: true });
+  ps.push({ key: 'C1', sym: 'C1', label: 'Room for activity in A1', min: 0.5, max: 10, step: 0.5, default: 2, role: 'modeller', active: opts.distractors !== false, advanced: true });
+  ps.push({ key: 'C2', sym: 'C2', label: 'Room for activity in A2', min: 1, max: 50, step: 1, default: 10, role: 'modeller', active: opts.distractors !== false, advanced: true });
   ps.push({ key: 'w1', sym: 'w1', label: 'Response weight for US in A1', min: -1, max: 1, step: 0.1, default: 1, role: 'modeller', active: true, advanced: true });
   ps.push({ key: 'w2', sym: 'w2', label: 'Response weight for US in A2', min: -1, max: 1, step: 0.1, default: 0.5, role: 'modeller', active: true, advanced: true });
   return ps;
@@ -123,7 +154,7 @@ const US = 'US';
 const TEST_MOMENTS = 10;
 
 export function init(params, cues, opts = {}, _rng, { context = null } = {}) {
-  const o = { retrieval: true, inhibition: true, links: true, ...opts };
+  const o = { retrieval: true, inhibition: true, links: true, distractors: true, ...opts };
   const nodes = [...cues, US];
   // Proportions of each node's elements in A1 and A2; the rest are inactive.
   const A1 = Object.fromEntries(nodes.map((n) => [n, 0]));
@@ -147,7 +178,21 @@ export function init(params, cues, opts = {}, _rng, { context = null } = {}) {
     const links = Object.fromEntries(cues.map((i) => [i, { ...V[i] }]));
     const series = (n) => Object.fromEntries(n.map((k) => [k, new Float64Array(length)]));
     const start = { A1: { ...A1 }, A2: { ...A2 } };
-    const m = { length, window, nodes, start, on: series(nodes), A1: series(nodes), A2: series(nodes), p2: series(nodes), response: new Float64Array(length) };
+    const m = {
+      length,
+      window,
+      nodes,
+      start,
+      on: series(nodes),
+      A1: series(nodes),
+      A2: series(nodes),
+      p2: series(nodes),
+      // The decay rates in force on each moment: the parameters, raised by
+      // the distractor rules when something comes on.
+      pd1: new Float64Array(length),
+      pd2: new Float64Array(length),
+      response: new Float64Array(length),
+    };
     const dV = Object.fromEntries(cues.map((i) => [i, Object.fromEntries(Object.keys(V[i]).map((j) => [j, 0]))]));
     const ovE = Object.fromEntries(cues.map((c) => [c, 0]));
     const ovI = Object.fromEntries(cues.map((c) => [c, 0]));
@@ -170,26 +215,42 @@ export function init(params, cues, opts = {}, _rng, { context = null } = {}) {
       const moment = k + 1;
       const isOn = (n) => Boolean(span[n]) && moment >= span[n][0] && moment <= span[n][1];
       // #region update
-      // 1. Associative activation: the cues in A1 call up what they are
-      //    linked to. p2 for each node, from the start of this moment.
+      // 1. Associative activation: the active cues call up what they are
+      //    linked to. p2 for each node, from the start of this moment: the
+      //    linked cues' V times their activity, mostly A1 (r1) and a little
+      //    A2 (r2).
       const p2 = {};
       for (const j of nodes) {
         let sum = 0;
-        for (const i of callers[j]) sum += V[i][j] * A1[i];
-        p2[j] = Math.min(1, Math.max(0, params.rho * sum));
+        for (const i of callers[j]) sum += V[i][j] * (params.r1 * A1[i] + params.r2 * A2[i]);
+        p2[j] = Math.min(1, Math.max(0, sum));
       }
-      // 2. Each node's elements move between states.
+      // 2. What enters each state this moment: presentation puts inactive
+      //    elements into A1, and calling up puts the rest into A2.
+      const toA1 = {};
+      const toA2 = {};
+      let enteringA1 = 0;
+      let enteringA2 = 0;
       for (const n of nodes) {
         const p1 = isOn(n) ? salience[n] : 0;
         const inactive = 1 - A1[n] - A2[n];
-        const toA1 = p1 * inactive;
-        const toA2 = p2[n] * (inactive - toA1);
-        const decay1 = params.pd1 * A1[n];
-        const decay2 = params.pd2 * A2[n];
-        A1[n] = A1[n] + toA1 - decay1;
-        A2[n] = A2[n] + toA2 + decay1 - decay2;
+        toA1[n] = p1 * inactive;
+        toA2[n] = p2[n] * (inactive - toA1[n]);
+        enteringA1 += toA1[n];
+        enteringA2 += toA2[n];
       }
-      // 3. Learning on this moment, for each cue and the US:
+      // 3. Distractor rules: memory holds only so much activity, so what
+      //    enters a state this moment speeds every node's decay out of it.
+      const pd1 = Math.min(1, params.pd1 + (o.distractors ? enteringA1 / params.C1 : 0));
+      const pd2 = Math.min(1, params.pd2 + (o.distractors ? enteringA2 / params.C2 : 0));
+      // 4. Each node's elements move between states.
+      for (const n of nodes) {
+        const decay1 = pd1 * A1[n];
+        const decay2 = pd2 * A2[n];
+        A1[n] = A1[n] + toA1[n] - decay1;
+        A2[n] = A2[n] + toA2[n] + decay1 - decay2;
+      }
+      // 5. Learning on this moment, for each cue and the US:
       //    excitation when both are in A1, inhibition when the US is in A2.
       for (const c of cues) {
         const excite = A1[c] * A1[US];
@@ -215,6 +276,8 @@ export function init(params, cues, opts = {}, _rng, { context = null } = {}) {
         m.A2[n][k] = A2[n];
         m.p2[n][k] = p2[n];
       }
+      m.pd1[k] = pd1;
+      m.pd2[k] = pd2;
       m.response[k] = R;
       const csOn = t.cs && moment >= t.cs[0] && moment <= t.cs[1] && punctate.length;
       if (csOn && !(t.us && moment >= t.us[0])) {
@@ -223,7 +286,7 @@ export function init(params, cues, opts = {}, _rng, { context = null } = {}) {
       }
     }
 
-    // 4. Apply the trial's learning.
+    // 6. Apply the trial's learning.
     for (const i of cues) for (const j of Object.keys(dV[i])) V[i][j] += dV[i][j];
 
     const perCue = Object.fromEntries(
@@ -247,7 +310,10 @@ export function init(params, cues, opts = {}, _rng, { context = null } = {}) {
       context,
       Lp: params.Lp,
       Lm: params.Lm,
-      rho: params.rho,
+      r1: params.r1,
+      r2: params.r2,
+      C1: params.C1,
+      C2: params.C2,
       pd1: params.pd1,
       pd2: params.pd2,
       p1US: params.p1US,
@@ -274,17 +340,28 @@ export function init(params, cues, opts = {}, _rng, { context = null } = {}) {
       const p2 = {};
       for (const j of nodes) {
         let sum = 0;
-        if (o.retrieval) for (const i of cues) if (i !== j && (j === US || o.links)) sum += V[i][j] * a1[i];
-        p2[j] = Math.min(1, Math.max(0, params.rho * sum));
+        if (o.retrieval) for (const i of cues) if (i !== j && (j === US || o.links)) sum += V[i][j] * (params.r1 * a1[i] + params.r2 * a2[i]);
+        p2[j] = Math.min(1, Math.max(0, sum));
       }
+      const toA1 = {};
+      const toA2 = {};
+      let e1 = 0;
+      let e2 = 0;
       for (const n of nodes) {
         const p1 = n === cue ? params[`p1_${n}`] : 0;
         const inactive = 1 - a1[n] - a2[n];
-        const toA1 = p1 * inactive;
-        const toA2 = p2[n] * (inactive - toA1);
-        const d1 = params.pd1 * a1[n];
-        a1[n] += toA1 - d1;
-        a2[n] += toA2 + d1 - params.pd2 * a2[n];
+        toA1[n] = p1 * inactive;
+        toA2[n] = p2[n] * (inactive - toA1[n]);
+        e1 += toA1[n];
+        e2 += toA2[n];
+      }
+      const pd1 = Math.min(1, params.pd1 + (o.distractors ? e1 / params.C1 : 0));
+      const pd2 = Math.min(1, params.pd2 + (o.distractors ? e2 / params.C2 : 0));
+      for (const n of nodes) {
+        const d1 = pd1 * a1[n];
+        const d2 = pd2 * a2[n];
+        a1[n] += toA1[n] - d1;
+        a2[n] += toA2[n] + d1 - d2;
       }
       total += a2[US];
     }

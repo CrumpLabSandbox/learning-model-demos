@@ -34,7 +34,7 @@ const expected = {
   sop: {
     model: sop,
     shows: [
-      'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition',
+      'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition',
       'trial-spacing', 'cs-us-interval', 'backward-conditioning', 'us-preexposure',
       'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
     ],
@@ -102,13 +102,25 @@ test('Pearce-Hall build stages unlock the expected phenomena', () => {
 });
 
 test('SOP build stages unlock the expected phenomena', () => {
-  assert.deepEqual(shownWith(sop, { retrieval: false, inhibition: false, links: false }), ['cs-us-interval', 'trial-spacing']);
+  // Overlap alone, with the activity limits: timing effects, a bending
+  // acquisition curve (the last trial's US is still fading when the next
+  // arrives), and one-trial overshadowing (two cues displace each other
+  // from A1 faster than one).
+  assert.deepEqual(shownWith(sop, { retrieval: false, inhibition: false, links: false }), ['acquisition', 'cs-us-interval', 'overshadowing', 'trial-spacing']);
+  assert.deepEqual(shownWith(sop, { retrieval: false, inhibition: false, links: false, distractors: false }), ['cs-us-interval', 'trial-spacing']);
+  // Calling up the US adds the cue-competition effects. Unblocking now needs
+  // the inhibitory term as well: with the activity limits, a bigger US alone
+  // does not lift B far enough above D.
   assert.deepEqual(shownWith(sop, { retrieval: true, inhibition: false, links: false }), [
-    'acquisition', 'blocking', 'cs-us-interval', 'overshadowing', 'salience', 'trial-spacing', 'unblocking', 'us-preexposure',
+    'acquisition', 'blocking', 'cs-us-interval', 'overshadowing', 'salience', 'trial-spacing', 'us-preexposure',
   ]);
-  const three = shownWith(sop, { retrieval: true, inhibition: true, links: false });
-  assert.deepEqual(three, classic(expected.sop.shows).filter((id) => id !== 'latent-inhibition'));
+  assert.deepEqual(shownWith(sop, { retrieval: true, inhibition: true, links: false }), classic(expected.sop.shows));
   assert.deepEqual(shownWith(sop, { retrieval: true, inhibition: true, links: true }), classic(expected.sop.shows));
+  // The context primes a pre-exposed cue through the cue-to-cue links, but
+  // with the distractor rules on the effect is too small to count. Without
+  // them it counts, and without the links it is gone.
+  assert.deepEqual(shownWith(sop, { links: true, distractors: false }), [...classic(expected.sop.shows), 'latent-inhibition'].sort());
+  assert.ok(!shownWith(sop, { links: false, distractors: false }).includes('latent-inhibition'));
 });
 
 test('timing in a design changes nothing for the trial-by-trial models', () => {
