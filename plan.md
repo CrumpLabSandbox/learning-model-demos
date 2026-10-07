@@ -408,6 +408,25 @@ Notes from building it:
 - With the default intensities (cues 0.5, context 0.15) the model shows acquisition, extinction, blocking, unblocking, overshadowing, conditioned inhibition, negative patterning, and the four streamed-trial effects. It misses salience (intensity only acts through a context), latent inhibition (nothing changes when nothing is predicted and nothing happens), backward blocking (absent patterns do not change), and the timing effects. The salience card says how to see the paper's account with a context line.
 - The models page reads a small `INFO` table in the registry rather than the model files, which stay maths only.
 
+### 9. Delamater's network, and designs with more than one outcome
+
+Delamater (2012) is the first model on the site with a hidden layer: the representation of a cue is learned, not given. It needed two additions to the framework: numbered outcomes in the design format (`A+1`, `B+2`) and a way to say which cues are of one modality (`Modalities: AB, CD`), both of which the other models ignore.
+
+- [x] `js/models/delamater.js`: input features (one per cue, one shared per modality, the context), hidden pathways (one per modality, plus a multimodal one, as in the paper's Figure 4), outcome units, the shifted logistic (Eq. 2), and backpropagation with momentum (Appendix Eqs. 1 to 3), averaged over seeded random networks
+- [x] Framework: `outcome` on trial types and `outcomes` on designs; `Modalities`; `multiOutcome` models; `probeSeries` for a second outcome's values per probe, plotted by an extra chart with `when(run)`; `h.outcome` in checks; a `panel` the spec draws (also used by Pearce)
+- [x] Three phenomena from the paper, with explanations for every model: acquired equivalence (Delamater, 1998, Exp. 3), the biconditional discrimination, and the feature-positive effect
+- [x] Tests (`tests/delamater.test.js`) with the paper's parameter values and trial counts: the equations worked from the record; two outcomes learned by two units; Figure 5 (reversal faster with different outcomes), Figure 6 (positive patterning ahead early, with a context; negative patterning ahead by the end without one), Figure 7 (biconditional faster with differential outcomes), Figure 8 (positive ahead of negative patterning within one task), Figure 10 (feature-positive faster than feature-negative), and the one-layer network's failure on negative patterning
+- [x] The network view (inputs, hidden units by pathway, outcomes), cueless equations about network 1's most active hidden unit, three build stages, a deck, glossary entries, primer section 24 with a logistic-unit widget
+
+Notes from building it:
+
+- The paper's "30-trial blocks" are 30 trials of each trial type: with the paper's learning rate (0.1) and momentum (0.9) the acquired-equivalence discrimination is learned in 8 such blocks (960 trials), as its Figure 5 shows, and not in 240 trials. The page's defaults are faster (learning rate 0.5, starting weights within ±1, 16 networks) so that the network learns within the shared experiments; the paper's orderings hold at both settings, and the tests use the paper's values.
+- Three results of the paper did not reproduce with this implementation and are not claimed: the lower panel of Figure 6 (in a negative patterning task with a less salient element, the compound was discriminated from the less salient element first; here the more salient element separates first), the biconditional discrimination being slower than negative patterning in Figure 8 (here it starts slower and overtakes), and the positive component of ambiguous occasion setting being learned faster than the negative component in Figure 9 (here they run together). The paper does not give the number of hidden units beyond its figure, the starting weight range, or how salience was coded, and these results may depend on them.
+- With a context, positive patterning leads negative patterning early and then its separation falls back, because the context-alone trials and the element-alone trials pull the same way; the paper reports only the lead. The test pins the first 600 trials.
+- The network's acquisition curve is S-shaped, so the shared acquisition check (first step bigger than the last) counts it as not shown, and most of the classic cue-competition effects need more trials than the shared presets give. The cards say so. With 16 networks the random starting weights no longer produce false ticks on the timing presets, which they did with 8.
+- A logistic outcome unit cannot go below zero, so conditioned inhibition reads as a low activation, not a negative strength, and the check counts it as not shown.
+- Averaging over networks can hide a failure: without the hidden layer, each network solves negative patterning by giving up on one element, a different one in different networks, and the mean over sixteen looks like a solution. The build-stage text says so, and the test pins single networks.
+
 ### Visual refresh: graph paper
 
 - [x] Colour kept for data: the interface (links, buttons, current page, step numbers, focus) is drawn in ink (`--ui`), so the only blue on a model page is cue A

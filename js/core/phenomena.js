@@ -36,7 +36,10 @@ export function evaluatePhenomenon(model, phenomenon, { params = {}, options = {
     const means = sum.map((x) => x / n);
     return list ? means : means[0];
   };
-  const helpers = { at, final, phaseEnd, phaseValues, response, lambda, margin: 0.05 * Math.max(lambda, 0.2), overSeeds };
+  // A probe's value for outcome j (1, 2, ...). Models that know one outcome
+  // have no second series, so every outcome reads as the first.
+  const outcome = (r, label, j, t = r.trials.length) => (r.probeSeries?.[`out${j}`]?.[label] ?? r.series[label])[t];
+  const helpers = { at, final, phaseEnd, phaseValues, response, outcome, lambda, margin: 0.05 * Math.max(lambda, 0.2), overSeeds };
   const result = phenomenon.check(run, helpers);
   return { ...result, run };
 }

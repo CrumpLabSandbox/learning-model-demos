@@ -6,6 +6,7 @@ import * as ph from '../js/models/pearce-hall.js';
 import * as sop from '../js/models/sop.js';
 import * as mal from '../js/models/minerva-al.js';
 import * as pearce from '../js/models/pearce.js';
+import * as delamater from '../js/models/delamater.js';
 import { phenomena } from '../content/phenomena/index.js';
 import { evaluatePhenomenon } from '../js/core/phenomena.js';
 import { parseDesign } from '../js/core/design.js';
@@ -18,18 +19,18 @@ const expected = {
     model: rw,
     shows: [
       'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'us-preexposure',
-      'contingency', 'one-phase-blocking', 'probabilistic-blocking',
+      'contingency', 'one-phase-blocking', 'probabilistic-blocking', 'feature-positive',
     ],
   },
   mackintosh: {
     model: mk,
-    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'us-preexposure', 'contingency', 'outcome-density', 'one-phase-blocking'],
+    shows: ['acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'us-preexposure', 'contingency', 'outcome-density', 'one-phase-blocking', 'feature-positive'],
   },
   'pearce-hall': {
     model: ph,
     shows: [
       'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition', 'us-preexposure',
-      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
+      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking', 'feature-positive',
     ],
   },
   sop: {
@@ -37,7 +38,7 @@ const expected = {
     shows: [
       'acquisition', 'extinction', 'salience', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition',
       'trial-spacing', 'cs-us-interval', 'backward-conditioning', 'us-preexposure',
-      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
+      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking', 'feature-positive',
     ],
   },
   'minerva-al': {
@@ -45,15 +46,19 @@ const expected = {
     shows: [
       'acquisition', 'extinction', 'salience', 'blocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition',
       'backward-blocking', 'negative-patterning',
-      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
+      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking', 'biconditional',
     ],
   },
   pearce: {
     model: pearce,
     shows: [
       'acquisition', 'extinction', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'negative-patterning',
-      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
+      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking', 'biconditional',
     ],
+  },
+  delamater: {
+    model: delamater,
+    shows: ['blocking', 'negative-patterning', 'contingency', 'outcome-density', 'one-phase-blocking', 'acquired-equivalence', 'biconditional', 'feature-positive'],
   },
 };
 
@@ -81,7 +86,7 @@ for (const [id, { model, shows }] of Object.entries(expected)) {
 // The build-stage tests below are about the classic conditioning phenomena.
 // The streamed-trial presets (human contingency judgement) are checked per
 // model above and in tests/contingency.test.js.
-const streamed = new Set(['contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking']);
+const streamed = new Set(['contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking', 'acquired-equivalence', 'biconditional', 'feature-positive']);
 const classic = (ids) => ids.filter((id) => !streamed.has(id)).sort();
 const shownWith = (model, options) =>
   phenomena.filter((p) => !streamed.has(p.id) && evaluatePhenomenon(model, p, { options }).shown).map((p) => p.id).sort();
@@ -155,4 +160,14 @@ test('Pearce build stages unlock the expected phenomena', () => {
   // stage changes how inhibition is learned, not which effects appear.
   assert.deepEqual(shownWith(pearce, { generalisation: true, inhibition: false }), classic(expected.pearce.shows));
   assert.deepEqual(shownWith(pearce, { generalisation: true, inhibition: true }), classic(expected.pearce.shows));
+});
+
+test('Delamater build stages: a single one-layer network cannot solve negative patterning; the hidden layer can', () => {
+  // Averaged over networks the one-layer stage can look as if it solved
+  // negative patterning, because each network gives up on a different
+  // element. A single network shows the failure.
+  const np = phenomena.find((p) => p.id === 'negative-patterning');
+  assert.equal(evaluatePhenomenon(delamater, np, { options: { hidden: false, momentum: false }, params: { learners: 1 } }).shown, false);
+  assert.equal(evaluatePhenomenon(delamater, np, { params: { learners: 1 } }).shown, true);
+  assert.deepEqual(shownWith(delamater, { hidden: true, momentum: true }), classic(expected.delamater.shows));
 });

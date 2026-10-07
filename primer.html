@@ -58,6 +58,7 @@
           <li><a href="#contingency">Contingency: the 2 × 2 table and ΔP</a></li>
           <li><a href="#criterion">A judgement is a decision</a></li>
           <li><a href="#configurations">Configurations and similarity</a></li>
+          <li><a href="#network">Units, weights, and the logistic</a></li>
         </ol>
         <p class="small" style="margin:.75rem 0 0"><a href="decks/reading-equations.html">Overview slides for this page</a></p>
       </nav>
@@ -267,6 +268,15 @@
           <div class="widget" data-widget="configurations"></div>
           <p>Intensity is written P. Notice that S is symmetric, so overshadowing (train AB, test A) and external inhibition (train A, test AB) are the same decrement, and that a context shared by everything gives every pair of configurations some similarity.</p>
           <div data-check="configurations"></div>
+        </section>
+
+        <section id="network">
+          <h2>24. Units, weights, and the logistic</h2>
+          <p>A neural network is built from <strong>units</strong> joined by <strong>weights</strong>. A unit adds up what reaches it, each input times its weight, and turns the total into an activation between 0 and 1 with a smooth step called the <strong>logistic</strong>: 1 / (1 + e<sup>−x</sup>). Delamater shifts the step to the right by 2.2, so that a unit with no input rests near 0.1 instead of 0.5, the way a neuron fires a little even when quiet.</p>
+          <p>Learning changes the weights. At an outcome unit the error is what happened minus what the unit said, scaled by the slope of the step at that point, written δ ("delta"). In a <a href="glossary.html#hidden-layer">hidden layer</a> the error is passed back: a hidden unit's δ is the outcome errors it fed into, each weighted by its connection, times its own slope. Every weight then changes by the learning rate times the error of the unit it feeds times the activation of the unit it comes from. This is <a href="glossary.html#backpropagation">backpropagation</a>.</p>
+          <div class="widget" data-widget="network"></div>
+          <p>Notice two things in the widget. The slope is steepest in the middle and nearly flat at the ends, so a unit that is already confident learns slowly. And the shift means a unit needs a net input above about 2.2 before it is half on.</p>
+          <div data-check="network"></div>
         </section>
       </article>
     </div>

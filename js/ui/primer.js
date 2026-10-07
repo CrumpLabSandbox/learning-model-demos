@@ -17,6 +17,8 @@ import { checks } from '../../content/primer/checks.js';
 import { notation } from '../../content/primer/notation.js';
 
 const { V, dV, sumV, alpha, beta, lambda } = RW;
+// e raised to minus (net − shift), for the network widget.
+const msupe = (minus, netText, shiftText) => `<msup><mi>e</mi><mrow>${minus}<mo>(</mo><mn>${netText}</mn><mo>−</mo><mn>${shiftText}</mn><mo>)</mo></mrow></msup>`;
 const s = (x) => signed(fmt(x));
 const se = (x) => signed(fmtExact(x));
 // Arithmetic on slider values is exact to 4 places, so show it without padding.
@@ -750,6 +752,54 @@ const widgets = {
         `<div class="table-scroll"><table class="symbol-guide small"><thead><tr><th class="left">Configurations</th><th>P shared</th><th>P of first</th><th>P of second</th><th>S</th></tr></thead><tbody>${row('AB', 'A')}${row('AB', 'B')}${row('A', 'B')}</tbody></table></div>` +
         `<p class="small cf-say">${P.Z === 0 ? 'With no context, A and B share nothing, so S between them is 0.' : `The context is in every configuration, so even A and B share something: S = ${fmt(S('A', 'B'))}.`} ${Math.abs(P.A - P.B) < 1e-9 ? 'With equal intensities the compound is equally like each element.' : `The compound is more like its more intense element, ${P.A > P.B ? 'A' : 'B'}, so the other one borrows less from it.`}</p>`;
     });
+  },
+
+  // One logistic unit: a net input slider, the shifted step, its slope, and
+  // the error at a target.
+  network(el) {
+    el.innerHTML =
+      `<div class="widget-grid"><div>` +
+      slider({ id: 'nw-net', label: 'Net input to the unit (inputs × weights, added up)', min: -2, max: 8, step: 0.1, value: 2.2 }) +
+      slider({ id: 'nw-shift', label: 'Shift', min: 0, max: 4, step: 0.1, value: 2.2 }) +
+      slider({ id: 'nw-target', label: 'Target λ (1 if the outcome happened, 0 if not)', min: 0, max: 1, step: 1, value: 1 }) +
+      `</div><div class="nw-out" aria-live="polite"></div></div><div class="nw-chart"></div>`;
+    const chart = el.querySelector('.nw-chart');
+    let net = 2.2;
+    let shift = 2.2;
+    let target = 1;
+    const logistic = (x) => 1 / (1 + Math.exp(-(x - shift)));
+    const draw = () => {
+      const W = Math.max(300, chart.clientWidth || 600);
+      const H = 180;
+      const m = { l: 36, r: 12, t: 12, b: 28 };
+      const x = (v) => m.l + ((v + 2) / 10) * (W - m.l - m.r);
+      const y = (a) => m.t + (1 - a) * (H - m.t - m.b);
+      const pts = [];
+      for (let v = -2; v <= 8.0001; v += 0.1) pts.push(`${x(v).toFixed(1)},${y(logistic(v)).toFixed(1)}`);
+      const a = logistic(net);
+      const slope = a * (1 - a);
+      const err = (target - a) * slope;
+      chart.innerHTML =
+        `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" class="nw-svg" role="img" aria-label="The logistic activation function with the current net input marked">` +
+        `<line x1="${m.l}" x2="${W - m.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--axis)"/><line x1="${m.l}" x2="${W - m.r}" y1="${y(0.5)}" y2="${y(0.5)}" stroke="var(--grid)"/><line x1="${m.l}" x2="${W - m.r}" y1="${y(1)}" y2="${y(1)}" stroke="var(--grid)"/>` +
+        `<text class="tick" x="${m.l - 6}" y="${y(0) + 4}" text-anchor="end">0</text><text class="tick" x="${m.l - 6}" y="${y(0.5) + 4}" text-anchor="end">0.5</text><text class="tick" x="${m.l - 6}" y="${y(1) + 4}" text-anchor="end">1</text>` +
+        `<polyline class="nw-curve" points="${pts.join(' ')}"/>` +
+        `<line class="nw-mark" x1="${x(net)}" x2="${x(net)}" y1="${y(0)}" y2="${y(a)}"/><circle class="nw-dot" cx="${x(net)}" cy="${y(a)}" r="5"/>` +
+        `<line class="nw-slope" x1="${x(net - 1.2)}" x2="${x(net + 1.2)}" y1="${y(a - 1.2 * slope)}" y2="${y(a + 1.2 * slope)}"/>` +
+        `<text class="tick" x="${x(0)}" y="${H - 8}" text-anchor="middle">0</text><text class="tick" x="${x(shift)}" y="${H - 8}" text-anchor="middle">shift</text><text class="tick" x="${W - m.r}" y="${H - 8}" text-anchor="end">net input →</text>` +
+        `</svg>`;
+      el.querySelector('.nw-out').innerHTML =
+        `<div class="ct-line">${math(mi('a'), mo('='), mn('1'), mo('/'), mo('('), mn('1'), mo('+'), msupe(mo('−'), ex(net), ex(shift)), mo(')'), mo('='), mn(fmt(a)))}</div>` +
+        `<p class="small"><strong>Slope</strong> a(1 − a) = ${fmt(slope)}. <strong>Error</strong> δ = (λ − a) × slope = (${target} − ${fmt(a)}) × ${fmt(slope)} = <strong>${fmt(err)}</strong>.</p>` +
+        `<p class="small muted">${Math.abs(err) < 0.01 ? 'Almost no error: the unit is near its target, or so far from the middle that its slope is nearly flat.' : err > 0 ? 'The unit said too little: its incoming weights will grow.' : 'The unit said too much: its incoming weights will shrink.'}</p>`;
+    };
+    wireSliders(el, ['nw-net', 'nw-shift', 'nw-target'], (v) => {
+      net = v['nw-net'];
+      shift = v['nw-shift'];
+      target = v['nw-target'];
+      draw();
+    });
+    whenResized(chart, draw);
   },
 
   notation(el) {

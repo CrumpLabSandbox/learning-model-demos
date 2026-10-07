@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Delamater (network) · Learning Model Demos</title>
+  <meta name="description" content="Interactive demo of Delamater's connectionist network (2012): cues reach the outcomes through a hidden layer that learns its own representations, with more than one outcome. Step through trials, read the equations, and see which effects the network shows.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+  <script src="../js/site-status.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6"/><path class="c1" d="M4.5 18.5C7.5 10 11.5 7 19.5 6"/><path class="c2" d="M4.5 18.5c5-3 9.5-4 15-4.2"/></svg>Learning Model Demos</a>
+    <nav aria-label="Pages">
+      <div class="nav-group" role="group" aria-label="Getting started">
+        <a href="../index.html#start">Start here</a>
+        <a href="../warm-up.html">Maths warm-up</a>
+        <a href="../primer.html">Reading the equations</a>
+      </div>
+      <div class="nav-group" role="group" aria-label="Models">
+        <a href="../models.html" aria-current="page">All models</a>
+        <a href="../compare.html">Compare</a>
+      </div>
+      <div class="nav-group" role="group" aria-label="More">
+        <a href="../stream.html">Streamed trials</a>
+        <a href="../index.html#tutorials">Tutorials</a>
+        <a href="../glossary.html">Glossary</a>
+      </div>
+    </nav>
+  </header>
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="../about.html#status">What this means</a></div>
+  <main class="page" id="app">
+    <noscript><p>This demo needs JavaScript.</p></noscript>
+  </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
+  <script type="module">
+    import * as model from '../js/models/delamater.js';
+    import * as spec from '../content/equations/delamater.js';
+    import { phenomena } from '../content/phenomena/index.js';
+    import { mountModelPage } from '../js/ui/page.js';
+
+    mountModelPage({
+      root: document.getElementById('app'),
+      model,
+      spec,
+      phenomena,
+      modelSourceUrl: '../js/models/delamater.js',
+      defaultPreset: 'acquired-equivalence',
+      overviewUrl: '../decks/delamater.html',
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Delamater Network Overview · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for Delamater's connectionist network (2012): a hidden layer that learns its own representations of the cues, more than one outcome, and what that explains.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+  <script src="../js/site-status.js"></script>
+</head>
+<body class="deck-page">
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="../about.html#status">What this means</a></div>
+  <main class="deck" data-title="Delamater network overview" data-back="../models/delamater.html#view=essentials" data-back-label="Open the model">
+    <section class="slide" data-title="Delamater: a network that learns what the cues are">
+      <div class="kicker">Overview · model 7</div>
+      <h1>Delamater: a network that learns what the cues are</h1>
+      <p class="sub">Andrew Delamater, 2012. A small neural network in which the representation of a cue is learned, not given.</p>
+      <aside class="notes">Delamater, A. R. (2012). On the nature of CS and US representations in Pavlovian learning. Learning &amp; Behavior, 40, 1–23. The article is a review of CS and US representation; the model is in its first half. The learning rule is backpropagation (Rumelhart, Hinton, &amp; Williams, 1986) with momentum.</aside>
+    </section>
+    <section class="slide" data-title="A question the other models skip">
+      <h2>A question the other models skip</h2>
+      <p>Every model so far takes the cues as given: a tone is a tone, and what is learned is a number attached to it.</p>
+      <p>But rats trained with two lights and two tones, each pair with its own food, come to treat the two lights as alike and the lights and tones as different. <a href="../glossary.html#acquired-equivalence">Acquired equivalence</a>: experience changes what the cues <em>are</em> to the animal.</p>
+      <p class="big">What if the representation itself is learned?</p>
+    </section>
+    <section class="slide" data-title="Three layers">
+      <h2>Three layers</h2>
+      <p><strong>Input units</strong> are features: one for each cue, one shared by the cues of a modality, one for the context.</p>
+      <p><strong><a href="../glossary.html#hidden-layer">Hidden units</a></strong> stand between. Each modality has a pathway of its own, and a multimodal pathway takes every input. They start out meaning nothing.</p>
+      <p><strong>Outcome units</strong>, one per US. What they say is the prediction.</p>
+      <aside class="notes">Figure 4 in the paper: two hidden units per modality pathway and four multimodal, with the stimuli coded as a distinct feature plus a shared modality feature (A1 = a + b, A2 = b + c). The site's Modalities line in a design does this coding.</aside>
+    </section>
+    <section class="slide" data-title="Learning works backwards from the mistake">
+      <h2>Learning works backwards from the mistake</h2>
+      <div class="two-col">
+        <div class="widget" data-widget="network"></div>
+        <div>
+          <p>Each unit squashes its input through a smooth step, the logistic, shifted so that a quiet unit rests near 0.1.</p>
+          <p>At the outcome, the error is what happened minus what was said. That error is passed back along the connections: a hidden unit that fed a wrong answer gets most of the blame, and every weight moves to shrink the mistake. This is <a href="../glossary.html#backpropagation">backpropagation</a>.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="What the hidden layer buys">
+      <h2>What the hidden layer buys</h2>
+      <div class="two-col">
+        <figure data-mini data-model="delamater" data-design="Training: 100 A+, 100 B+, 100 AB-|Modalities: A, B|Test: A, B, AB" data-lines="A,B,AB" data-caption="Negative patterning: the hidden layer learns to represent the compound differently from its elements."></figure>
+        <div>
+          <p>Without a hidden layer the network is Rescorla-Wagner through a squash: it can only add up. With one, a compound can mean something its elements do not.</p>
+          <p>Negative patterning, <a href="../glossary.html#biconditional-discrimination">biconditional discriminations</a>, and <a href="../glossary.html#occasion-setting">occasion setting</a> all become solvable, and the paper reproduces the order in which animals find them hard.</p>
+        </div>
+      </div>
+      <aside class="notes">Switch off "Hidden layer" on the model page to see the one-layer network fail negative patterning. The paper's Figure 8 reproduces Harris et al. (2008): positive patterning is learned faster than negative patterning, and a biconditional discrimination slower than either.</aside>
+    </section>
+    <section class="slide" data-title="More than one outcome">
+      <h2>More than one outcome</h2>
+      <p>The outcome units are separate, so the network can learn that a tone means food and a light means sugar water. Write <code>A+1</code> and <code>B+2</code> in a design.</p>
+      <p>Cues reinforced with <em>different</em> outcomes come to use different hidden units; cues reinforced with the <em>same</em> outcome come to share them. That is the network's account of acquired equivalence and of why <a href="../glossary.html#differential-outcomes">differential outcomes</a> make hard discriminations easier.</p>
+      <aside class="notes">The paper's Figure 5 (Delamater, 1998, Experiment 3): a reversal is learned faster when the two stimuli of a modality were trained with different USs. Figures 7 and 9: biconditional and ambiguous occasion-setting tasks are learned faster with differential outcomes. The tests reproduce these as orderings.</aside>
+    </section>
+    <section class="slide" data-title="What it gets wrong, and what it costs">
+      <h2>What it gets wrong, and what it costs</h2>
+      <ul>
+        <li><strong><a href="../glossary.html#latent-inhibition">Latent inhibition</a>.</strong> A trial with no outcome and no prediction produces no error, so nothing changes.</li>
+        <li><strong>Timing.</strong> Like every trial-level model, it knows nothing about moments.</li>
+        <li><strong>Biology.</strong> Delamater notes that neurons do not pass errors backwards. The rule is a stand-in for something more plausible that behaves alike.</li>
+        <li><strong>Speed.</strong> The network needs hundreds of trials for the harder tasks, and eight runs are averaged because the starting weights are random.</li>
+      </ul>
+    </section>
+    <section class="slide" data-title="Try these first">
+      <h2>Try these first on the model page</h2>
+      <ol class="path-steps">
+        <li>Load <strong>Acquired equivalence</strong>, run it, and open <strong>Inside network 1</strong> on an A trial and then a B trial: compare the hidden patterns.</li>
+        <li>Load <strong>Negative patterning</strong>, then switch off <strong>Hidden layer</strong> and watch the compound fail to separate.</li>
+        <li>Load <strong>Biconditional</strong> and compare the differential-outcome and single-outcome versions in the Trials box.</li>
+      </ol>
+      <p><a class="btn primary" href="../models/delamater.html#view=essentials">Open Delamater (Essentials view)</a></p>
+      <p class="sub">New notation here: units, weights, the logistic, and δ for the error. See <a href="../primer.html#network">Reading the equations, section 24</a>.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

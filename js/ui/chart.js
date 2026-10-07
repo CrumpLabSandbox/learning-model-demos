@@ -41,8 +41,14 @@ export function predictionSource(run) {
   return { series: run.series, spread: run.spread, probes: run.displayProbes, title: run.predictionTitle ?? 'Prediction', floor: run.params.lambda ?? 1 };
 }
 
+// A per-cue state series (run.stateSeries), or a per-probe series the
+// model supplies for every probe (run.probeSeries), such as a second
+// outcome's activation.
 export function stateSource(key, title, ceiling = 1) {
-  return (run) => ({ series: run.stateSeries[key] ?? {}, probes: run.cues, title, floor: 0, ceiling });
+  return (run) =>
+    run.probeSeries?.[key]
+      ? { series: run.probeSeries[key], probes: run.displayProbes, title, floor: 0, ceiling }
+      : { series: run.stateSeries[key] ?? {}, probes: run.cues, title, floor: 0, ceiling };
 }
 
 export function createChart(container, { onSelect, onSketch = () => {}, onSketchEnd = () => {}, source = predictionSource, label = 'Predictions' }) {

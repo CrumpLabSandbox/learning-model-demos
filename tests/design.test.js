@@ -4,9 +4,27 @@ import { parseDesign, parseTrialType, formatDesign, expandDesign, DesignError, D
 import { makeRng } from '../js/core/rng.js';
 
 test('parses trial types', () => {
-  assert.deepEqual(parseTrialType('BA+'), { label: 'BA+', cues: ['A', 'B'], reinforced: true, magnitude: null });
+  assert.deepEqual(parseTrialType('BA+'), { label: 'BA+', cues: ['A', 'B'], reinforced: true, outcome: 1, magnitude: null });
   assert.deepEqual(parseTrialType('A-').reinforced, false);
+  assert.equal(parseTrialType('A-').outcome, 0);
   assert.equal(parseTrialType('A+(0.5)').magnitude, 0.5);
+});
+
+test('numbered outcomes and modalities', () => {
+  assert.equal(parseTrialType('A+2').outcome, 2);
+  assert.equal(parseTrialType('A+2(0.5)').magnitude, 0.5);
+  assert.equal(parseTrialType('A+2(0.5)').outcome, 2);
+  assert.throws(() => parseTrialType('A-2'), /only reinforced/);
+  const d = parseDesign('Train: 10 A+1, 10 B+2, 10 C-\nModalities: AB, C');
+  assert.deepEqual(d.outcomes, [1, 2]);
+  assert.deepEqual(d.modalities, [['A', 'B'], ['C']]);
+  assert.deepEqual(parseDesign('10 A+').outcomes, [1]);
+  assert.equal(parseDesign('10 A+').modalities, null);
+  assert.throws(() => parseDesign('10 A+\nModalities: AB, BC'), /two modalities/);
+  assert.throws(() => parseDesign('10 A+\nModalities: AZ\nContext: Z'), /context/);
+  assert.deepEqual(parseDesign(formatDesign(d)), d);
+  // A cue named only in the Modalities line is still a cue.
+  assert.deepEqual(parseDesign('10 A+\nModalities: AB').cues, ['A', 'B']);
 });
 
 test('rejects malformed trial types with a helpful message', () => {

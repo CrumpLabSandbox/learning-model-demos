@@ -13,6 +13,7 @@ import * as phSpec from '../content/equations/pearce-hall.js';
 import * as sopSpec from '../content/equations/sop.js';
 import * as malSpec from '../content/equations/minerva-al.js';
 import * as pearceSpec from '../content/equations/pearce.js';
+import * as delamaterSpec from '../content/equations/delamater.js';
 import { checks as tutorialChecks } from '../content/tutorials/checks.js';
 import { phenomena } from '../content/phenomena/index.js';
 import { MODELS } from '../js/core/registry.js';
@@ -63,7 +64,7 @@ test('glossary entries are complete and their cross-links resolve', () => {
 
 test('every symbol in every model links to a primer section that exists', () => {
   const primerIds = ids(read('primer.html'));
-  for (const spec of [rwSpec, mkSpec, phSpec, sopSpec, malSpec, pearceSpec]) {
+  for (const spec of [rwSpec, mkSpec, phSpec, sopSpec, malSpec, pearceSpec, delamaterSpec]) {
     for (const [key, def] of Object.entries(spec.symbols)) {
       assert.ok(primerIds.has(def.primer), `${key} -> #${def.primer}`);
       assert.ok(def.render || def.display, `${key} needs a render or a display text`);
