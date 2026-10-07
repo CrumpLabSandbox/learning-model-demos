@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MINERVA-AL · Learning Model Demos</title>
-  <meta name="description" content="Run MINERVA-AL trial by trial: every trial is stored as a memory trace, and expectations come from retrieving traces like what is present now.">
+  <title>Pearce (configural) · Learning Model Demos</title>
+  <meta name="description" content="Interactive demo of Pearce's configural model (1987): the whole pattern of cues on a trial learns as one unit and lends its strength to similar patterns. Step through trials, read the equations, and see which effects the model shows.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
   <script src="../js/site-status.js"></script>
@@ -38,8 +38,8 @@
     <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
   </footer>
   <script type="module">
-    import * as model from '../js/models/minerva-al.js';
-    import * as spec from '../content/equations/minerva-al.js';
+    import * as model from '../js/models/pearce.js';
+    import * as spec from '../content/equations/pearce.js';
     import { phenomena } from '../content/phenomena/index.js';
     import { mountModelPage } from '../js/ui/page.js';
 
@@ -48,9 +48,9 @@
       model,
       spec,
       phenomena,
-      modelSourceUrl: '../js/models/minerva-al.js',
-      defaultPreset: 'backward-blocking',
-      overviewUrl: '../decks/minerva-al.html',
+      modelSourceUrl: '../js/models/pearce.js',
+      defaultPreset: 'negative-patterning',
+      overviewUrl: '../decks/pearce.html',
     });
   </script>
 </body>

@@ -727,6 +727,31 @@ const widgets = {
     whenResized(chart, draw);
   },
 
+  // Configurations and their similarity (Pearce, 1987, Eq. 3): three
+  // intensity sliders and the similarity between A, B, and AB.
+  configurations(el) {
+    el.innerHTML =
+      `<div class="widget-grid"><div>` +
+      slider({ id: 'cf-a', label: 'Intensity of A', min: 0.1, max: 1, step: 0.05, value: 0.5 }) +
+      slider({ id: 'cf-b', label: 'Intensity of B', min: 0.1, max: 1, step: 0.05, value: 0.5 }) +
+      slider({ id: 'cf-z', label: 'Intensity of the context (0 = none)', min: 0, max: 0.5, step: 0.05, value: 0 }) +
+      `</div><div class="cf-out" aria-live="polite"></div></div>`;
+    wireSliders(el, ['cf-a', 'cf-b', 'cf-z'], (v) => {
+      const P = { A: v['cf-a'], B: v['cf-b'], Z: v['cf-z'] };
+      const cfgs = { A: ['A', 'Z'], B: ['B', 'Z'], AB: ['A', 'B', 'Z'] };
+      const tot = (c) => c.reduce((t, x) => t + P[x], 0);
+      const S = (a, b) => {
+        const common = cfgs[a].filter((x) => cfgs[b].includes(x));
+        const pc = tot(common);
+        return pc === 0 ? 0 : (pc / tot(cfgs[a])) * (pc / tot(cfgs[b]));
+      };
+      const row = (a, b) => `<tr><td class="left">${a} and ${b}</td><td class="num">${ex(tot(cfgs[a].filter((x) => cfgs[b].includes(x))))}</td><td class="num">${ex(tot(cfgs[a]))}</td><td class="num">${ex(tot(cfgs[b]))}</td><td class="num"><strong>${fmt(S(a, b))}</strong></td></tr>`;
+      el.querySelector('.cf-out').innerHTML =
+        `<div class="table-scroll"><table class="symbol-guide small"><thead><tr><th class="left">Configurations</th><th>P shared</th><th>P of first</th><th>P of second</th><th>S</th></tr></thead><tbody>${row('AB', 'A')}${row('AB', 'B')}${row('A', 'B')}</tbody></table></div>` +
+        `<p class="small cf-say">${P.Z === 0 ? 'With no context, A and B share nothing, so S between them is 0.' : `The context is in every configuration, so even A and B share something: S = ${fmt(S('A', 'B'))}.`} ${Math.abs(P.A - P.B) < 1e-9 ? 'With equal intensities the compound is equally like each element.' : `The compound is more like its more intense element, ${P.A > P.B ? 'A' : 'B'}, so the other one borrows less from it.`}</p>`;
+    });
+  },
+
   notation(el) {
     el.innerHTML =
       `<div class="table-wrap" style="max-height:none"><table class="symbol-guide notation"><thead><tr><th>Idea</th><th>This site</th><th>Original paper</th><th>Other forms you may meet</th></tr></thead><tbody>` +

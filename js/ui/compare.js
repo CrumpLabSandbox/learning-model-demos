@@ -22,6 +22,7 @@ export const PLOTTED = {
   'pearce-hall': 'V − V̄: excitatory minus inhibitory strength.',
   sop: 'V: the link from each cue to the US. Its scale is set by the retrieval weight r₁.',
   'minerva-al': 'Retrieval of the outcome given the cue, from −1 to 1, averaged over 25 simulated learners. The band is the spread.',
+  pearce: 'V: the net strength of the configuration of the cue with the context, mostly borrowed from the configurations that were trained.',
 };
 
 const subs = (text) => esc(text).replace(/([A-Za-zΑ-ω]+)_([A-Z])/g, '$1<sub>$2</sub>');

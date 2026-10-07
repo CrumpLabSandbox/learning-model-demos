@@ -912,3 +912,11 @@ body.deck-page > .site-footer { width: 100%; padding-bottom: 5rem; }
 .sd-area.weak { fill: var(--ink-2); }
 .sd-area.strong { fill: var(--cue-1); }
 .sd-crit { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 5 4; }
+
+/* Pearce: the configurations view. */
+.config-table .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.config-table tr.current td { background: var(--hl); }
+.symbol-guide .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.model-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 1rem; margin-top: 1rem; }
+.model-card h3 a { text-decoration: none; color: inherit; }
+.model-card h3 a:hover { text-decoration: underline; }

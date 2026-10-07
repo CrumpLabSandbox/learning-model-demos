@@ -5,6 +5,7 @@ import * as mk from '../js/models/mackintosh.js';
 import * as ph from '../js/models/pearce-hall.js';
 import * as sop from '../js/models/sop.js';
 import * as mal from '../js/models/minerva-al.js';
+import * as pearce from '../js/models/pearce.js';
 import { phenomena } from '../content/phenomena/index.js';
 import { evaluatePhenomenon } from '../js/core/phenomena.js';
 import { parseDesign } from '../js/core/design.js';
@@ -44,6 +45,13 @@ const expected = {
     shows: [
       'acquisition', 'extinction', 'salience', 'blocking', 'overshadowing', 'conditioned-inhibition', 'latent-inhibition',
       'backward-blocking', 'negative-patterning',
+      'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
+    ],
+  },
+  pearce: {
+    model: pearce,
+    shows: [
+      'acquisition', 'extinction', 'blocking', 'unblocking', 'overshadowing', 'conditioned-inhibition', 'negative-patterning',
       'contingency', 'outcome-density', 'one-phase-blocking', 'probabilistic-blocking',
     ],
   },
@@ -134,4 +142,17 @@ test('timing in a design changes nothing for the trial-by-trial models', () => {
 test('MINERVA-AL: storing the discrepancy is what produces cue competition and retrospective revaluation', () => {
   assert.deepEqual(shownWith(mal, { discrepancy: false }), ['acquisition', 'extinction', 'latent-inhibition', 'negative-patterning']);
   assert.deepEqual(shownWith(mal, { discrepancy: true }), classic(expected['minerva-al'].shows));
+});
+
+test('Pearce build stages unlock the expected phenomena', () => {
+  // Each pattern alone: negative patterning is solved, and a cue trained
+  // only in a compound knows nothing when tested alone (which the
+  // overshadowing check counts as overshadowing). Extinction works by
+  // weakening E at this stage.
+  assert.deepEqual(shownWith(pearce, { generalisation: false, inhibition: false }), ['acquisition', 'extinction', 'negative-patterning', 'overshadowing']);
+  // Generalisation adds blocking, unblocking, and conditioned inhibition
+  // (E going negative does the work of inhibition at this stage). The last
+  // stage changes how inhibition is learned, not which effects appear.
+  assert.deepEqual(shownWith(pearce, { generalisation: true, inhibition: false }), classic(expected.pearce.shows));
+  assert.deepEqual(shownWith(pearce, { generalisation: true, inhibition: true }), classic(expected.pearce.shows));
 });

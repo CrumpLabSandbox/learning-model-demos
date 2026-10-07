@@ -19,14 +19,10 @@
         <a href="primer.html" aria-current="page">Reading the equations</a>
       </div>
       <div class="nav-group" role="group" aria-label="Models">
-        <a href="models/rescorla-wagner.html">Rescorla-Wagner</a>
-        <a href="models/mackintosh.html">Mackintosh</a>
-        <a href="models/pearce-hall.html">Pearce-Hall</a>
-        <a href="models/sop.html">SOP</a>
-        <a href="models/minerva-al.html">MINERVA-AL</a>
+        <a href="models.html">All models</a>
+        <a href="compare.html">Compare</a>
       </div>
       <div class="nav-group" role="group" aria-label="More">
-        <a href="compare.html">Compare</a>
         <a href="stream.html">Streamed trials</a>
         <a href="index.html#tutorials">Tutorials</a>
         <a href="glossary.html">Glossary</a>
@@ -61,6 +57,7 @@
           <li><a href="#notation">Notation map</a></li>
           <li><a href="#contingency">Contingency: the 2 × 2 table and ΔP</a></li>
           <li><a href="#criterion">A judgement is a decision</a></li>
+          <li><a href="#configurations">Configurations and similarity</a></li>
         </ol>
         <p class="small" style="margin:.75rem 0 0"><a href="decks/reading-equations.html">Overview slides for this page</a></p>
       </nav>
@@ -261,6 +258,15 @@
           <p>The two curves below are how a weak stream and a strong stream feel over many repetitions. Move the sensitivity to pull them apart. Move the criterion and watch both the hits (strong streams called strong) and the false alarms (weak streams called strong) change together, with the curves exactly where they were. That is what an <a href="glossary.html#outcome-density">outcome density</a> manipulation did in the streamed-trial studies: it moved the criterion and left the sensitivity alone.</p>
           <div class="widget" data-widget="criterion"></div>
           <div data-check="criterion"></div>
+        </section>
+
+        <section id="configurations">
+          <h2>23. Configurations and similarity</h2>
+          <p>The models so far give each cue its own strength and add them up. Pearce's model gives the strength to the whole pattern on a trial instead: the <a href="glossary.html#configuration">configuration</a> of everything present, with the context. Tone alone, light alone, and tone-with-light are three configurations, written here as A, B, and AB, and each has its own excitation E and inhibition I.</p>
+          <p>Configurations are not strangers. Each lends its strength to the others in proportion to their <strong>similarity</strong> S, a number from 0 to 1. To find S, add up the intensities of the stimuli the two configurations share, and ask what share of each configuration that is. S is the product of the two shares. A compound and one of its elements share that element; with equal intensities and no context the element is half of the compound and all of itself, so S = ½ × 1 = ½. Two configurations with nothing in common have S = 0.</p>
+          <div class="widget" data-widget="configurations"></div>
+          <p>Intensity is written P. Notice that S is symmetric, so overshadowing (train AB, test A) and external inhibition (train A, test AB) are the same decrement, and that a context shared by everything gives every pair of configurations some similarity.</p>
+          <div data-check="configurations"></div>
         </section>
       </article>
     </div>

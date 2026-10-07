@@ -12,13 +12,14 @@ import * as mkSpec from '../content/equations/mackintosh.js';
 import * as phSpec from '../content/equations/pearce-hall.js';
 import * as sopSpec from '../content/equations/sop.js';
 import * as malSpec from '../content/equations/minerva-al.js';
+import * as pearceSpec from '../content/equations/pearce.js';
 import { checks as tutorialChecks } from '../content/tutorials/checks.js';
 import { phenomena } from '../content/phenomena/index.js';
 import { MODELS } from '../js/core/registry.js';
 
 const root = new URL('..', import.meta.url).pathname;
 const inDir = (d) => readdirSync(join(root, d)).filter((f) => f.endsWith('.html')).map((f) => `${d}/${f}`);
-const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'compare.html', 'about.html', ...inDir('models'), ...inDir('decks'), ...inDir('tutorials')];
+const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'compare.html', 'stream.html', 'models.html', 'about.html', ...inDir('models'), ...inDir('decks'), ...inDir('tutorials')];
 const read = (p) => readFileSync(join(root, p), 'utf8');
 const ids = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
 
@@ -62,7 +63,7 @@ test('glossary entries are complete and their cross-links resolve', () => {
 
 test('every symbol in every model links to a primer section that exists', () => {
   const primerIds = ids(read('primer.html'));
-  for (const spec of [rwSpec, mkSpec, phSpec, sopSpec, malSpec]) {
+  for (const spec of [rwSpec, mkSpec, phSpec, sopSpec, malSpec, pearceSpec]) {
     for (const [key, def] of Object.entries(spec.symbols)) {
       assert.ok(primerIds.has(def.primer), `${key} -> #${def.primer}`);
       assert.ok(def.render || def.display, `${key} needs a render or a display text`);
@@ -123,7 +124,7 @@ test('every page carries the same navigation', () => {
   };
   const want = labels(read('index.html'));
   assert.equal(want.length, 3);
-  assert.ok(want.flat().length >= 13);
+  assert.ok(want.flat().length >= 11);
   for (const page of pages.filter((p) => !p.startsWith('decks/'))) assert.deepEqual(labels(read(page)), want, page);
 });
 
@@ -133,8 +134,8 @@ test('the navigation marks the page you are on, and only that page', () => {
     const nav = html.match(/<nav aria-label="Pages">([\s\S]*?)<\/nav>/)[1];
     const targets = [...nav.matchAll(/<a href="([^"]+)"/g)].map((m) => normalize(join(dirname(page), m[1])));
     const current = [...nav.matchAll(/<a href="([^"]+)" aria-current="page">/g)].map((m) => normalize(join(dirname(page), m[1])));
-    // Tutorials mark Tutorials; a page with its own link marks it; others (the landing and About pages) mark nothing.
-    const want = page.startsWith('tutorials/') ? ['index.html#tutorials'] : targets.includes(page) ? [page] : [];
+    // Tutorials mark Tutorials, model pages mark All models, a page with its own link marks it, and others (the landing and About pages) mark nothing.
+    const want = page.startsWith('tutorials/') ? ['index.html#tutorials'] : page.startsWith('models/') ? ['models.html'] : targets.includes(page) ? [page] : [];
     assert.deepEqual(current, want, page);
   }
 });
