@@ -58,7 +58,7 @@ const expected = {
   },
   delamater: {
     model: delamater,
-    shows: ['blocking', 'negative-patterning', 'contingency', 'outcome-density', 'one-phase-blocking', 'acquired-equivalence', 'biconditional', 'feature-positive'],
+    shows: ['acquisition', 'blocking', 'conditioned-inhibition', 'negative-patterning', 'contingency', 'outcome-density', 'one-phase-blocking', 'acquired-equivalence', 'biconditional', 'feature-positive'],
   },
 };
 
@@ -120,7 +120,8 @@ test('SOP build stages unlock the expected phenomena', () => {
   // arrives), and one-trial overshadowing (two cues displace each other
   // from A1 faster than one).
   assert.deepEqual(shownWith(sop, { retrieval: false, inhibition: false, links: false }), ['acquisition', 'cs-us-interval', 'overshadowing', 'trial-spacing']);
-  assert.deepEqual(shownWith(sop, { retrieval: false, inhibition: false, links: false, distractors: false }), ['cs-us-interval', 'trial-spacing']);
+  // Even with nothing to limit it, the climb levels off a little, because the last trial's US is still fading when the next arrives.
+  assert.deepEqual(shownWith(sop, { retrieval: false, inhibition: false, links: false, distractors: false }), ['acquisition', 'cs-us-interval', 'trial-spacing']);
   // Calling up the US adds the cue-competition effects. Unblocking now needs
   // the inhibitory term as well: with the activity limits, a bigger US alone
   // does not lift B far enough above D.
@@ -154,7 +155,8 @@ test('Pearce build stages unlock the expected phenomena', () => {
   // only in a compound knows nothing when tested alone (which the
   // overshadowing check counts as overshadowing). Extinction works by
   // weakening E at this stage.
-  assert.deepEqual(shownWith(pearce, { generalisation: false, inhibition: false }), ['acquisition', 'extinction', 'negative-patterning', 'overshadowing']);
+  // Conditioned inhibition passes the summation test here too: AX is its own configuration and never learns, so adding X to A removes A's prediction entirely.
+  assert.deepEqual(shownWith(pearce, { generalisation: false, inhibition: false }), ['acquisition', 'conditioned-inhibition', 'extinction', 'negative-patterning', 'overshadowing']);
   // Generalisation adds blocking, unblocking, and conditioned inhibition
   // (E going negative does the work of inhibition at this stage). The last
   // stage changes how inhibition is learned, not which effects appear.
