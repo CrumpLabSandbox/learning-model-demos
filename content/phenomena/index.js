@@ -67,6 +67,10 @@ export const phenomena = [
         why: "On trial 1 memory is empty, so the echo is noise and the whole event is stored. On each later trial A brings back the earlier traces of A with the outcome, so the echo holds more of the outcome. As the outcome becomes expected, less of it is new, and each new trace is fainter. Retrieval rises fast and levels off near 1.",
         tryThis: "Open the memory view and step through the first trials: the first traces are bright, the later ones pale, because less was surprising. Then lower the learning rate L and watch the curve rise more slowly.",
       },
+      pearce: {
+        why: 'The configuration A (with nothing else) is met for the first time with E = 0, so the discrepancy β(λ − V) is large and E grows by a quarter of the gap each trial. As E approaches λ the gap closes and the steps shrink. Nothing is borrowed, because no other configuration has been met.',
+        tryThis: 'Open Configurations: one row, A, with E climbing toward 1. Then add a line "Context: Z" to the design: the context-alone configuration appears and shares a little of A\'s strength.',
+      },
     },
   },
   {
@@ -103,6 +107,10 @@ export const phenomena = [
       'minerva-al': {
         why: "On A− trials A brings back the outcome, but it does not come, so each trial stores A together with the opposite of the outcome. Later, A brings back both kinds of trace, and the outcome and its opposite cancel in the echo. Nothing is erased: the old traces are all still in memory.",
         tryThis: "Step to trial 25 and look at the memory view: the new trace's outcome features are red (negative). Then compare with Rescorla-Wagner, where extinction erases the strength.",
+      },
+      pearce: {
+        why: 'On the A− trials λ is 0 and A predicts V > 0, so the discrepancy is negative and goes to A\'s inhibition I. E stays where it was. V = E − I falls to 0 when I has caught E up. Nothing is forgotten: the old learning is still there, with new learning laid over it.',
+        tryThis: 'Open Configurations during extinction: E stays at 1 while I climbs to meet it. Then switch off \'Inhibition as new learning\': E itself falls, as in Rescorla-Wagner.',
       },
     },
   },
@@ -147,6 +155,10 @@ export const phenomena = [
         why: "Salience multiplies a cue's features. B's features are only 0.1, so the probe for B is mostly the context, and B's traces stand out less from the rest of memory. B's retrieval rises more slowly. Both end near 1.",
         tryThis: "Set the two saliences equal (Everything view) and the lines become one.",
       },
+      pearce: {
+        why: 'Intensity matters in this model only through similarity. With no context in the design, A and B are each their own configuration and share nothing with anything, so a more intense A learns no faster than B. Pearce\'s account of salience needs the context: an intense cue leaves the context less of the buffer, so less excitation generalises to the context and less inhibition comes back.',
+        tryThis: 'Add a line "Context: Z" to the design and the two cues part: the intense A is slowed less by inhibition borrowed from the context than the faint B.',
+      },
     },
   },
   {
@@ -184,6 +196,10 @@ export const phenomena = [
       'minerva-al': {
         why: "By the compound trials A already brings back the outcome. The most surprising thing on an AB trial is B, so each trace stores B strongly and the outcome only weakly. B later brings back those traces, and with them little outcome. D's partner C was new, so the CD traces hold more outcome.",
         tryThis: "Switch off 'Store the discrepancy': each trial stores the whole event, expected or not, and blocking disappears.",
+      },
+      pearce: {
+        why: 'A is trained to λ. On AB+ trials the configuration AB is new, but it borrows half of A\'s strength (S = 0.5 with equal intensities), so the discrepancy is half what it would be and AB learns only to half of λ itself. B alone then borrows half of what AB learned: a quarter of λ. D borrows half of CD, which had to learn all of λ: a half. Blocking is generalisation from A to AB, then dilution from AB to B.',
+        tryThis: 'Raise A\'s intensity above B\'s: AB is more like A, borrows more, learns less, and lends B less, so blocking deepens. Lower it and blocking fades, as Pearce predicts from the relative intensities.',
       },
     },
   },
@@ -227,6 +243,10 @@ export const phenomena = [
         why: "The AB+(2) trials store an outcome of size 2. D's probe matches those traces through the context they share, and their large outcome features come back in D's echo too. So D is not blocked in this design, and there is nothing for B to be unblocked from. With AB+ in place of AB+(2), B and D are both blocked.",
         tryThis: "Change AB+(2) to AB+ in the design: B and D both end near 0.4. The paper does not simulate unblocking.",
       },
+      pearce: {
+        why: 'On AB+(2) trials λ is 2 but AB borrows only half of A\'s strength, 0.5, so the discrepancy is large and AB learns a lot of its own. B borrows half of that. D\'s compound borrows half of C and learns only up to λ = 1, so D ends lower.',
+        tryThis: 'Change AB+(2) back to AB+ and B ends where D does.',
+      },
     },
   },
   {
@@ -265,6 +285,10 @@ export const phenomena = [
         why: "Every trace that holds B also holds A, so a probe with B alone only partly matches them, and they answer more weakly (similarity about 0.8, cubed about 0.5). The outcome comes back less clearly for B than for C, whose traces match its probe fully. The paper's Table 8 shows the same.",
         tryThis: "Lower A's salience (Everything view): A's features become fainter in the traces, B's probe matches them better, and the overshadowing of B shrinks.",
       },
+      pearce: {
+        why: 'AB learns to λ as one configuration. B alone is a different pattern that shares B with it, half of AB by intensity, so B borrows half of what AB learned. C, trained alone, keeps all of its own. This is generalisation decrement, and it is there from the first trial.',
+        tryThis: 'Step to trial 2 and compare B and C: B is already behind. Then make A more intense than B: AB is more like A, so B borrows even less.',
+      },
     },
   },
   {
@@ -301,6 +325,10 @@ export const phenomena = [
       'minerva-al': {
         why: "A brings back the outcome on AX− trials, but it does not come, so each AX trace stores A, X, and the opposite of the outcome. X brings back those traces, and with them the opposite of the outcome: retrieval goes below zero. The paper's Table 2 shows the same.",
         tryThis: "Switch off 'Store the discrepancy': the AX traces then hold no outcome at all, rather than its opposite, and X does not go below zero.",
+      },
+      pearce: {
+        why: 'A is reinforced and AX is not. AX borrows half of A\'s excitation, so on AX− trials it predicts the outcome, gets none, and gains inhibition of its own until the borrowed excitation is cancelled. X alone borrows half of AX\'s inhibition and little else, so X ends negative. This is the paper\'s Figure 1, and A itself ends above λ, because it must offset the inhibition it borrows back from AX.',
+        tryThis: 'Open Configurations at the end: A has E above 1, AX has I of about 0.67 and V near 0. Then switch off \'Inhibition as new learning\': AX\'s excitation is weakened instead, X cannot go below 0, and the effect disappears.',
       },
     },
   },
@@ -347,6 +375,10 @@ export const phenomena = [
         why: "Each pre-exposure trial leaves a trace of A with nothing after it. During conditioning A brings back those traces too, and they water down the outcome in the echo, so A's retrieval rises more slowly than B's, which has no such traces. The paper calls this proactive interference.",
         tryThis: "Step to the first conditioning trial with A and look at the memory view: the pre-exposure traces light up in the similarity bars. Then lower L and watch the effect grow, as in the paper's Table 6.",
       },
+      pearce: {
+        why: 'On the pre-exposure trials A predicts nothing and nothing happens, so the discrepancy is 0 and no configuration changes. A starts conditioning exactly where B does. Pearce suggests that attention to a familiar cue would be needed to explain latent inhibition, and the model as written has none.',
+        tryThis: 'Compare with Pearce-Hall, where pre-exposure lowers attention, and with SOP and MINERVA-AL, where the context comes to prime or recall the cue.',
+      },
     },
   },
   {
@@ -384,6 +416,10 @@ export const phenomena = [
       'minerva-al': {
         why: "In the second phase A brings back B from the AB traces, but B is not there, so each A trace stores the opposite of B. Later, B's probe matches those traces negatively. Cubing keeps the sign, so they count against B's echo, taking away some of the outcome that the AB traces brought back. B ends below D.",
         tryThis: "Look at the memory view after the second phase: the A traces have red (negative) features in B's field. Then switch off 'Store the discrepancy' and backward blocking disappears.",
+      },
+      pearce: {
+        why: 'Only the configuration on a trial learns. During the A+ trials the AB configuration is not presented, so its E and I do not change, and B alone borrows the same amount from it as before. Absent patterns do not change.',
+        tryThis: 'Compare with MINERVA-AL, where the later A+ traces change what A brings back about B.',
       },
     },
   },
@@ -427,6 +463,10 @@ export const phenomena = [
         why: "A, B, and AB each bring back the traces most like them, and cubing makes close matches count far more than loose ones. AB brings back mostly the AB− traces, which hold the opposite of the outcome; A brings back mostly the A+ traces. The compound is remembered as its own pattern, not as A plus B.",
         tryThis: "Step to an AB− trial late in training and look at the memory view: the AB traces have the longest activation bars. Even with the similarity exponent at 1 (Everything view), AB is still told apart from A and B, because each compound is stored as its own pattern.",
       },
+      pearce: {
+        why: 'A, B, and AB are three configurations. A and B each learn to λ. AB borrows half of each, predicts about λ on its first trial, is not reinforced, and gains inhibition until it predicts 0; that inhibition generalises back to A and B, which learn a little extra to compensate. The model solves the problem by making the compound its own unit.',
+        tryThis: 'Open Configurations: the AB row has E near 0 and I near 1, while A and B have E a little above 1. Then switch off \'Generalisation\': AB learns nothing and A and B are untouched, which also solves it, but by treating every pattern as a stranger.',
+      },
     },
   },
   {
@@ -464,6 +504,10 @@ export const phenomena = [
       'minerva-al': {
         why: "MINERVA-AL stores each trial as one event, with no time inside it or between trials, so the timing in square brackets makes no difference. The paper notes that the model cannot model timing.",
         tryThis: "Compare with SOP, the one model here where time matters.",
+      },
+      pearce: {
+        why: 'The model learns trial by trial and knows nothing about time between trials, so spaced and massed trials are the same.',
+        tryThis: 'Only SOP, which runs moment by moment, can show this.',
       },
     },
   },
@@ -503,6 +547,10 @@ export const phenomena = [
         why: "Each trial is one event, so a gap between the cue and the outcome cannot matter: they are stored in the same trace either way.",
         tryThis: "Compare with SOP, where the cue fades before a late outcome arrives.",
       },
+      pearce: {
+        why: 'The model learns trial by trial and knows nothing about time within a trial, so a gap before the outcome changes nothing.',
+        tryThis: 'Only SOP, which runs moment by moment, can show this.',
+      },
     },
   },
   {
@@ -541,6 +589,10 @@ export const phenomena = [
         why: "Each trial is one event, so the order of the cue and the outcome inside a trial is lost: a backward pairing is stored like an ordinary A+ trial.",
         tryThis: "Compare with SOP, where the order matters.",
       },
+      pearce: {
+        why: 'The model learns trial by trial and knows nothing about the order of cue and outcome within a trial, so backward pairings are just pairings.',
+        tryThis: 'Only SOP, which runs moment by moment, can show this.',
+      },
     },
   },
   {
@@ -578,6 +630,10 @@ export const phenomena = [
       'minerva-al': {
         why: "The outcome-alone trials store the context with the outcome. B's probe includes the context, so it matches those traces partly, and they help B bring back the outcome rather than hinder it. B learns no more slowly than A did.",
         tryThis: "Compare with Rescorla-Wagner, where the context gains strength and blocks B.",
+      },
+      pearce: {
+        why: 'On the outcome-alone trials the configuration is the context Z by itself, and it learns to predict the outcome. When B is trained, the configuration BZ borrows from Z in proportion to the context\'s share of it, which is small with the default intensities, so B is slowed only a little.',
+        tryThis: 'Raise the context\'s intensity: BZ becomes more like Z, borrows more, and B is slowed more.',
       },
     },
   },
@@ -628,6 +684,10 @@ export const phenomena = [
         why: "Every frame is stored as a trace. A's probe shares the context with every trace, so it brings back the outcome at the stream's base rate, and A's own traces add to that: A+ traces store the outcome, A- traces store the opposite of what was expected. B's traces hold little outcome beyond what the context already brought back, so retrieval for B stays near 0.",
         tryThis: 'Open the memory view on a B+ frame late in the second stream: the new trace stores little of the outcome, because the context had already brought back about that much.',
       },
+      pearce: {
+        why: 'Every frame is one of four configurations: A with the context, the context alone, and the same for B. A\'s configuration learns toward P(O | A), the context alone toward P(O | no A), and A alone borrows from both in proportion to the shares they take up. A ends above B, but above ΔP too, because a cue\'s own configuration tracks how often the outcome follows it rather than the difference.',
+        tryThis: 'Compare with Rescorla-Wagner, where A settles at ΔP exactly. Then raise the context\'s intensity: A\'s configuration shares more with the context-alone configuration and borrows more of its base rate.',
+      },
     },
   },
   {
@@ -668,6 +728,10 @@ export const phenomena = [
       'minerva-al': {
         why: "In the dense stream the context alone brings back the outcome, because most traces hold it. B's probe includes the context, so B's echo holds the outcome too, and the echo is scaled to its largest feature. B retrieves the outcome strongly though B adds nothing to the context's prediction. This is the model's base-rate behaviour: a cue in a trained context retrieves what the context retrieves.",
         tryThis: 'Open the memory view on a frame with B and look at the probe: the context features are part of it, and the traces they match are most of memory.',
+      },
+      pearce: {
+        why: 'Both cues\' configurations learn toward how often the outcome follows them, 0.2 for A and 0.8 for B, and the context alone learns toward the base rate. The model tracks pairings for each pattern, not the contingency, so a dense outcome looks like a strong cue.',
+        tryThis: 'Compare with Rescorla-Wagner, where the context soaks up the base rate and both cues head for ΔP = 0.',
       },
     },
   },
@@ -710,6 +774,10 @@ export const phenomena = [
         why: 'On AB frames A and the context already bring back the outcome, so each new trace stores the outcome only faintly with B, and B− frames store the opposite of the expected outcome with B. CD traces store the outcome in full, because C brings back little. B later retrieves little outcome, D retrieves much.',
         tryThis: "Switch off 'Store the discrepancy': every trace then holds the whole frame, and the gap between B and D shrinks.",
       },
+      pearce: {
+        why: 'A is followed by the outcome every time it appears, so the configurations containing A learn to λ. AB borrows from A alone and learns little of its own, and B alone is only half like AB, so B borrows little: blocking by generalisation. D\'s companion C predicts nothing, so the CD configuration learns all of its own and lends D half.',
+        tryThis: 'Switch off \'Generalisation\': every pattern learns alone, B alone and D alone each learn from their own frames, and the gap closes.',
+      },
     },
   },
   {
@@ -750,6 +818,10 @@ export const phenomena = [
       'minerva-al': {
         why: 'In the first phase the context and A are stored with the outcome, so on AB frames A brings the outcome back and the trace stores it only faintly with B. C is new, so CD traces store the outcome in full. The effect is modest with probabilistic outcomes, because the A+ and A− frames in the compound phase also store traces that weaken what A brings back.',
         tryThis: "Swap the two phases. MINERVA-AL is the one model here that can change B while B is absent, as in backward blocking, but with these probabilistic frames the backward effect is small.",
+      },
+      pearce: {
+        why: 'A\'s configuration learns toward 0.75 in the first phase and lends AB half of it, so AB learns less of its own than CD, which starts from nothing. B borrows half of AB and D half of CD, so B ends a little below D. The effect is modest because A alone is followed by the outcome on only a quarter of the compound-phase frames, which pulls A\'s configuration down and lets AB learn more.',
+        tryThis: 'Compare with the deterministic Blocking preset, where A is always reinforced and the gap between B and D is wide.',
       },
     },
   },

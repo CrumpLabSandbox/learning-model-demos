@@ -151,6 +151,9 @@ export function mountModelPage({
     : null;
   function renderMemory() {
     memoryView?.update({ run: state.run, rec: currentRecord() });
+    // A view the equation spec draws itself from the trial record, such as
+    // the configurations a configural model has met.
+    if (spec.panel) $('spec-panel').innerHTML = spec.panel.render(currentRecord(), state.run);
   }
 
   // ---- Design -------------------------------------------------------------
@@ -1048,6 +1051,15 @@ function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
       <div id="chart"></div>
       <div class="predict-feedback" id="predict-feedback" hidden></div>
     </section>
+    ${
+      spec.panel
+        ? `<section class="panel spoiler" id="spec-panel-wrap">
+      <h2>${esc(spec.panel.title)}</h2>
+      <p class="small muted">${spec.panel.help}</p>
+      <div id="spec-panel"></div>
+    </section>`
+        : ''
+    }
     ${
       model.memory
         ? `<section class="panel spoiler" id="memory-panel">

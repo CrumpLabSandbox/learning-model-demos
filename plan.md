@@ -390,6 +390,24 @@ Notes from building it:
 - SOP treats each frame as a well-spaced trial under the default timing, and its context becomes a strong inhibitor over the many frames with nothing on them, so its cue strengths run above 1. This is the model's behaviour under the site's trial-structured context; the page says so, and a `Timing: ITI 2` line is offered as something to try.
 - The streamed-trial page flashes stimuli. The default is 500 ms frames with 150 ms gaps and a grey card between frames, and it follows `prefers-reduced-motion`; the paper's 100 ms frames with black gaps are an option with a warning. Nothing is saved between visits.
 
+### 8. Pearce's configural model, and a models page
+
+Pearce (1987) is the first configural model on the site: the whole pattern of cues on a trial learns as one unit and lends its strength to similar patterns. It answers negative patterning and one-trial overshadowing in a different way from MINERVA-AL. The header could not take a sixth model name, so the models now live on their own page.
+
+- [x] `js/models/pearce.js` from Pearce (1987): configurations with their own E and I, similarity by the shares of the common stimuli (Eq. 3), generalised excitation and inhibition (Eq. 6), net strength (Eq. 9), and learning from the discrepancy (Eq. 10) with inhibition as new learning
+- [x] Tests (`tests/pearce.test.js`): hand-worked trials, the asymptotes of the paper's Figures 1 and 2 (E = 4/3, I = 2/3, the feature at 2/3), one-trial overshadowing, the symmetry of overshadowing and external inhibition, overexpectation only with a context, blocking by relative intensity, the summation-test asymmetry, and the check that every displayed equation evaluates to the number the model used
+- [x] A configurations view on the page (the spec's `panel`), an own-strength chart, cueless equations about the configuration on the trial, and build stages: each pattern alone, lend by similarity, learn about absence
+- [x] Explanations for every phenomenon, an overview deck, glossary entries (configuration, generalisation, generalisation decrement, external inhibition, overexpectation), and primer section 23 with a similarity widget
+- [x] `models.html`: one card per model in course order, from the registry (`INFO`), with the idea, what it explains and misses, and links. The header's Models group is now All models and Compare; model pages mark All models as current
+- [ ] Attention in the buffer (Pearce's suggestion for latent inhibition) and the 1994 revision, if they are wanted for teaching
+
+Notes from building it:
+
+- With equal intensities and no context, a compound and either element have similarity 0.5 exactly, which is the value Pearce's simulations set by hand, and two single cues have similarity 0. The tests reproduce both figures' asymptotes to three decimals: in A+ / AB− the element's excitation ends at 4/3 and the compound's inhibition at 2/3, so that the element predicts λ and the compound 0; the feature-positive case mirrors it, with the feature alone at 2/3.
+- The paper describes inhibitory learning for nonreinforced trials; this page applies the same rule to an over-predicted reinforced trial, so overexpectation (which needs a context, as the paper says) reduces both cues through inhibition. Without a context the compound of two trained cues predicts exactly λ and nothing changes.
+- With the default intensities (cues 0.5, context 0.15) the model shows acquisition, extinction, blocking, unblocking, overshadowing, conditioned inhibition, negative patterning, and the four streamed-trial effects. It misses salience (intensity only acts through a context), latent inhibition (nothing changes when nothing is predicted and nothing happens), backward blocking (absent patterns do not change), and the timing effects. The salience card says how to see the paper's account with a context line.
+- The models page reads a small `INFO` table in the registry rather than the model files, which stay maths only.
+
 ### Visual refresh: graph paper
 
 - [x] Colour kept for data: the interface (links, buttons, current page, step numbers, focus) is drawn in ink (`--ui`), so the only blue on a model page is cue A

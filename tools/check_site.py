@@ -455,13 +455,52 @@ class Checker:
         ctx.close()
 
     # -- comparison page and tutorials -----------------------------------------
+    # -- a configural model (Pearce) ------------------------------------------
+    def configural_model(self, browser) -> None:
+        ctx = browser.new_context(viewport=DESKTOP)
+        page = self.open(ctx, "models/pearce.html#view=everything&preset=negative-patterning", wait=900)
+        self.check("pearce: no preview notice (checked against the paper)", page.query_selector(".preview-note") is None)
+        page.click('[data-act="all"]')
+        page.wait_for_timeout(300)
+        rows = page.query_selector_all("#spec-panel .config-table tbody tr")
+        self.check("pearce: the configurations view lists A, B, and AB", len(rows) == 3, f"{len(rows)} rows")
+        text = page.text_content("#spec-panel") or ""
+        self.check("pearce: the compound carries inhibition", "AB" in text and page.query_selector("#spec-panel tr.current") is not None)
+        self.check("pearce: equations render for the configuration", len(page.query_selector_all("#eq-list .eq-card")) >= 6)
+        self.check("pearce: the own-strength chart draws a line per cue", len(page.query_selector_all("#chart-own path.series")) >= 2)
+        badge = lambda: page.text_content('.card:has(h3:text("Blocking")) .badge')
+        before = badge()
+        page.click('[data-opt="generalisation"]')
+        page.wait_for_timeout(250)
+        self.check("pearce: switching off generalisation removes blocking", before != badge(), f"{before} -> {badge()}")
+        page.click('[data-opt="generalisation"]')
+        page.click('[data-act="start"]')
+        page.wait_for_timeout(200)
+        self.check("pearce: build stage 1 runs", "Stage 1 of" in page.text_content("#build"))
+        while page.query_selector('#build [data-act="next"]'):
+            page.click('#build [data-act="next"]')
+            page.wait_for_timeout(150)
+        self.check("pearce: build reaches the full model", page.query_selector('#build [data-act="done"]') is not None)
+        self.shot(page, "pearce-page", full=True)
+        self.clean(page, "pearce")
+        page.close()
+
+        page = self.open(ctx, "models.html")
+        cards = page.query_selector_all(".model-card")
+        self.check("models page: one card per model", len(cards) == 6, f"{len(cards)} cards")
+        self.check("models page: every card links to its page and slides", all(c.query_selector('a[href^="models/"]') and c.query_selector('a[href^="decks/"]') for c in cards))
+        self.shot(page, "models-page", full=True)
+        self.clean(page, "models")
+        page.close()
+        ctx.close()
+
     def comparison(self, browser) -> None:
         ctx = browser.new_context(viewport=DESKTOP)
         page = self.open(ctx, "compare.html#preset=blocking", wait=900)
         cards = page.query_selector_all(".cmp-card")
-        self.check("compare: one panel per model", len(cards) == 5, f"{len(cards)} panels")
+        self.check("compare: one panel per model", len(cards) == 6, f"{len(cards)} panels")
         self.check("compare: every panel draws its lines", all(c.query_selector("path.series") for c in cards))
-        self.check("compare: every panel has a verdict", len(page.query_selector_all(".cmp-card .badge")) == 5)
+        self.check("compare: every panel has a verdict", len(page.query_selector_all(".cmp-card .badge")) == 6)
         page.click('#cmp-stepper [data-act="start"]')
         page.click('#cmp-stepper [data-act="fwd"]')
         page.wait_for_timeout(150)
@@ -474,14 +513,14 @@ class Checker:
         self.check("compare: clicking one chart moves them all", len(set(texts)) == 1 and "Trial 1 " not in texts[0], "; ".join(texts))
         page.click('[data-model="sop"]')
         page.wait_for_timeout(300)
-        self.check("compare: unticking a model removes its panel", len(page.query_selector_all(".cmp-card")) == 4)
+        self.check("compare: unticking a model removes its panel", len(page.query_selector_all(".cmp-card")) == 5)
         page.select_option("#cmp-preset", "negative-patterning")
         page.wait_for_timeout(600)
         self.check("compare: only MINERVA-AL shows negative patterning", page.text_content('[data-model-card="minerva-al"] .badge').strip().startswith("✓") and page.text_content('[data-model-card="rescorla-wagner"] .badge').strip().startswith("✗"))
         page.click(".cmp-own summary")
         page.fill("#cmp-design", "Training: 10 A+, 10 B-")
         page.wait_for_timeout(800)
-        self.check("compare: a custom design runs without verdicts", len(page.query_selector_all(".cmp-card")) == 4 and not page.query_selector_all(".cmp-card .badge") and page.text_content("#cmp-error") == "")
+        self.check("compare: a custom design runs without verdicts", len(page.query_selector_all(".cmp-card")) == 5 and not page.query_selector_all(".cmp-card .badge") and page.text_content("#cmp-error") == "")
         self.shot(page, "compare-page", full=True)
         self.clean(page, "compare")
         page.close()
@@ -493,7 +532,7 @@ class Checker:
             drawn = len(page.query_selector_all("figure[data-mini] svg"))
             self.check(f"{name}: every chart draws", figs > 0 and drawn == figs, f"{drawn} of {figs}")
             strips = page.query_selector_all("[data-verdicts]")
-            self.check(f"{name}: every verdict strip covers five models", all(len(s.query_selector_all(".verdict")) == 5 for s in strips))
+            self.check(f"{name}: every verdict strip covers six models", all(len(s.query_selector_all(".verdict")) == 6 for s in strips))
             first = page.query_selector("[data-check] [data-opt='0']")
             if first:
                 first.click()
@@ -503,7 +542,7 @@ class Checker:
 
         page = self.open(ctx, "index.html")
         rows = page.query_selector_all(".matrix tbody tr")
-        self.check("landing: the phenomenon table covers every phenomenon and model", len(rows) == 18 and all(len(r.query_selector_all("td")) == 5 for r in rows))
+        self.check("landing: the phenomenon table covers every phenomenon and model", len(rows) == 18 and all(len(r.query_selector_all("td")) == 6 for r in rows))
         self.check("landing: five tutorials", len(page.query_selector_all("#tutorials .entry-card")) == 5)
         page.close()
         ctx.close()
@@ -526,7 +565,7 @@ class Checker:
         page.wait_for_timeout(600)
         result = page.text_content("#st-result") or ""
         self.check("stream: the reveal shows the table, ΔP, and the rating", "17" in result and "0.467" in result and "Your rating" in result and "+40" in result, result[:200])
-        self.check("stream: every model reports a value for the same frames", len(page.query_selector_all("#st-result .models-table tbody tr")) == 5)
+        self.check("stream: every model reports a value for the same frames", len(page.query_selector_all("#st-result .models-table tbody tr")) == 6)
         self.check("stream: the session log has one row", page.is_visible("#st-log") and len(page.query_selector_all("#st-log tbody tr")) == 1)
         # Frequency estimates, on a two-cue stream.
         page.click(".stream-options summary")
@@ -562,7 +601,7 @@ class Checker:
     def learning_pages(self, browser) -> None:
         ctx = browser.new_context(viewport=DESKTOP)
         page = self.open(ctx, "primer.html")
-        self.check("primer: 22 sections with widgets", len(page.query_selector_all("article section")) == 22 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
+        self.check("primer: 23 sections with widgets", len(page.query_selector_all("article section")) == 23 and len(page.query_selector_all(".widget svg, .widget math")) > 10)
         page.click('#contingency [data-ct-preset="2"]')
         self.check("primer: the contingency table recomputes ΔP", "0" in (page.text_content("#contingency .ct-dp") or "") and "24" in page.input_value('#contingency [data-ct="a"]'))
         page.eval_on_selector("#sd-c", "el => { el.value = '-2'; el.dispatchEvent(new Event('input', { bubbles: true })); }")
@@ -630,7 +669,7 @@ class Checker:
         if self.built:
             page.wait_for_timeout(300)
             self.check("landing: shows the build version", "Site version" in page.text_content("#build-info"))
-        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-cards .entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 9 and page.query_selector('.units a[href="models/minerva-al.html#view=essentials"]') is not None and not page.query_selector_all(".units tr.soon"))
+        self.check("landing: three entry points and every unit", len(page.query_selector_all(".entry-cards .entry-card")) == 3 and len(page.query_selector_all(".units tbody tr")) == 10 and page.query_selector('.units a[href="models/minerva-al.html#view=essentials"]') is not None and not page.query_selector_all(".units tr.soon"))
         lines = page.eval_on_selector_all(".hero .hero-chart path.mini-line", "els => els.map(e => e.getAttribute('d').length)")
         self.check("landing: the hero chart is drawn by the model", len(lines) == 3 and all(n > 100 for n in lines), f"lines: {lines}")
         page.close()
@@ -641,7 +680,7 @@ class Checker:
         fonts = page.evaluate("['Figtree', 'Bricolage Grotesque'].map(f => [...document.fonts].some(ff => ff.family.replace(/\"/g, '') === f && ff.status === 'loaded'))")
         self.check("look: Figtree and Bricolage Grotesque load", all(fonts), f"loaded: {fonts}")
         current = page.eval_on_selector_all(".site-header nav a[aria-current]", "els => els.map(e => [e.textContent, getComputedStyle(e).backgroundColor])")
-        self.check("look: the header marks the current page", len(current) == 1 and current[0][0] == "SOP" and current[0][1] not in ("rgba(0, 0, 0, 0)", "transparent"), f"{current}")
+        self.check("look: the header marks the current page", len(current) == 1 and current[0][0] == "All models" and current[0][1] not in ("rgba(0, 0, 0, 0)", "transparent"), f"{current}")
         page.close()
         ctx.close()
 
@@ -656,7 +695,7 @@ def run_checks(directory: Path, browsers: list[str]) -> bool:
                 print(f"\n== {name} ({'built site' if built else 'source'}, {base}) ==")
                 browser = getattr(pw, name).launch()
                 c = Checker(base, name, built)
-                for section in (c.pages, c.dev_toggle, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.comparison, c.streamed_trials, c.learning_pages):
+                for section in (c.pages, c.dev_toggle, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.configural_model, c.comparison, c.streamed_trials, c.learning_pages):
                     print(f"- {section.__name__}")
                     c.run(section.__name__, section, browser)
                 browser.close()

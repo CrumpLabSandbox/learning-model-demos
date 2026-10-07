@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pearce Configural Model Overview · Learning Model Demos</title>
+  <meta name="description" content="Overview slides for Pearce's configural model (1987): the whole pattern of cues learns as one unit, similarity lends strength between patterns, and inhibition is new learning.">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/load-guard.js"></script>
+  <script src="../js/site-status.js"></script>
+</head>
+<body class="deck-page">
+  <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="../about.html#status">What this means</a></div>
+  <main class="deck" data-title="Pearce configural model overview" data-back="../models/pearce.html#view=essentials" data-back-label="Open the model">
+    <section class="slide" data-title="Pearce: the whole pattern learns">
+      <div class="kicker">Overview · model 6</div>
+      <h1>Pearce: the whole pattern learns</h1>
+      <p class="sub">John Pearce, 1987. A configural model: what learns is not each cue but the whole pattern of stimulation on a trial.</p>
+      <aside class="notes">Pearce, J. M. (1987). A model for stimulus generalization in Pavlovian conditioning. Psychological Review, 94, 61–73. The 1994 revision (Psychological Review, 101, 587–607) squares the similarity and adds a connectionist framing; this site implements the 1987 paper.</aside>
+    </section>
+    <section class="slide" data-title="A problem the other models share">
+      <h2>A problem the other models share</h2>
+      <p>In every model so far, a compound predicts the sum of its parts. Tone predicts food, light predicts food, so tone-and-light must predict food even more.</p>
+      <p>But animals learn <a href="../glossary.html#negative-patterning">negative patterning</a>: food after the tone, food after the light, <strong>no food after both</strong>. Adding up cannot do that.</p>
+      <p class="big">What if the unit of learning is the whole pattern, not the parts?</p>
+    </section>
+    <section class="slide" data-title="The big idea">
+      <h2>The big idea</h2>
+      <p>On a trial the learner meets one <a href="../glossary.html#configuration">configuration</a>: everything present together, in this place. That configuration is the thing that learns.</p>
+      <p>Tone alone, light alone, and tone-with-light are three different configurations, each with its own strength. So the compound can learn something the elements have not.</p>
+      <aside class="notes">The configuration includes the context, which is why the model treats conditioning to a single cue as a discrimination between "cue plus context" and "context alone".</aside>
+    </section>
+    <section class="slide" data-title="Similarity lends strength">
+      <h2>Similarity lends strength</h2>
+      <div class="two-col">
+        <div class="widget" data-widget="configurations"></div>
+        <div>
+          <p>If configurations were strangers to each other, a tone trained with a light would know nothing when tested alone. It does not; it knows less.</p>
+          <p>So each pattern borrows from every other in proportion to their <a href="../glossary.html#similarity">similarity</a>: the share of each pattern taken up by what they have in common.</p>
+        </div>
+      </div>
+      <aside class="notes">With equal intensities and no context, a compound and either element have similarity 0.5, which is what Pearce's own simulations used. Intensity matters: the compound is more similar to its more intense element, so the fainter one is overshadowed more.</aside>
+    </section>
+    <section class="slide" data-title="Overshadowing on the first trial">
+      <h2>Overshadowing on the first trial</h2>
+      <div class="two-col">
+        <figure data-mini data-model="pearce" data-design="Training: 10 AB+, 10 C+" data-lines="B,C" data-caption="Pearce: B, trained in the AB compound, borrows half of what AB learned. C, trained alone, keeps all of its own."></figure>
+        <div>
+          <p>B tested alone is a different pattern from AB, so it borrows only part of AB's strength: <a href="../glossary.html#generalisation-decrement">generalisation decrement</a>.</p>
+          <p>That is why overshadowing is there after a single trial, where Rescorla-Wagner needs many. Adding a new cue to a trained one dilutes it the same way: <a href="../glossary.html#external-inhibition">external inhibition</a>.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="Negative patterning">
+      <h2>Negative patterning</h2>
+      <div class="two-col">
+        <figure data-mini data-model="pearce" data-design="Training: 40 A+, 40 B+, 40 AB-|Test: A, B, AB" data-lines="A,B,AB" data-caption="Pearce: A and B each predict the outcome; the AB configuration learns inhibition and predicts almost nothing."></figure>
+        <div>
+          <p>AB borrows excitation from A and from B, but it is not reinforced, so it learns <strong>inhibition</strong> of its own until the borrowed excitation is cancelled.</p>
+          <p>Rescorla-Wagner, Mackintosh, Pearce-Hall, and SOP all fail here. MINERVA-AL and Pearce solve it, in different ways.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide" data-title="Inhibition is new learning">
+      <h2>Inhibition is new learning</h2>
+      <p>When less happens than a configuration predicted, it does not lose excitation. It gains <a href="../glossary.html#inhibitory-strength">inhibition</a>, which is subtracted from what it predicts.</p>
+      <p>So extinction leaves the old learning in place and lays new learning over it, and inhibition generalises to similar patterns just as excitation does.</p>
+      <p class="sub">The same view as Pearce-Hall, and Konorski before them.</p>
+      <aside class="notes">Pearce's Figure 1 (A+ with AB−) and Figure 2 (A− with AB+) show the consequences: the reinforced element or compound ends up with more excitation than λ, "supernormal", balanced by inhibition borrowed from the nonreinforced pattern. The tests reproduce both figures' asymptotes exactly.</aside>
+    </section>
+    <section class="slide" data-title="What it gets wrong">
+      <h2>What it gets wrong</h2>
+      <ul>
+        <li><strong><a href="../glossary.html#latent-inhibition">Latent inhibition</a>.</strong> Nothing happens on a trial with no outcome and no prediction, so pre-exposure changes nothing. Pearce suggests attention would be needed.</li>
+        <li><strong><a href="../glossary.html#backward-blocking">Backward blocking</a>.</strong> A configuration that is not presented does not change.</li>
+        <li><strong>Timing.</strong> Like every trial-level model, it knows nothing about moments.</li>
+      </ul>
+    </section>
+    <section class="slide" data-title="Try these first">
+      <h2>Try these first on the model page</h2>
+      <ol class="path-steps">
+        <li>Load <strong>Negative patterning</strong> and open <strong>Configurations</strong>: watch the AB row gain inhibition while A and B gain excitation.</li>
+        <li>Load <strong>Overshadowing</strong> and step to trial 1: B is already behind C.</li>
+        <li>Switch off <strong>Generalisation between configurations</strong> and watch blocking and overshadowing disappear.</li>
+      </ol>
+      <p><a class="btn primary" href="../models/pearce.html#view=essentials">Open Pearce (Essentials view)</a></p>
+      <p class="sub">New notation here: configurations and the similarity S. See <a href="../primer.html#configurations">Reading the equations, section 23</a>.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
+    <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="../about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
+  </footer>
+  <script type="module">
+    import { mountDeck } from '../js/ui/deck.js';
+    mountDeck(document.querySelector('.deck'));
+  </script>
+</body>
+</html>

@@ -18,18 +18,15 @@
 //                             optional @phase (1-based) to span one phase
 
 import { parseDesign } from '../core/design.js';
-import { runModel } from '../core/runner.js';
-import * as rw from '../models/rescorla-wagner.js';
-import * as mackintosh from '../models/mackintosh.js';
-import * as pearceHall from '../models/pearce-hall.js';
-import * as sop from '../models/sop.js';
-import * as minervaAL from '../models/minerva-al.js';
-import { defaultOptions } from '../core/runner.js';
+import { runModel, defaultOptions } from '../core/runner.js';
+import { MODELS as REGISTRY } from '../core/registry.js';
 import { esc } from './equation.js';
 import { whenResized } from './widget-kit.js';
 import { trialPlot } from './timeline.js';
 
-const MODELS = { 'rescorla-wagner': rw, mackintosh, 'pearce-hall': pearceHall, sop, 'minerva-al': minervaAL };
+// Every model in the registry, by id, so a new model works in slides and
+// tutorials as soon as it is registered.
+const MODELS = Object.fromEntries(REGISTRY.map((m) => [m.id, m]));
 
 // Inside one trial of a moment-by-moment model.
 export function drawMiniTrial(el, { design, model = 'sop', trial, cue = null }) {

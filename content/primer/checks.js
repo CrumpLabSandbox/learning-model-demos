@@ -122,4 +122,12 @@ export const checks = {
       { text: 'Both', correct: false, why: 'Both can move in general, but the question says telling them apart did not change. Only the criterion did.' },
     ],
   },
+  configurations: {
+    q: 'A and B have equal intensity and there is no context. After AB is trained to strength 1, what does A alone borrow from it?',
+    options: [
+      { text: '0.5', correct: true, why: 'Right. A is half of AB (its share is ½) and all of itself (share 1), so S = ½ × 1 = ½, and A borrows half of AB\'s strength. That is overshadowing, on the first trial.' },
+      { text: '1', correct: false, why: 'That would mean A alone is just as good as the whole pattern it was trained in. It is only half of that pattern, so S = ½ and it borrows half.' },
+      { text: '0', correct: false, why: 'Zero similarity would make A a stranger to AB, and A would know nothing at all. But A is part of AB, and the shared part gives S = ½.' },
+    ],
+  },
 };
