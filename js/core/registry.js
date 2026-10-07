@@ -8,8 +8,9 @@ import * as pearceHall from '../models/pearce-hall.js';
 import * as sop from '../models/sop.js';
 import * as minervaAL from '../models/minerva-al.js';
 import * as pearce from '../models/pearce.js';
+import * as delamater from '../models/delamater.js';
 
-export const MODELS = [rw, mackintosh, pearceHall, sop, minervaAL, pearce];
+export const MODELS = [rw, mackintosh, pearceHall, sop, minervaAL, pearce, delamater];
 
 // One line on each model for the models page and the landing page: the
 // idea in plain words, and what it is known for explaining or missing.
@@ -43,6 +44,11 @@ export const INFO = {
     authors: 'Pearce',
     idea: 'The whole pattern of cues on a trial learns as one unit, and lends its strength to similar patterns.',
     explains: 'Explains negative patterning, one-trial overshadowing, and external inhibition. Misses latent inhibition and the timing effects.',
+  },
+  delamater: {
+    authors: 'Delamater',
+    idea: 'A small neural network: cues reach the outcomes through a hidden layer that learns its own way of representing them.',
+    explains: 'Explains acquired equivalence, patterning, biconditional discriminations, and occasion setting, with more than one outcome. Misses latent inhibition and the timing effects.',
   },
 };
 

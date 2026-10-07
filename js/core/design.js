@@ -17,6 +17,14 @@
 //   one they teach nothing and just take up a trial. The four together,
 //   `A+`, `A-`, `+`, `-`, are the four cells of a 2 × 2 contingency table
 //   (see js/core/contingency.js).
+// - A design can use more than one outcome: `A+1` and `B+2` are reinforced
+//   with outcome 1 and outcome 2. `A+` is outcome 1. `A+2(0.5)` sets the
+//   magnitude of outcome 2 on that trial type. Models that know one US treat
+//   every outcome as that US; a model with `multiOutcome` learns about each.
+// - A line `Modalities: AB, CD` says that A and B are of one kind (say,
+//   visual) and C and D of another. A model that represents stimuli by
+//   features (Delamater's network) gives each group a shared feature and its
+//   own pathway. Other models ignore the line.
 // - Timing, for models that run moment by moment (SOP): an item can end with
 //   settings in square brackets, such as `20 A+ [CS 1-10, US 9-10, ITI 100]`.
 //   CS a-b says the cues are on from moment a to moment b of the trial, US
@@ -50,7 +58,7 @@ export class DesignError extends Error {
   }
 }
 
-const TYPE_RE = /^([A-Za-z]*)([+-])(?:\(\s*([0-9]*\.?[0-9]+)\s*\))?$/;
+const TYPE_RE = /^([A-Za-z]*)([+-])([1-9])?(?:\(\s*([0-9]*\.?[0-9]+)\s*\))?$/;
 
 export function parseTrialType(text, line) {
   const s = text.trim();
@@ -61,7 +69,10 @@ export function parseTrialType(text, line) {
       line,
     );
   }
-  const [, letters, sign, mag] = m;
+  const [, letters, sign, outcomeDigit, mag] = m;
+  if (sign === '-' && outcomeDigit !== undefined) {
+    throw new DesignError(`"${s}": only reinforced (+) trials name an outcome.`, line);
+  }
   if (letters !== letters.toUpperCase()) {
     throw new DesignError(`Cues are capital letters: write ${letters.toUpperCase()}${sign} instead of ${s}.`, line);
   }
@@ -77,6 +88,8 @@ export function parseTrialType(text, line) {
     label: s,
     cues: cues.slice().sort(),
     reinforced,
+    // Which outcome: 1 unless the design says otherwise, 0 on a trial with none.
+    outcome: reinforced ? Number(outcomeDigit ?? 1) : 0,
     magnitude: mag === undefined ? null : Number(mag),
   };
 }
@@ -145,6 +158,7 @@ export function parseDesign(text) {
   let probes = null;
   let context = null;
   let timing = null;
+  let modalities = null;
   const lines = String(text).split(/\r?\n/);
   lines.forEach((raw, i) => {
     const lineNo = i + 1;
@@ -160,6 +174,16 @@ export function parseDesign(text) {
     }
     if (/^timing$/i.test(name)) {
       timing = parseTiming(body, lineNo);
+      return;
+    }
+    if (/^modalities$/i.test(name)) {
+      modalities = body.split(/[,\s]+/).filter(Boolean).map((g) => [...parseCueSet(g, lineNo)]);
+      const seen = new Set();
+      for (const g of modalities) for (const c of g) {
+        if (seen.has(c)) throw new DesignError(`${c} is listed in two modalities.`, lineNo);
+        seen.add(c);
+      }
+      if (!modalities.length) throw new DesignError('The Modalities line lists no cues.', lineNo);
       return;
     }
     if (/^test$/i.test(name)) {
@@ -206,9 +230,14 @@ export function parseDesign(text) {
     if (inTrials) throw new DesignError(`${context} is the context, so it is already on every trial. Remove it from the trial types.`);
     cueSet.add(context);
   }
+  for (const g of modalities ?? []) for (const c of g) {
+    if (c === context) throw new DesignError(`${c} is the context, which is of every modality. Leave it out of the Modalities line.`);
+    cueSet.add(c);
+  }
   const cues = [...cueSet].sort();
   if (!cues.length) throw new DesignError('The design has no cues. Add a cue to a trial type, such as A+, or a context line, such as "Context: Z".');
-  return { phases, probes, cues, context, timing, totalTrials: total };
+  const outcomes = [...new Set(phases.flatMap((p) => p.trials.filter((t) => t.type.reinforced).map((t) => t.type.outcome)))].sort((a, b) => a - b);
+  return { phases, probes, cues, context, timing, modalities, outcomes, totalTrials: total };
 }
 
 // Turn a parsed design back into text. parseDesign(formatDesign(d)) gives d.
@@ -219,6 +248,7 @@ export function formatDesign(design) {
     return `${p.name}: ${items.join(', ')}`;
   });
   if (design.timing) lines.push(`Timing: ${timingText(design.timing)}`);
+  if (design.modalities) lines.push(`Modalities: ${design.modalities.map((g) => g.join('')).join(', ')}`);
   if (design.context) lines.push(`Context: ${design.context}`);
   if (design.probes) lines.push(`Test: ${design.probes.join(', ')}`);
   return lines.join('\n');

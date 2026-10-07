@@ -886,7 +886,12 @@ export function mountModelPage({
   // ---- Render groups ------------------------------------------------------
   function renderTrialViews({ scrollTable = true } = {}) {
     chart.update({ run: state.run, t: state.t, revealed: state.revealed, predict: state.predict, reference: referenceLines() });
-    for (const c of extraCharts) c.update({ run: state.run, t: state.t, revealed: state.revealed });
+    (spec.charts ?? []).forEach((c, i) => {
+      // A chart can apply only to some designs (such as a second outcome's).
+      const show = !c.when || c.when(state.run);
+      $(`panel-${c.key}`).hidden = !show;
+      if (show) extraCharts[i].update({ run: state.run, t: state.t, revealed: state.revealed });
+    });
     renderStepper();
     renderEquations();
     renderArith();

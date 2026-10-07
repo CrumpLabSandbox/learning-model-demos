@@ -130,4 +130,12 @@ export const checks = {
       { text: '0', correct: false, why: 'Zero similarity would make A a stranger to AB, and A would know nothing at all. But A is part of AB, and the shared part gives S = ½.' },
     ],
   },
+  network: {
+    q: 'An outcome unit says 0.9 and the outcome happens (target 1). Another says 0.5 and the outcome happens. Which unit\'s weights change more?',
+    options: [
+      { text: 'The one that said 0.5', correct: true, why: 'Right. Its error is 0.5 and its slope, a(1 − a) = 0.25, is at its steepest. The unit that said 0.9 has a smaller error (0.1) and a flatter slope (0.09), so it changes much less.' },
+      { text: 'The one that said 0.9', correct: false, why: 'It is closer to the target, so its error is smaller, and the logistic is nearly flat up there, so its slope is small too. It changes less on both counts.' },
+      { text: 'They change the same', correct: false, why: 'The change is the error times the slope, and both are bigger for the unit at 0.5.' },
+    ],
+  },
 };

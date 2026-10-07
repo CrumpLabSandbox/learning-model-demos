@@ -920,3 +920,19 @@ body.deck-page > .site-footer { width: 100%; padding-bottom: 5rem; }
 .model-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 1rem; margin-top: 1rem; }
 .model-card h3 a { text-decoration: none; color: inherit; }
 .model-card h3 a:hover { text-decoration: underline; }
+
+/* Delamater: the network view and the primer's logistic unit. */
+.net-view { display: grid; gap: 0.8rem; }
+.net-layer { display: grid; gap: 0.3rem; }
+.net-group { display: grid; gap: 0.15rem; }
+.net-row { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.net-cell { display: inline-grid; justify-items: center; gap: 0.1rem; min-width: 3.2rem; padding: 0.3rem 0.4rem; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent) calc(var(--v) * 85%), var(--surface)); color: var(--ink); }
+.net-cell.top { outline: 2px solid var(--ui); outline-offset: 1px; }
+.net-cell .net-val { font-family: var(--mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; mix-blend-mode: difference; color: #fff; }
+.net-cell .net-lab { font-size: 0.72rem; color: var(--ink-2); background: var(--surface); padding: 0 0.3rem; border-radius: 4px; }
+.nw-svg { display: block; max-width: 100%; height: auto; }
+.nw-curve { fill: none; stroke: var(--cue-1); stroke-width: 2.5; }
+.nw-mark { stroke: var(--ink-2); stroke-dasharray: 3 3; }
+.nw-dot { fill: var(--ink); }
+.nw-slope { stroke: var(--cue-2); stroke-width: 2; }

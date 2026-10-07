@@ -8,13 +8,19 @@
 //                           slider specs: [{ key, sym, cue?, label, min, max, step, default, role, advanced? }]
 //   init(params, cues, opts, rng, { context }) -> learner
 // A learner has:
-//   trial({ cues, reinforced, magnitude, timing }) -> trial record (model-specific fields)
+//   trial({ cues, reinforced, outcome, magnitude, timing }) -> trial record (model-specific fields)
+//                           outcome is which outcome (1 unless the design says
+//                           `+2`, 0 when none); models that know one US ignore it.
 //                           timing is { cs, us, iti } in moments (see design.js);
 //                           models that work trial by trial ignore it
 //   predict(cues) -> number, the prediction for a probe, without learning
 //   summary(cues) -> { mean, sd }, optional, for a model that simulates many
 //                    learners: the mean is the prediction, and the chart
 //                    shows the spread
+//   probeSeries(labels) -> { key: { label: value } }, optional: extra values
+//                    for every probe (single cues and compounds), such as a
+//                    second outcome's activation; the runner turns each key
+//                    into run.probeSeries[key][label][t]
 //   state() -> internal values for model-specific views
 
 import { expandDesign } from './design.js';
@@ -46,7 +52,7 @@ export function probeLabels(design) {
 export function runModel(model, { design, params = {}, options = {}, seed = 1 }) {
   const opts = { ...defaultOptions(model), ...options };
   const cues = design.cues;
-  const extra = { context: design.context ?? null };
+  const extra = { context: design.context ?? null, modalities: design.modalities ?? null, outcomes: design.outcomes ?? [1] };
   const fullParams = resolveParams(model, cues, opts, params, extra);
   const rng = makeRng(seed);
   const sequence = expandDesign(design, makeRng(seed));
@@ -55,6 +61,7 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
   const labels = probeLabels(design);
   const series = Object.fromEntries(labels.map((l) => [l, []]));
   const spread = learner.summary ? Object.fromEntries(labels.map((l) => [l, []])) : null;
+  const probeSeries = learner.probeSeries ? {} : null;
   const observe = () => {
     for (const l of labels) {
       if (spread) {
@@ -62,6 +69,13 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
         series[l].push(s.mean);
         spread[l].push(s.sd);
       } else series[l].push(learner.predict([...l]));
+    }
+    if (probeSeries) {
+      const extra = learner.probeSeries(labels.map((l) => [...l]));
+      for (const [key, byLabel] of Object.entries(extra)) {
+        probeSeries[key] ??= Object.fromEntries(labels.map((l) => [l, []]));
+        labels.forEach((l, i) => probeSeries[key][l].push(byLabel[i]));
+      }
     }
   };
   observe();
@@ -71,6 +85,7 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
     const rec = learner.trial({
       cues: entry.cues,
       reinforced: entry.type.reinforced,
+      outcome: entry.type.outcome,
       magnitude: entry.type.magnitude,
       timing: entry.timing,
     });
@@ -112,7 +127,9 @@ export function runModel(model, { design, params = {}, options = {}, seed = 1 })
     labels,
     displayProbes: design.probes ?? cues,
     context: design.context ?? null,
+    outcomes: design.outcomes ?? [1],
     stateSeries,
+    probeSeries,
     responseKey: model.responseKey ?? null,
     predictionTitle: model.predictionTitle ?? null,
     phases,

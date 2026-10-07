@@ -71,6 +71,10 @@ export const phenomena = [
         why: 'The configuration A (with nothing else) is met for the first time with E = 0, so the discrepancy β(λ − V) is large and E grows by a quarter of the gap each trial. As E approaches λ the gap closes and the steps shrink. Nothing is borrowed, because no other configuration has been met.',
         tryThis: 'Open Configurations: one row, A, with E climbing toward 1. Then add a line "Context: Z" to the design: the context-alone configuration appears and shares a little of A\'s strength.',
       },
+      delamater: {
+        why: 'The outcome unit starts near 0.1 and its slope is shallow there, so the first steps are small; the curve is S-shaped, fast in the middle and slow at both ends. The check wants a first step bigger than the last, and the network\'s first step is its smallest. Over more trials A reaches the outcome; in 30 it is partway up.',
+        tryThis: 'Raise the trial count to 100 and watch the S-curve complete. Then raise the learning rate to 1: the curve steepens but keeps its shape.',
+      },
     },
   },
   {
@@ -111,6 +115,10 @@ export const phenomena = [
       pearce: {
         why: 'On the A− trials λ is 0 and A predicts V > 0, so the discrepancy is negative and goes to A\'s inhibition I. E stays where it was. V = E − I falls to 0 when I has caught E up. Nothing is forgotten: the old learning is still there, with new learning laid over it.',
         tryThis: 'Open Configurations during extinction: E stays at 1 while I climbs to meet it. Then switch off \'Inhibition as new learning\': E itself falls, as in Rescorla-Wagner.',
+      },
+      delamater: {
+        why: 'Learning is the same rule in both directions: the error at the outcome unit, now negative, pulls the weights down. But in 20 acquisition trials the network has climbed only partway, so there is little to extinguish, and the fall is as gradual as the rise was.',
+        tryThis: 'Give acquisition 100 trials and extinction 60, and the S-curve runs up and back down.',
       },
     },
   },
@@ -159,6 +167,10 @@ export const phenomena = [
         why: 'Intensity matters in this model only through similarity. With no context in the design, A and B are each their own configuration and share nothing with anything, so a more intense A learns no faster than B. Pearce\'s account of salience needs the context: an intense cue leaves the context less of the buffer, so less excitation generalises to the context and less inhibition comes back.',
         tryThis: 'Add a line "Context: Z" to the design and the two cues part: the intense A is slowed less by inhibition borrowed from the context than the faint B.',
       },
+      delamater: {
+        why: 'A fainter cue\'s feature is switched on less strongly, so it sends less forward and its weights change less (the change is error times input). The network is slow at the start for both cues, so in a short run the difference is small.',
+        tryThis: 'Run 100 trials of each: the salient cue\'s S-curve rises sooner.',
+      },
     },
   },
   {
@@ -200,6 +212,10 @@ export const phenomena = [
       pearce: {
         why: 'A is trained to λ. On AB+ trials the configuration AB is new, but it borrows half of A\'s strength (S = 0.5 with equal intensities), so the discrepancy is half what it would be and AB learns only to half of λ itself. B alone then borrows half of what AB learned: a quarter of λ. D borrows half of CD, which had to learn all of λ: a half. Blocking is generalisation from A to AB, then dilution from AB to B.',
         tryThis: 'Raise A\'s intensity above B\'s: AB is more like A, borrows more, learns less, and lends B less, so blocking deepens. Lower it and blocking fades, as Pearce predicts from the relative intensities.',
+      },
+      delamater: {
+        why: 'After pretraining, A\'s hidden units already drive the outcome unit, so on AB trials the error is small and B\'s weights change little. The hidden layer is random to begin with, so part of B\'s effect depends on which hidden units it happens to share with A; averaged over the networks, B ends below D.',
+        tryThis: 'Switch off \'Hidden layer\': the one-layer network is Rescorla-Wagner through a squash, and blocking is cleaner. Then raise the learning rate to 1 to see it within fewer trials.',
       },
     },
   },
@@ -247,6 +263,10 @@ export const phenomena = [
         why: 'On AB+(2) trials λ is 2 but AB borrows only half of A\'s strength, 0.5, so the discrepancy is large and AB learns a lot of its own. B borrows half of that. D\'s compound borrows half of C and learns only up to λ = 1, so D ends lower.',
         tryThis: 'Change AB+(2) back to AB+ and B ends where D does.',
       },
+      delamater: {
+        why: 'A bigger outcome raises the target above what A\'s hidden units drive, so the error returns on AB trials and B learns. The network needs more trials than this design gives to block D in the first place, so the check finds no blocking to undo.',
+        tryThis: 'Give the pretraining 60 trials: D is then blocked and B is unblocked.',
+      },
     },
   },
   {
@@ -289,6 +309,10 @@ export const phenomena = [
         why: 'AB learns to λ as one configuration. B alone is a different pattern that shares B with it, half of AB by intensity, so B borrows half of what AB learned. C, trained alone, keeps all of its own. This is generalisation decrement, and it is there from the first trial.',
         tryThis: 'Step to trial 2 and compare B and C: B is already behind. Then make A more intense than B: AB is more like A, so B borrows even less.',
       },
+      delamater: {
+        why: 'Two active features share the error between them, so each learns about half as fast as a cue alone would, as in Rescorla-Wagner. But the network\'s early trials are slow for every cue, and in 30 trials B and C are both still climbing, so the gap has not opened.',
+        tryThis: 'Run 100 trials: C reaches the outcome and B levels off below it.',
+      },
     },
   },
   {
@@ -329,6 +353,10 @@ export const phenomena = [
       pearce: {
         why: 'A is reinforced and AX is not. AX borrows half of A\'s excitation, so on AX− trials it predicts the outcome, gets none, and gains inhibition of its own until the borrowed excitation is cancelled. X alone borrows half of AX\'s inhibition and little else, so X ends negative. This is the paper\'s Figure 1, and A itself ends above λ, because it must offset the inhibition it borrows back from AX.',
         tryThis: 'Open Configurations at the end: A has E above 1, AX has I of about 0.67 and V near 0. Then switch off \'Inhibition as new learning\': AX\'s excitation is weakened instead, X cannot go below 0, and the effect disappears.',
+      },
+      delamater: {
+        why: 'On AX− trials the error is negative, and X, present only then, acquires weights that pull the outcome unit down. A logistic unit cannot go below 0, so X alone reads as a low activation rather than a negative strength, and the check, which wants a value below zero, counts it as not shown.',
+        tryThis: 'Probe AX against A: X pulls A\'s prediction down, which is what an inhibitor does here.',
       },
     },
   },
@@ -379,6 +407,10 @@ export const phenomena = [
         why: 'On the pre-exposure trials A predicts nothing and nothing happens, so the discrepancy is 0 and no configuration changes. A starts conditioning exactly where B does. Pearce suggests that attention to a familiar cue would be needed to explain latent inhibition, and the model as written has none.',
         tryThis: 'Compare with Pearce-Hall, where pre-exposure lowers attention, and with SOP and MINERVA-AL, where the context comes to prime or recall the cue.',
       },
+      delamater: {
+        why: 'On a trial with no outcome and an outcome unit already near 0, the error is near 0 and nothing changes. Pre-exposure leaves the network as it was, so A starts conditioning where B does.',
+        tryThis: 'Compare with Pearce-Hall, where pre-exposure lowers attention.',
+      },
     },
   },
   {
@@ -420,6 +452,10 @@ export const phenomena = [
       pearce: {
         why: 'Only the configuration on a trial learns. During the A+ trials the AB configuration is not presented, so its E and I do not change, and B alone borrows the same amount from it as before. Absent patterns do not change.',
         tryThis: 'Compare with MINERVA-AL, where the later A+ traces change what A brings back about B.',
+      },
+      delamater: {
+        why: 'Only weights from active features change, and only through the error of the trial at hand. During A+ trials B\'s feature is off, so B\'s weights stay where the AB trials left them.',
+        tryThis: 'Compare with MINERVA-AL, where A\'s later traces change what A brings back about B.',
       },
     },
   },
@@ -467,6 +503,10 @@ export const phenomena = [
         why: 'A, B, and AB are three configurations. A and B each learn to λ. AB borrows half of each, predicts about λ on its first trial, is not reinforced, and gains inhibition until it predicts 0; that inhibition generalises back to A and B, which learn a little extra to compensate. The model solves the problem by making the compound its own unit.',
         tryThis: 'Open Configurations: the AB row has E near 0 and I near 1, while A and B have E a little above 1. Then switch off \'Generalisation\': AB learns nothing and A and B are untouched, which also solves it, but by treating every pattern as a stranger.',
       },
+      delamater: {
+        why: 'The hidden layer earns its keep here. A and B each come to drive the outcome unit through their own hidden units, and on AB trials the two inputs together learn to switch those units off, so the compound predicts little while each element predicts the outcome. A one-layer network could only add.',
+        tryThis: 'Switch off \'Hidden layer\' and the compound predicts more than either element. Then open Inside network 1 on an A trial and an AB trial and compare the hidden patterns.',
+      },
     },
   },
   {
@@ -507,6 +547,10 @@ export const phenomena = [
       },
       pearce: {
         why: 'The model learns trial by trial and knows nothing about time between trials, so spaced and massed trials are the same.',
+        tryThis: 'Only SOP, which runs moment by moment, can show this.',
+      },
+      delamater: {
+        why: 'The network learns trial by trial and knows nothing about the time between trials.',
         tryThis: 'Only SOP, which runs moment by moment, can show this.',
       },
     },
@@ -551,6 +595,10 @@ export const phenomena = [
         why: 'The model learns trial by trial and knows nothing about time within a trial, so a gap before the outcome changes nothing.',
         tryThis: 'Only SOP, which runs moment by moment, can show this.',
       },
+      delamater: {
+        why: 'The network learns trial by trial and knows nothing about time within a trial.',
+        tryThis: 'Only SOP, which runs moment by moment, can show this.',
+      },
     },
   },
   {
@@ -591,6 +639,10 @@ export const phenomena = [
       },
       pearce: {
         why: 'The model learns trial by trial and knows nothing about the order of cue and outcome within a trial, so backward pairings are just pairings.',
+        tryThis: 'Only SOP, which runs moment by moment, can show this.',
+      },
+      delamater: {
+        why: 'The network learns trial by trial and knows nothing about the order of cue and outcome within a trial.',
         tryThis: 'Only SOP, which runs moment by moment, can show this.',
       },
     },
@@ -634,6 +686,10 @@ export const phenomena = [
       pearce: {
         why: 'On the outcome-alone trials the configuration is the context Z by itself, and it learns to predict the outcome. When B is trained, the configuration BZ borrows from Z in proportion to the context\'s share of it, which is small with the default intensities, so B is slowed only a little.',
         tryThis: 'Raise the context\'s intensity: BZ becomes more like Z, borrows more, and B is slowed more.',
+      },
+      delamater: {
+        why: 'The context\'s feature is on during the outcome-alone trials and learns to drive the outcome unit, so when B is trained the error is already smaller. But with so few trials the network has learned little either way, and A, trained first, is still low too.',
+        tryThis: 'Give each phase 60 trials: the context then blocks B as it does in Rescorla-Wagner.',
       },
     },
   },
@@ -688,6 +744,10 @@ export const phenomena = [
         why: 'Every frame is one of four configurations: A with the context, the context alone, and the same for B. A\'s configuration learns toward P(O | A), the context alone toward P(O | no A), and A alone borrows from both in proportion to the shares they take up. A ends above B, but above ΔP too, because a cue\'s own configuration tracks how often the outcome follows it rather than the difference.',
         tryThis: 'Compare with Rescorla-Wagner, where A settles at ΔP exactly. Then raise the context\'s intensity: A\'s configuration shares more with the context-alone configuration and borrows more of its base rate.',
       },
+      delamater: {
+        why: 'Each frame is a trial for the network: A\'s feature with the context\'s on some frames, the context\'s alone on others. The context\'s weights learn the base rate and A\'s the difference, as in Rescorla-Wagner, though through a squash and slowly. A ends above B.',
+        tryThis: 'Raise the learning rate to 1: A climbs toward ΔP within the stream.',
+      },
     },
   },
   {
@@ -732,6 +792,10 @@ export const phenomena = [
       pearce: {
         why: 'Both cues\' configurations learn toward how often the outcome follows them, 0.2 for A and 0.8 for B, and the context alone learns toward the base rate. The model tracks pairings for each pattern, not the contingency, so a dense outcome looks like a strong cue.',
         tryThis: 'Compare with Rescorla-Wagner, where the context soaks up the base rate and both cues head for ΔP = 0.',
+      },
+      delamater: {
+        why: 'With a common outcome the context\'s feature drives the outcome unit, and B\'s frames add to it; with a rare outcome neither does. Both cues\' features learn in proportion to how often the outcome follows them, so the dense cue ends higher.',
+        tryThis: 'Compare with Rescorla-Wagner, where the context soaks up the base rate and both cues head for zero.',
       },
     },
   },
@@ -778,6 +842,10 @@ export const phenomena = [
         why: 'A is followed by the outcome every time it appears, so the configurations containing A learn to λ. AB borrows from A alone and learns little of its own, and B alone is only half like AB, so B borrows little: blocking by generalisation. D\'s companion C predicts nothing, so the CD configuration learns all of its own and lends D half.',
         tryThis: 'Switch off \'Generalisation\': every pattern learns alone, B alone and D alone each learn from their own frames, and the gap closes.',
       },
+      delamater: {
+        why: 'A\'s feature is on every time the outcome comes, so A\'s weights take the error first, and on AB frames there is little error left for B. D\'s companion C predicts nothing, so D\'s feature does the work on CD frames.',
+        tryThis: 'Switch off \'Hidden layer\' to see the same effect in the one-layer network.',
+      },
     },
   },
   {
@@ -822,6 +890,160 @@ export const phenomena = [
       pearce: {
         why: 'A\'s configuration learns toward 0.75 in the first phase and lends AB half of it, so AB learns less of its own than CD, which starts from nothing. B borrows half of AB and D half of CD, so B ends a little below D. The effect is modest because A alone is followed by the outcome on only a quarter of the compound-phase frames, which pulls A\'s configuration down and lets AB learn more.',
         tryThis: 'Compare with the deterministic Blocking preset, where A is always reinforced and the gap between B and D is wide.',
+      },
+      delamater: {
+        why: 'A\'s weights are partly trained before the compound phase, so AB frames start with a smaller error than CD frames, and B learns more slowly than D at first. The difference is small, because A alone is followed by the outcome on only a quarter of the compound-phase frames and loses strength.',
+        tryThis: 'Compare with the Blocking preset, where A is always reinforced.',
+      },
+    },
+  },
+
+  // ---- Discriminations with more than one outcome (Delamater, 2012) --------
+  {
+    id: 'acquired-equivalence',
+    title: 'Acquired equivalence',
+    predict: {
+      cues: ['B', 'F'],
+      prompt: 'Two groups of four cues, each with two visual and two auditory cues. In the first phase one cue of each pair is reinforced. Then the roles reverse. In the first group the reversed cues get a different outcome from their partner\'s (A+1 then B+2); in the second the same (E+1 then F+1). Sketch B and F through the reversal.',
+    },
+    focus: { phase: 1, cue: 'B' },
+    design: 'Acquisition: 30 A+1, 30 B-, 30 C-, 30 D+2, 30 E+1, 30 F-, 30 G-, 30 H+2\nReversal: 30 A-, 30 B+2, 30 C+1, 30 D-, 30 E-, 30 F+1, 30 G+2, 30 H-\nModalities: AB, CD, EF, GH',
+    empirical:
+      'Rats trained with two visual and two auditory cues reversed the discrimination faster when the two cues of a modality had been reinforced with different outcomes than when they shared one. Cues followed by different outcomes become more distinct; cues followed by the same outcome become more alike.',
+    citation: 'Delamater (1998), Experiment 3; Delamater (2012), Figure 5',
+    criterion: 'At the end of the reversal, the group whose pairs had different outcomes (A to D) separates the newly reinforced cues from the newly nonreinforced ones more than the group whose pairs shared an outcome (E to H), each cue read on its own outcome unit.',
+    check(run, h) {
+      const different = (h.outcome(run, 'B', 2) + h.outcome(run, 'C', 1)) / 2 - (h.outcome(run, 'A', 1) + h.outcome(run, 'D', 2)) / 2;
+      const same = (h.outcome(run, 'F', 1) + h.outcome(run, 'G', 2)) / 2 - (h.outcome(run, 'E', 1) + h.outcome(run, 'H', 2)) / 2;
+      return { shown: different - same > h.margin, measure: `Reversal separation: ${f(different)} with different outcomes, ${f(same)} with the same.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: 'The model knows one outcome, so +1 and +2 are the same reinforcer and the two groups are the same experiment. Each cue has its own strength and nothing passes between cues, so the reversal runs at the same pace in both groups.',
+        tryThis: 'Compare with Delamater, where the hidden layer gives cues that shared an outcome a shared representation.',
+      },
+      mackintosh: {
+        why: 'One outcome, and each cue learns from its own error, so the groups are the same experiment. Attention shifts to whichever cue predicts best in each phase, but equally for both groups.',
+        tryThis: 'Watch the attention chart through the reversal: the newly reinforced cues gain attention in both groups alike.',
+      },
+      'pearce-hall': {
+        why: 'One outcome, so the groups are the same experiment. The surprise of the reversal restores attention to every cue, and relearning runs at the same pace in both groups.',
+        tryThis: 'Compare with Delamater, the one model here with two outcome units.',
+      },
+      sop: {
+        why: 'SOP has one US node, so +1 and +2 are the same US and the groups are the same experiment. The reversal runs alike in both.',
+        tryThis: 'Compare with Delamater, the one model here with two outcome units.',
+      },
+      'minerva-al': {
+        why: 'The outcome is one field of the event vector, so +1 and +2 are stored the same way and the groups are the same experiment. Traces of the first phase still match the reversal probes, which slows relearning equally in both groups.',
+        tryThis: 'Compare with Delamater, where the two outcomes are two units and shape what the cues look like inside the network.',
+      },
+      pearce: {
+        why: 'One outcome, and each configuration learns on its own, so the groups are the same experiment. A cue\'s configuration carries its excitation into the reversal and learns inhibition at the same pace in both groups.',
+        tryThis: 'Compare with Delamater, the one model here with two outcome units.',
+      },
+      delamater: {
+        why: 'In the first group A and D drive different outcome units, so the hidden layer learns to represent them differently, and B and C, which share modality features with them, inherit distinct representations. In the second group E and H drive the same unit and come to share hidden units, and so do their partners. Distinct representations are easier to re-map, so the first group reverses faster. This is the network\'s account of acquired distinctiveness and equivalence.',
+        tryThis: 'Open Inside network 1 on an A trial and a B trial at the end of acquisition, then on an E trial and an F trial: the first pair\'s hidden patterns differ more than the second\'s.',
+      },
+    },
+  },
+  {
+    id: 'biconditional',
+    title: 'Biconditional discrimination',
+    predict: {
+      cues: ['AC', 'AD'],
+      prompt: 'Four compounds of a visual and an auditory cue. AC and BD are reinforced, AD and BC are not, so no single cue predicts anything on its own. Sketch AC and AD.',
+    },
+    focus: { t: 120, cue: 'A' },
+    design: 'Training: 30 AC+1, 30 AD-, 30 BC-, 30 BD+2\nModalities: AB, CD\nTest: AC, AD, BC, BD',
+    empirical:
+      'Animals learn to respond to AC and BD and not to AD and BC, though every cue is reinforced exactly as often as not. Rats learn it faster when the two reinforced compounds have different outcomes.',
+    citation: 'Delamater, Kranjec & Fein (2010); Delamater (2012), Figure 7',
+    criterion: 'At the end of training both reinforced compounds, each read on its own outcome unit, stand above both nonreinforced compounds on every outcome unit.',
+    check(run, h) {
+      const pos = Math.min(h.outcome(run, 'AC', 1), h.outcome(run, 'BD', 2));
+      const neg = Math.max(h.outcome(run, 'AD', 1), h.outcome(run, 'BC', 1), h.outcome(run, 'AD', 2), h.outcome(run, 'BC', 2));
+      return { shown: pos - neg > h.margin, measure: `Reinforced compounds at least ${f(pos)}; nonreinforced at most ${f(neg)}.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: 'Each cue is reinforced on half its trials and not on the other half, and a compound predicts the sum of its parts, so no assignment of strengths can make AC and BD high while AD and BC are low. The strengths settle where every compound predicts about a half.',
+        tryThis: 'Watch all four compound lines converge. This is the same wall as negative patterning.',
+      },
+      mackintosh: {
+        why: 'Each cue learns from its own error and is reinforced half the time, so every cue settles near a half and every compound near one. Attention cannot help, because no cue predicts better than any other.',
+        tryThis: 'Compare with MINERVA-AL and Pearce, which treat each compound as its own pattern.',
+      },
+      'pearce-hall': {
+        why: 'Every cue is reinforced half the time, so the surprise never goes away and attention stays high, but the compound still predicts the sum of its parts, and the sums cannot separate the four compounds.',
+        tryThis: 'Compare with Delamater, where a hidden layer learns a pattern for each compound.',
+      },
+      sop: {
+        why: 'Each cue\'s link to the US grows on its reinforced compounds and shrinks on the others, and the compound\'s retrieval adds the two links, so the four compounds stay close together.',
+        tryThis: 'Compare with Pearce, where each compound is a configuration with its own strength.',
+      },
+      'minerva-al': {
+        why: 'Each compound is stored as its own traces. An AC probe matches AC traces best, which hold the outcome, and AD and BC traces, which hold its opposite, less. The compounds separate, as in negative patterning.',
+        tryThis: 'Open the memory view on an AD trial: the AD traces store the opposite of the outcome that AC and BD led the probe to expect.',
+      },
+      pearce: {
+        why: 'The four compounds are four configurations. Each learns for itself, and similar configurations lend to each other, but AC and BD gain excitation of their own while AD and BC gain inhibition until the borrowed excitation is cancelled.',
+        tryThis: 'Open Configurations at the end: the two reinforced rows carry E, the two nonreinforced rows carry I.',
+      },
+      delamater: {
+        why: 'The hidden layer learns a different pattern for each compound, so that AC drives outcome unit 1, BD drives outcome unit 2, and AD and BC drive neither. It learns faster here than with one outcome, because the two reinforced compounds pull their hidden representations apart from the start.',
+        tryThis: 'Change +2 to + so that both reinforced compounds share an outcome, run again, and compare how far the compounds have separated. Then switch off \'Hidden layer\' and watch the four lines converge.',
+      },
+    },
+  },
+  {
+    id: 'feature-positive',
+    title: 'Feature-positive effect',
+    predict: {
+      cues: ['AC', 'A'],
+      prompt: 'Two discriminations at once. Feature-positive: AC is reinforced and A alone is not. Feature-negative: B alone is reinforced and BD is not. Sketch AC and A.',
+    },
+    focus: { t: 60, cue: 'C' },
+    design: 'Training: 30 AC+, 30 A-, 30 B+, 30 BD-\nModalities: AB, CD\nTest: AC, A, B, BD',
+    empirical:
+      'Learning that a feature signals the outcome (AC+, A−) is easier than learning that it signals the outcome\'s absence (B+, BD−), for animals and people alike.',
+    citation: 'Jenkins & Sainsbury (1969); Hearst (1984); Delamater (2012), Figure 10',
+    criterion: 'Halfway through training, the feature-positive gap (AC above A) is bigger than the feature-negative gap (B above BD).',
+    check(run, h) {
+      const t = Math.round(run.trials.length / 2);
+      const fp = h.at(run, 'AC', t) - h.at(run, 'A', t);
+      const fn = h.at(run, 'B', t) - h.at(run, 'BD', t);
+      return { shown: fp - fn > h.margin, measure: `After ${t} trials: feature-positive gap ${f(fp)}, feature-negative gap ${f(fn)}.` };
+    },
+    models: {
+      'rescorla-wagner': {
+        why: 'In the feature-positive task the feature C simply gains strength, while A stays near zero: the gap is V_C. In the feature-negative task D must go below zero to cancel B, and it can only do so after B has gained strength for it to cancel, so the gap opens later. Both end up the same size.',
+        tryThis: 'Step through the first 20 trials and compare V_C with V_D in the table.',
+      },
+      mackintosh: {
+        why: 'The feature C predicts the outcome better than anything else on AC trials and gains attention; D predicts nothing on BD trials (λ = 0 and V_D = 0 tie with B\'s error), so D\'s attention never rises and D cannot cancel B. The feature-negative task is not learned at all.',
+        tryThis: 'Switch on the 1975 direction rule, or compare with Pearce-Hall, where the surprise on BD trials keeps attention to D high.',
+      },
+      'pearce-hall': {
+        why: 'On AC trials the outcome is a surprise and C, present only then, takes it up quickly. On BD trials the missing outcome is a surprise too, but D gains inhibition only as fast as B over-predicts, which takes B\'s own learning first.',
+        tryThis: 'Compare α_C and α_D on the attention chart over the first trials.',
+      },
+      sop: {
+        why: 'C and the US are in A1 together from the first AC trial, so C gains at once. D can only lose strength while B calls the US up into A2, which needs B trained first, so the feature-negative gap opens later.',
+        tryThis: 'Step to an early BD trial and open Inside the trial for D: little of the US is in A2 yet.',
+      },
+      'minerva-al': {
+        why: 'Both tasks are stored as traces and both gaps open at the same pace: AC traces hold the outcome and A traces its opposite, just as B traces hold the outcome and BD traces its opposite. Memory for instances does not care which way round the feature goes.',
+        tryThis: 'Compare with Delamater, where the error-driven rule makes the positive task faster.',
+      },
+      pearce: {
+        why: 'The two tasks are mirror images for configurations: AC is reinforced and A is not, B is reinforced and BD is not. Each reinforced configuration gains excitation and each nonreinforced one gains inhibition at the same pace, so the gaps match.',
+        tryThis: 'Open Configurations: AC and B carry E, A and BD carry I, in matching amounts.',
+      },
+      delamater: {
+        why: 'Early in training the outcome units say little, so the error on a reinforced trial is large and the error on a nonreinforced trial is small. In the feature-positive task the feature C is present on the big-error trials and learns fast; in the feature-negative task the feature D is present only on the small-error trials. The paper also notes that D has the harder job, both inhibiting the outcome and opposing B\'s pathway.',
+        tryThis: 'Step through the first 20 trials and compare the δ column on AC trials with that on BD trials.',
       },
     },
   },
