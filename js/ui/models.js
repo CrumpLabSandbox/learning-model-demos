@@ -1,4 +1,4 @@
-// The models page: one card per model, in course order, from the registry.
+// The models page: one card per model, in order of publication, from the registry.
 // The header links here instead of listing every model, so it does not grow
 // with the model count.
 

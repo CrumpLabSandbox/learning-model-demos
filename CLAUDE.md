@@ -48,7 +48,7 @@ decks/<unit>.html             overview slides for each unit (js/ui/deck.js)
 models/<model>.html           one page per model; each just calls mountModelPage()
 js/site-status.js             IN_DEVELOPMENT: true shows the development strip on every page; false hides it
 js/core/                      no DOM: design parser, runner, rng, phenomenon checks, sketch comparison, URL state, formatting,
-                              registry (every model in course order), matrix (the phenomenon-by-model table),
+                              registry (every model in order of publication), matrix (the phenomenon-by-model table),
                               contingency (the 2 × 2 table, ΔP, and stream frames)
 js/models/<model>.js          one module per model, common interface (see js/core/runner.js)
 js/ui/                        DOM: page.js wires everything; chart, equation, arithmetic, table, highlight, primer,
@@ -90,7 +90,7 @@ The audience runs from students new to the area who find maths stressful to stud
 - Every technical term used anywhere goes in `content/glossary.js`. Link the first use on a page to `glossary.html#<id>`.
 - On model pages, mark anything beyond the essentials with the class `advanced`; Essentials view hides it.
 - Check questions have exactly one right answer, an explanation for every option, and, on the warm-up, a hint. Wrong answers are never scolded.
-- Every page uses the same navigation, in three `nav-group`s: Getting started (Start here, Maths warm-up, Reading the equations), Models (All models, Compare), and More (Streamed trials, Tutorials, Glossary). The models themselves are listed on `models.html`, one card per model in course order, so the header does not grow with the model count. The page you are on carries `aria-current="page"` (tutorials mark Tutorials; model pages mark All models). `tests/content.test.js` checks both.
+- Every page uses the same navigation, in three `nav-group`s: Getting started (Start here, Maths warm-up, Reading the equations), Models (All models, Compare), and More (Streamed trials, Tutorials, Glossary). The models themselves are listed on `models.html`, one card per model in order of publication, so the header does not grow with the model count. The page you are on carries `aria-current="page"` (tutorials mark Tutorials; model pages mark All models). `tests/content.test.js` checks both.
 - A tutorial is prose with live pieces: `data-mini` charts (any model, with `data-options`, `data-params`, `data-ref`, and `data-seed`), `data-widget` primer widgets, `data-check` questions, and `data-verdicts` strips that run one phenomenon through every model. List each tutorial in the landing page's tutorial section.
 - Every page and deck loads `js/site-status.js` right after `js/load-guard.js` (or on its own, if it runs no module), carries one `dev-strip` (after the header; first in the body on decks) linking to `about.html#status`, and ends with the same `site-footer`: the credit (Matthew J. C. Crump, Brooklyn College of CUNY) and both licences. `tests/content.test.js` and the browser checks enforce it. To take the site out of development, set `IN_DEVELOPMENT` to `false`; nothing else changes.
 - `tests/content.test.js` fails on any broken link between pages, sections, or glossary entries.

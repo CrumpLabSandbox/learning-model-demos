@@ -1,4 +1,4 @@
-// Every model on the site, in course order, with where its pages live.
+// Every model on the site, in order of publication, with where its pages live.
 // Pages that compare models (the comparison page, the phenomenon table, the
 // slides) read this list, so a new model appears everywhere once it is here.
 
@@ -10,7 +10,9 @@ import * as minervaAL from '../models/minerva-al.js';
 import * as pearce from '../models/pearce.js';
 import * as delamater from '../models/delamater.js';
 
-export const MODELS = [rw, mackintosh, pearceHall, sop, minervaAL, pearce, delamater];
+// In order of publication. Delamater (2012) appeared online in 2011, so it
+// comes before MINERVA-AL (2012).
+export const MODELS = [rw, mackintosh, pearceHall, sop, pearce, delamater, minervaAL];
 
 // One line on each model for the models page and the landing page: the
 // idea in plain words, and what it is known for explaining or missing.
