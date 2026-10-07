@@ -10,7 +10,7 @@ const run = (text, params = {}, options = {}) => runModel(sop, { design: parseDe
 const close = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) < tol, `${a} is not within ${tol} of ${b}`);
 
 test('the first moments of a trial, worked by hand', () => {
-  const r = run('1 A+', { p1_A: 0.2, pd1: 0.15, pd2: 0.03, p1US: 0.5 });
+  const r = run('1 A+', { p1_A: 0.2, pd1: 0.15, pd2: 0.03, p1US: 0.5 }, { distractors: false });
   const m = r.trials[0].moments;
   // Moment 1: 0.2 of the inactive elements go to A1.
   close(m.A1.A[0], 0.2);
@@ -47,7 +47,7 @@ test('a trial\'s learning is L⁺ times the A1 overlap minus L⁻ times the A2 o
 });
 
 test('proportions stay between 0 and 1 and never add up to more than 1', () => {
-  const r = run('Pre: 10 A-\nTrain: 10 AB+ [ITI 3], 10 A+ [US 1-2, CS 3-8]\nExt: 5 AB-\nContext: Z', { p1_A: 0.9, p1US: 1, rho: 2 });
+  const r = run('Pre: 10 A-\nTrain: 10 AB+ [ITI 3], 10 A+ [US 1-2, CS 3-8]\nExt: 5 AB-\nContext: Z', { p1_A: 0.9, p1US: 1, r1: 2 });
   for (const rec of r.trials) {
     const m = rec.moments;
     for (const n of m.nodes) {
@@ -63,7 +63,7 @@ test('a stimulus left on settles where A1 = p1·I/pd1 and A2 = p1·I/pd2', () =>
   // The context is on at every moment. With nothing linked to it, it settles
   // where as many elements enter each state as leave it.
   const p = { p1_Z: 0.05, pd1: 0.15, pd2: 0.03 };
-  const r = run('Train: 4 A- [ITI 400]\nContext: Z', p, { links: false });
+  const r = run('Train: 4 A- [ITI 400]\nContext: Z', p, { links: false, distractors: false });
   const m = r.trials[3].moments;
   const I = 1 / (1 + p.p1_Z / p.pd1 + p.p1_Z / p.pd2);
   close(m.A1.Z[m.length - 1], (p.p1_Z * I) / p.pd1, 1e-6);
@@ -71,13 +71,13 @@ test('a stimulus left on settles where A1 = p1·I/pd1 and A2 = p1·I/pd2', () =>
 });
 
 test('after the stimulus goes off, A1 decays by a fixed fraction each moment', () => {
-  const r = run('1 A-', { pd1: 0.2 });
+  const r = run('1 A-', { pd1: 0.2 }, { distractors: false });
   const a = r.trials[0].moments.A1.A;
   for (let k = 10; k < 20; k++) close(a[k], a[k - 1] * 0.8, 1e-12);
 });
 
 test('without associative activation nothing limits learning: identical trials give identical steps', () => {
-  const r = run('6 A+ [ITI 400]', {}, { retrieval: false, inhibition: false, links: false });
+  const r = run('6 A+ [ITI 400]', {}, { retrieval: false, inhibition: false, links: false, distractors: false });
   const steps = r.trials.map((t) => t.perCue.A.deltaV);
   // (The US's A2 from the trial before has faded to almost nothing.)
   for (const s of steps) close(s, steps[0], 1e-4);

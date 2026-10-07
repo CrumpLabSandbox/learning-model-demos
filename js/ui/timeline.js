@@ -243,8 +243,8 @@ export function createTimeline(container, { spec, onFocus = () => {} }) {
       const cells = [
         m.on[node][k] ? `${p1Sym} × ${fmt(inactive)} = <strong>${fmt(toA1)}</strong>` : `<span class="muted">off: 0</span>`,
         opts.retrieval ? `${p2Sym} ${fmt(p2)} × ${fmt(inactive - toA1)} = <strong>${fmt(toA2)}</strong>` : `<span class="muted">switched off</span>`,
-        `${sym('pd1')} × ${fmt(a1)} = <strong>${fmt(rec.pd1 * a1)}</strong>`,
-        `${sym('pd2')} × ${fmt(a2)} = <strong>${fmt(rec.pd2 * a2)}</strong>`,
+        `${sym('pd1')}${m.pd1[k] > rec.pd1 + 1e-12 ? `<span class="muted"> raised to ${fmt(m.pd1[k])}</span>` : ''} × ${fmt(a1)} = <strong>${fmt(m.pd1[k] * a1)}</strong>`,
+        `${sym('pd2')}${m.pd2[k] > rec.pd2 + 1e-12 ? `<span class="muted"> raised to ${fmt(m.pd2[k])}</span>` : ''} × ${fmt(a2)} = <strong>${fmt(m.pd2[k] * a2)}</strong>`,
       ];
       return `<tr${node === 'US' ? '' : ` data-cue="${node}"`}><th class="left">${node}</th>${cells.map((c) => `<td class="left">${c}</td>`).join('')}</tr>`;
     };

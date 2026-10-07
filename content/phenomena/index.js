@@ -340,8 +340,8 @@ export const phenomena = [
         tryThis: 'Set γ to 1, the 1980 model: attention recovers after one surprising trial, and the effect is much smaller.',
       },
       sop: {
-        why: "During pre-exposure the context Z and A are both in A1, so Z gains a link to A. When conditioning starts, Z calls up A into A2 before A appears. Those elements cannot go to A1, so A is less active than B and learns more slowly. The context primes A, and a primed cue is learned about slowly.",
-        tryThis: "Compare A's solid line on trial 31 with B's on trial 32 in Inside the trial. Then switch off 'Cues link to each other': Z cannot call up A, and the effect disappears.",
+        why: "During pre-exposure the context Z and A are both in A1, so Z gains a link to A. When conditioning starts, Z calls up A into A2 before A appears, those elements cannot go to A1, and A gains less than B on their first trials: the context primes A. But with the activity limits on, A's own onset knocks the context out of A1 faster, so Z's link to A stays weak, and A catches B up within a few trials. Averaged over the phase, the gap is too small to count.",
+        tryThis: "Switch off 'Activity limits': the context's link to A grows stronger, A is primed more, and the gap lasts long enough to count. Then switch off 'Cues link to each other' as well, and the effect disappears, because nothing primes A.",
       },
       'minerva-al': {
         why: "Each pre-exposure trial leaves a trace of A with nothing after it. During conditioning A brings back those traces too, and they water down the outcome in the echo, so A's retrieval rises more slowly than B's, which has no such traces. The paper calls this proactive interference.",

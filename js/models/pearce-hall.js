@@ -12,35 +12,43 @@
 // recently. The error does not drive learning directly, as in
 // Rescorla-Wagner; it drives attention, and attention drives learning.
 //
-// Each cue has an excitatory strength V and an inhibitory strength V̄; its
-// net strength is V − V̄, and the prediction ΣV adds up the net strengths of
-// the cues present. On a trial, for each cue A present:
+// Each cue has an excitatory strength V and an inhibitory strength V̄
+// (the paper's Figure 2); its net strength is V − V̄, and the prediction ΣV
+// adds up the net strengths of the cues present. On a trial, for each cue A
+// present:
 //   excitatory learning when more happened than expected (λ > ΣV):
-//                                                       ΔV_A = S_A α_A λ
+//                                                       ΔV_A = S_A α_A λ      (Eq. 9)
 //   inhibitory learning when less happened than expected (ΣV > λ):
-//                                                       ΔV̄_A = S_A α_A (ΣV − λ)
+//                                                       ΔV̄_A = S_A α_A (ΣV − λ)  (Eqs. 11, 12)
 //   attention for A's next trial (Pearce, Kaye, & Hall, 1982):
 //                                                       α_A ← γ|λ − ΣV| + (1 − γ) α_A
-// With γ = 1 attention is just the surprise on the cue's last trial, as in
-// the 1980 paper. With γ < 1 (the default here, 0.8) attention is a running
-// average of recent surprise, the 1982 version; then the effect of
-// pre-exposure lasts beyond one trial. With small γ attention lags behind and
-// learning can overshoot λ before inhibition pulls it back. S_A is A's salience, which never changes. Errors use the
-// strengths before the trial.
+// With γ = 1 attention is just the surprise on the cue's last trial,
+// α_A^n = |λ^(n−1) − ΣV^(n−1)|, the 1980 paper's Equation 13 (its Equation 8
+// is written with V_A alone, but the paper's account of blocking and its
+// general form use the summed strength of every cue present). With γ < 1
+// (the default here, 0.8) attention is a running average of recent
+// surprise, the 1982 version; the 1980 paper's Equation 15 proposes an
+// average over a fixed number of recent trials for the same reason, so that
+// pre-exposure takes more than one trial to work. With small γ attention
+// lags behind and learning can overshoot λ before inhibition pulls it back.
+// S_A is A's salience, which never changes. Errors use the strengths before
+// the trial.
 //
 // A choice made here: excitatory and inhibitory learning happen on
-// different trials, depending on the sign of the error. If excitatory
-// learning also happened whenever the outcome occurred, a cue that already
-// over-predicts would keep gaining both kinds of strength, and the net
-// prediction would settle at 2λ rather than λ. Cues that are absent do not change, and their
-// attention keeps its last value.
+// different trials, depending on the sign of the error. Equation 9 as
+// written adds excitation on every reinforced trial, and Equation 11 adds
+// inhibition whenever the prediction exceeds λ, so on a reinforced trial
+// that is over-predicted both would happen; the net change would then be
+// S α (2λ − ΣV), and the prediction would settle at 2λ rather than λ. The
+// paper's own worked cases never need both on one trial, so this page
+// applies whichever one the sign of the error calls for. Cues that are
+// absent do not change, and their attention keeps its last value.
 
 export const id = 'pearce-hall';
 export const name = 'Pearce-Hall';
 export const year = 1980;
 export const citation =
   'Pearce, J. M., & Hall, G. (1980). A model for Pavlovian learning: Variations in the effectiveness of conditioned but not of unconditioned stimuli. Psychological Review, 87, 532–552.';
-export const status = 'preview';
 
 export const salienceKey = (cue) => `S_${cue}`;
 

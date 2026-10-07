@@ -20,7 +20,7 @@ export const PLOTTED = {
   'rescorla-wagner': 'V: how strongly each cue predicts the outcome. It levels off at λ = 1.',
   mackintosh: 'V: how strongly each cue predicts the outcome, learned from its own error.',
   'pearce-hall': 'V − V̄: excitatory minus inhibitory strength.',
-  sop: 'V: the link from each cue to the US. Its scale is set by the retrieval strength ρ.',
+  sop: 'V: the link from each cue to the US. Its scale is set by the retrieval weight r₁.',
   'minerva-al': 'Retrieval of the outcome given the cue, from −1 to 1, averaged over 25 simulated learners. The band is the spread.',
 };
 

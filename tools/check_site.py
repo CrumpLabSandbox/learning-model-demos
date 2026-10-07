@@ -311,7 +311,7 @@ class Checker:
         for path, preset, opt, card in cases:
             name = path.split("/")[-1].removesuffix(".html")
             page = self.open(ctx, f"{path}#view=everything&preset={preset}")
-            self.check(f"{name}: shows the preview notice", page.is_visible(".preview-note"))
+            self.check(f"{name}: no preview notice (checked against the paper)", page.query_selector(".preview-note") is None)
             self.check(f"{name}: attention chart draws a line per cue", len(page.query_selector_all("#chart-alpha path.series")) >= 2)
             page.click('[data-act="fwd"]')
             # Follow a cue that is on this trial.
@@ -347,7 +347,7 @@ class Checker:
     def real_time_model(self, browser) -> None:
         ctx = browser.new_context(viewport=DESKTOP)
         page = self.open(ctx, "models/sop.html#view=everything&preset=acquisition&t=1")
-        self.check("sop: shows the preview notice", page.is_visible(".preview-note"))
+        self.check("sop: no preview notice (checked against the papers)", page.query_selector(".preview-note") is None)
         self.check("sop: inside the trial draws the cue and the US in A1 and A2", len(page.query_selector_all("#timeline polyline.tl-line")) == 4)
         self.check("sop: inside the trial shades the gain and the loss", page.query_selector("#timeline path.tl-gain") is not None and page.query_selector("#timeline path.tl-loss") is not None)
         self.check("sop: starts at the moment the US arrives", page.text_content(".tl-label") == "Moment 9 of 110")

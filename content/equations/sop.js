@@ -106,14 +106,53 @@ export const symbols = {
     where: 'Inside the trial: the moment readout.',
     value: (r) => r.moments.p2.US[Math.min(r.moments.length - 1, refMoment(r))],
   },
-  rho: {
-    primer: 'greek',
-    render: { base: 'ρ' },
+  pA2: {
+    primer: 'states',
+    render: { base: 'p', sub: 'A2,$' },
+    role: 'computed',
+    name: 'how much of the cue is fading',
+    meaning: (c) => `The proportion of ${c}'s elements in secondary activity (A2). A cue in A2 calls up the US only faintly (r₂ is small). The value shown is the one just before the US arrives.`,
+    where: 'Inside the trial: the dashed line for the cue.',
+    value: (r, c) => at(r.moments.A2[c], r),
+  },
+  r1: {
+    primer: 'states',
+    render: { base: 'r', sub: '1' },
     role: 'modeller',
-    name: 'retrieval strength',
-    meaning: () => 'ρ is "rho". It turns link strength into a chance of calling up the US. It only sets the scale on which V is shown.',
-    where: 'Slider: retrieval strength (Everything view).',
-    value: (r) => r.rho,
+    name: 'retrieval by a cue in A1',
+    meaning: () => 'How strongly a cue in A1 turns its link strength into a chance of calling up the US. Mazur and Wagner set it to 1; this page uses 0.55, which only sets the scale on which V is shown.',
+    where: 'Slider: retrieval by a cue in A1 (Everything view).',
+    value: (r) => r.r1,
+    exact: true,
+  },
+  r2: {
+    primer: 'states',
+    render: { base: 'r', sub: '2' },
+    role: 'modeller',
+    name: 'retrieval by a cue in A2',
+    meaning: () => 'How strongly a cue that is fading (in A2) calls up the US. The papers make it tiny (0.01), so that only a cue being felt (in A1) does the calling up.',
+    where: 'Slider: retrieval by a cue in A2 (Everything view).',
+    value: (r) => r.r2,
+    exact: true,
+  },
+  C1: {
+    primer: 'states',
+    render: { base: 'C', sub: '1' },
+    role: 'modeller',
+    name: 'room for activity in A1',
+    meaning: () => 'How much A1 activity memory holds in all. When a stimulus puts elements into A1, every node\'s decay from A1 rises by that share divided by C₁ on that moment.',
+    where: 'Slider (Everything view). Inside the trial: the raised decay on the moment a stimulus comes on.',
+    value: (r) => r.C1,
+    exact: true,
+  },
+  C2: {
+    primer: 'states',
+    render: { base: 'C', sub: '2' },
+    role: 'modeller',
+    name: 'room for activity in A2',
+    meaning: () => 'How much A2 activity memory holds in all. When a cue calls elements up into A2, every node\'s decay from A2 rises by that share divided by C₂ on that moment.',
+    where: 'Slider (Everything view).',
+    value: (r) => r.C2,
     exact: true,
   },
   Lp: {
@@ -235,10 +274,22 @@ export function equations(opts) {
         note: 'kept between 0 and 1',
         lo: { op: 'const', value: 0 },
         hi: { op: 'const', value: 1 },
-        arg: { op: 'mul', args: [S('rho'), { op: 'paren', arg: { op: 'sumEach', each: (c) => ({ op: 'mul', args: [{ sym: 'V', cue: c }, { sym: 'pA1', cue: c }] }) } }] },
+        arg: {
+          op: 'sumEach',
+          // Every cue with any activity left calls up the US, including a
+          // cue from an earlier trial that is still fading in A2.
+          over: (r) => r.moments.nodes.filter((n) => n !== 'US' && (at(r.moments.A1[n], r) > 1e-9 || at(r.moments.A2[n], r) > 1e-9)),
+          each: (c) => ({
+            op: 'mul',
+            args: [
+              { sym: 'V', cue: c },
+              { op: 'paren', arg: { op: 'add', args: [{ op: 'mul', args: [S('r1'), { sym: 'pA1', cue: c }] }, { op: 'mul', args: [S('r2'), { sym: 'pA2', cue: c }] }] } },
+            ],
+          }),
+        },
       },
       words:
-        '{p2US|How strongly the US is called up} is {rho|the retrieval strength} times each cue\'s {V|link strength} times {pA1|how active it is}, added up over the cues present (%present%). The called-up US goes to A2, not A1, so it cannot be felt as a new US.',
+        "{p2US|How strongly the US is called up} is each cue's {V|link strength} times its activity, {r1|mostly} {pA1|how much of it is in A1} and {r2|a little} {pA2|how much is fading in A2}, added up over every cue with any activity left. The called-up US goes to A2, not A1, so it cannot be felt as a new US.",
     });
   }
   eqs.push({
@@ -314,9 +365,13 @@ export function absentNote(cue, rec) {
 }
 
 export const codeNames = {
-  rho: 'rho',
+  r1: 'r1',
+  r2: 'r2',
+  C1: 'C1',
+  C2: 'C2',
   p2US: 'p2',
   pA1: 'A1',
+  pA2: 'A2',
   pA2US: 'A2',
   pd1: 'pd1',
   pd2: 'pd2',
@@ -340,12 +395,12 @@ export const stages = [
     options: { retrieval: false, inhibition: false, links: false },
     added: ['Lp', 'ovE', 'pA1', 'pA1US'],
     equation: 'excite',
-    text: 'Start with one idea: a cue gains strength whenever it and the US are in A1 at the same moments. Nothing stops the growth: the US is felt just as strongly on the hundredth trial as on the first, so V climbs in a straight line. But timing already matters. A gap between the cue and the US means less overlap, and so do trials packed close together, because the last trial is still active.',
+    text: 'Start with one idea: a cue gains strength whenever it and the US are in A1 at the same moments. Nothing much stops the growth: the US is felt almost as strongly on the hundredth trial as on the first, so V climbs nearly in a straight line. But timing already matters. A gap between the cue and the US means less overlap, and so do trials packed close together, because the last trial is still active. And because memory holds only so much activity, two cues shown together push each other out of A1 sooner than one cue alone, so each learns less: overshadowing, from the very first trial.',
   },
   {
     title: 'Cues call up the US',
     options: { retrieval: true, inhibition: false, links: false },
-    added: ['p2US', 'rho', 'V'],
+    added: ['p2US', 'r1', 'r2', 'V'],
     equation: 'recall',
     text: 'Now a cue in A1 sends US elements straight to A2. A trained cue calls up the US before it arrives, so fewer US elements are left to go to A1, and the US is felt less. Learning slows and levels off. A pretrained cue blocks a new one, two cues trained together overshadow each other, and a context that calls up the US slows learning about new cues. None of this needs an error term.',
   },
@@ -361,7 +416,7 @@ export const stages = [
     options: { retrieval: true, inhibition: true, links: true },
     added: [],
     equation: 'net',
-    text: 'Finally, every cue learns about every other cue by the same rule. The context comes to call up a cue that is often shown in it, so that cue is already in A2 when it appears and is slow to learn: latent inhibition. This is the full model.',
+    text: 'Finally, every cue learns about every other cue by the same rule. The context comes to call up a cue that is often shown in it, so that cue is partly in A2 when it appears and gains less on its first trials: the beginnings of latent inhibition. With the activity limits on, the context\'s link stays weak and the pre-exposed cue soon catches up; switch the limits off to see the effect in full. This is the full model.',
   },
 ];
 
@@ -373,10 +428,11 @@ export const intro = `
 <ul class="small">
 <li>On each moment, presenting a stimulus acts first; calling up (p<sub>2</sub>) applies to the inactive elements that are left.</li>
 <li>Learning adds up over every moment of the trial and the gap after it, and V changes once, at the end of the trial.</li>
-<li>How strongly the cues call up the US is p<sub>2</sub> = ρ × the sum of V × p<sub>A1</sub> over the cues, kept between 0 and 1.</li>
+<li>How strongly the cues call up the US is p<sub>2</sub> = the sum over the cues of V × (r<sub>1</sub> p<sub>A1</sub> + r<sub>2</sub> p<sub>A2</sub>), kept between 0 and 1 (Mazur &amp; Wagner, 1982, Eq. 1.2).</li>
+<li>The distractor rules (Eqs. 1.3 and 1.4) count the elements that presentation and calling up move on a moment, over every node. Decay itself does not count, so a stimulus left alone follows the papers' decay functions exactly.</li>
 <li>Every cue also links to every other cue, by the same rule. The US links to nothing.</li>
 <li>A bigger US, such as A+(2), multiplies the US intensity, up to 1.</li>
 <li>The response is R = w<sub>1</sub> × the US in A1 + w<sub>2</sub> × the US in A2, averaged while the cue is on, before the US arrives.</li>
 <li>Every stimulus starts inactive, and the context is on all the time.</li>
-<li>The default numbers are this site's, chosen so that one set of values shows the classic effects. They are not from the papers.</li>
+<li>The default numbers are this site's, chosen so that one set of values shows the classic effects and V levels off near 1. The papers' own values (p<sub>1,US</sub> 0.6, p<sub>1,CS</sub> 0.3, p<sub>d1</sub> 0.1, p<sub>d2</sub> 0.02, L<sup>+</sup> 0.1, L<sup>−</sup> 0.02, r<sub>1</sub> 1, r<sub>2</sub> 0.01, C<sub>1</sub> 2, C<sub>2</sub> 10) are used in the tests that reproduce their figures. The papers set L<sup>+</sup> = 5 L<sup>−</sup> so that a static context gains nothing; here L<sup>−</sup> is smaller, because the context on this page comes and goes with each trial.</li>
 </ul></details>`;
