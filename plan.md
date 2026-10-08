@@ -434,6 +434,24 @@ Notes from building it:
 - [x] "Why blocking happens, five ways" became seven ways, with sections for Pearce (generalisation from A to AB, then dilution to B) and Delamater (the shared error, with a hidden layer in between). The Rescorla-Wagner failures tutorial names all three models that solve negative patterning.
 - [x] The landing page's "comfortable with equations" card links to the models page.
 
+### 10. Phenomena pages: the findings on their own terms
+
+The site so far is organised around the models, with the phenomena as what the models explain. But a student should be able to learn about a phenomenon without any theory: what the finding is, how solid the evidence for it is, and what the experiments that measured it actually looked like. A finding without solid empirical support is not worth modelling, and the site should say so where it applies. The phenomenon cards on the model pages stay as they are; this milestone gives each phenomenon a home of its own.
+
+- [ ] `phenomena.html`: one card per phenomenon, in the order of the table, each with a one-line description, how strong the evidence is, and a link to its page. Added to the header's Models group (All models, Phenomena, Compare), so a student can start from either side
+- [ ] `phenomena/<id>.html`: one page per phenomenon, rendered from a content file, with these sections in this order: what the finding is, in plain words and with the site's design notation; the evidence, with the key papers and an honest statement of how well established the finding is (robust, qualified, or disputed, and in which species and preparations); the experimental designs, how the original and the best later studies were run, what was measured, and what the control conditions were; how the site's preset relates to those designs and what it leaves out; and which models show it, with a link to the table and to each model's card. Where the empirical picture is mixed, the page says so rather than smoothing it over
+- [ ] `content/phenomena/evidence.js` (or one file per phenomenon): the references in a consistent format, with DOIs where they exist, the sentence or two each paper supports, and the strength-of-evidence judgement with its basis. Written from the papers, not from memory, so the folder of papers (`TrainingPapers/Phenomena/`, gitignored) grows as the pages do
+- [ ] The phenomenon cards on the model pages, the comparison page, and the models page's table link to the phenomenon's page
+- [ ] Glossary entries link to the phenomenon pages where they exist; the tutorials' "the finding" paragraphs link to them too
+- [ ] Tests: every phenomenon in `content/phenomena/index.js` has a page and an evidence entry; every reference has an author, a year, a title, and a source; every link resolves; the strength-of-evidence judgement is one of a fixed set. Browser checks for the phenomena page and one phenomenon page
+- [ ] Start with the phenomena the models disagree about, since those are where the evidence matters most for teaching: latent inhibition, backward blocking, negative patterning, unblocking, the outcome density effect, and the feature-positive effect. Then the rest
+
+Notes before building it:
+
+- The strength-of-evidence judgement needs a fixed vocabulary so that pages can be compared: for example "robust" (many replications across preparations), "established" (replicated, but in a narrow range of preparations or with known boundary conditions), "qualified" (real but dependent on conditions that the page names), and "disputed" (replication failures or live disagreement, with the sides named). Each judgement cites what it rests on.
+- The experimental-design section should use the site's design notation alongside the prose, so that a student can see exactly how the preset simplifies the original (for example, the original blocking experiments used a conditioned-suppression measure with specific trial counts and controls that the two-line preset does not show).
+- Some of the site's phenomena are the streamed-trial findings, where the papers are already in the folder; others, such as unblocking by a bigger US or backward conditioning, need their primary sources gathered first. The folder of phenomenon papers is the input to this milestone, as the model papers were to the Preview checks.
+
 ### Visual refresh: graph paper
 
 - [x] Colour kept for data: the interface (links, buttons, current page, step numbers, focus) is drawn in ink (`--ui`), so the only blue on a model page is cue A
