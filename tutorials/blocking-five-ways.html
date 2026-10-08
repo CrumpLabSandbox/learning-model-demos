@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Why blocking happens, five ways · Learning Model Demos</title>
-  <meta name="description" content="One finding, five explanations: how each learning model on this site produces blocking, and which part of each model does it.">
+  <title>Why blocking happens, seven ways · Learning Model Demos</title>
+  <meta name="description" content="One finding, seven explanations: how each learning model on this site produces blocking, and which part of each model does it.">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/load-guard.js"></script>
   <script src="../js/site-status.js"></script>
@@ -34,15 +34,15 @@
     <article class="prose tutorial" id="tutorial">
       <p class="kicker">Tutorial · about 15 minutes</p>
 
-      <h1>Why blocking happens, five ways</h1>
-      <p class="lede">Blocking is one of the most famous findings in learning. Every model on this site produces it, but each for a different reason. Seeing the five reasons side by side is a good way to see what each model is really claiming.</p>
+      <h1>Why blocking happens, seven ways</h1>
+      <p class="lede">Blocking is one of the most famous findings in learning. Every model on this site produces it, but each for a different reason. Seeing the seven reasons side by side is a good way to see what each model is really claiming.</p>
 
       <h2>The finding</h2>
       <p>Kamin (1969) first trained rats with a noise, A, followed by a mild shock. Then he trained a compound of the noise and a light, AB, followed by the same shock. A comparison cue, D, was trained with a new partner, C. Here is the design, in this site's notation:</p>
       <div class="design-text">Pretraining: 20 A+
 Compound: 20 AB+, 20 CD+</div>
       <div data-check="blockingPredict"></div>
-      <p>The rats learned little about B. A <a href="../glossary.html#blocking">blocked</a> it. Here is what the five models say, run just now:</p>
+      <p>The rats learned little about B. A <a href="../glossary.html#blocking">blocked</a> it. Here is what the seven models say, run just now:</p>
       <div data-verdicts="blocking"></div>
 
       <h2><span class="step-no-big">1</span>Rescorla-Wagner: a shared error</h2>
@@ -68,7 +68,17 @@ Compound: 20 AB+, 20 CD+</div>
       <p>MINERVA-AL has no strengths. Each trial is stored as a <a href="../glossary.html#trace">trace</a>: what happened minus what memory expected. On AB trials A already brings back the outcome, so each trace stores B strongly and the outcome only faintly. Later, B brings back those faint traces. <strong>Blocking comes from <a href="../glossary.html#discrepancy-encoding">discrepancy encoding</a>.</strong></p>
       <figure data-mini data-model="minerva-al" data-options="discrepancy:0" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="The same model storing every event as it is (MINERVA 2): no blocking."></figure>
 
-      <h2>Five answers to one question</h2>
+      <h2><span class="step-no-big">6</span>Pearce: the compound borrows from A</h2>
+      <figure data-mini data-model="pearce" data-design="Pretraining: 20 A+|Compound: 20 AB+, 20 CD+" data-lines="B,D" data-caption="Pearce: B borrows from the AB configuration, which borrowed from A and so learned little of its own; D borrows from CD, which had to learn everything."></figure>
+      <p>In Pearce's model the whole pattern on a trial, the <a href="../glossary.html#configuration">configuration</a>, is what learns, and configurations lend strength to each other by similarity. AB is half like A, so it borrows half of A's strength from the start and has only the rest to learn. B alone then borrows half of what AB learned: a quarter of λ. CD borrowed nothing, learned all of λ, and lends D half. <strong>Blocking is generalisation from A to AB, then dilution from AB to B.</strong></p>
+      <p class="small"><a href="../models/pearce.html#preset=blocking">Try it</a>: switch off "Generalisation between configurations" and B and D both know nothing when tested alone.</p>
+
+      <h2><span class="step-no-big">7</span>Delamater: the error is already small</h2>
+      <figure data-mini data-model="delamater" data-design="Pretraining: 60 A+|Compound: 60 AB+, 60 CD+" data-lines="B,D" data-caption="Delamater's network, given the extra trials it needs: after pretraining, A's hidden units already drive the outcome, so the error on AB trials is small and B's weights barely move."></figure>
+      <p>The network learns from the error at its outcome unit, passed back through a <a href="../glossary.html#hidden-layer">hidden layer</a>. After pretraining, A already drives the outcome unit through the hidden units it recruited, so on AB trials the error is small and B's connections change little. D's partner C is new, so the error on CD trials is large and D learns. <strong>This is Rescorla-Wagner's shared error, with a hidden layer in between.</strong> The network is a slow starter, which is why this chart gives it three times the trials.</p>
+      <p class="small"><a href="../models/delamater.html#preset=blocking">Try it</a>: switch off "Hidden layer" and the one-layer network blocks the same way, more cleanly.</p>
+
+      <h2>Seven answers to one question</h2>
       <div class="table-scroll"><table class="symbol-guide small">
         <thead><tr><th class="left">Model</th><th class="left">Why B learns little</th><th class="left">The part that does it</th></tr></thead>
         <tbody>
@@ -77,9 +87,11 @@ Compound: 20 AB+, 20 CD+</div>
           <tr><td>Pearce-Hall</td><td>Nothing is surprising, so B loses attention</td><td>α, attention to the uncertain</td></tr>
           <tr><td>SOP</td><td>The US is already in A2, so gain and loss cancel</td><td>retrieval into A2</td></tr>
           <tr><td>MINERVA-AL</td><td>An expected outcome is stored faintly</td><td>discrepancy encoding</td></tr>
+          <tr><td>Pearce</td><td>AB borrows A's strength and learns little; B borrows half of that</td><td>similarity between configurations</td></tr>
+          <tr><td>Delamater</td><td>A's hidden units already drive the outcome, so the error is small</td><td>the error passed back through the hidden layer</td></tr>
         </tbody>
       </table></div>
-      <p>The models agree on blocking but disagree about other experiments. Unblocking, latent inhibition, and backward blocking pull them apart: see the <a href="../index.html#phenomena">table on the start page</a>.</p>
+      <p>The models agree on blocking but disagree about other experiments. Unblocking, latent inhibition, backward blocking, and negative patterning pull them apart: see the <a href="../models.html#phenomena">table on the models page</a>.</p>
       <div data-check="blockingWho"></div>
       <p class="small muted">Next: <a href="../index.html#tutorials">all tutorials</a> · <a href="../compare.html">compare the models</a> · <a href="../glossary.html">glossary</a></p>
     </article>

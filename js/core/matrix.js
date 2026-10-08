@@ -1,5 +1,5 @@
 // The phenomenon-by-model table: every phenomenon preset run through every
-// model with its default settings. The landing page shows it as static HTML
+// model with its default settings. The models page shows it as static HTML
 // written by tools/matrix.mjs, and tests/matrix.test.js fails if that HTML
 // no longer matches what the models do.
 
