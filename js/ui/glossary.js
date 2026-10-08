@@ -1,9 +1,11 @@
 // Renders the glossary with a search box and a letter index.
 import { glossary } from '../../content/glossary.js';
 import { esc } from './equation.js';
+import { phenomena } from '../../content/phenomena/index.js';
 
 export function mountGlossary(root) {
   const byId = Object.fromEntries(glossary.map((g) => [g.id, g]));
+  const finding = (id) => phenomena.find((p) => p.id === id);
   const sorted = glossary.slice().sort((a, b) => a.term.localeCompare(b.term));
   const letters = [...new Set(sorted.map((g) => g.term[0].toUpperCase()))];
   const entry = (g) =>
@@ -12,6 +14,7 @@ export function mountGlossary(root) {
     `<dd><p>${esc(g.plain)}</p>` +
     (g.example ? `<p class="gl-example"><strong>Example:</strong> ${esc(g.example)}</p>` : '') +
     (g.learnMore ? `<p class="small"><a href="${g.learnMore.href}">${esc(g.learnMore.label)}</a></p>` : '') +
+    (g.phenomenon && finding(g.phenomenon) ? `<p class="small"><a href="phenomena/${g.phenomenon}.html">The finding: ${esc(finding(g.phenomenon).title)}, its evidence and designs</a></p>` : '') +
     (g.related?.length ? `<p class="small muted">See also: ${g.related.filter((r) => byId[r]).map((r) => `<a href="#${r}">${esc(byId[r].term)}</a>`).join(', ')}</p>` : '') +
     `</dd></div>`;
   root.innerHTML =

@@ -37,6 +37,9 @@ Every page that runs a module loads `js/load-guard.js` first, and its mount func
 ```
 index.html                    landing page: entry points, every unit, tutorials, and the build version
 models.html                   every model as a card, in order of publication, with its one-line idea, what it explains, and links (js/ui/models.js), and the phenomenon table
+phenomena.html                every finding as a card, in the order of the table, with how well established it is (js/ui/phenomena.js)
+phenomena/<id>.html           one page per finding, rendered from the preset and content/phenomena/evidence.js: the finding, the evidence,
+                              the experimental designs, the site's preset, and which models show it (computed); each just calls mountPhenomenonPage()
 compare.html                  one design through several models, as small multiples (js/ui/compare.js)
 stream.html                   streamed trials: watch a stream of cue-outcome frames, judge it, see ΔP and every model's value (js/ui/stream.js)
 tutorials/<name>.html         guided tutorials across models (js/ui/tutorial.js; checks in content/tutorials/checks.js)
@@ -60,6 +63,9 @@ js/ui/                        DOM: page.js wires everything; chart, equation, ar
 content/equations/<model>.js  equation spec per model: symbols, equations, words, table columns, build stages
 content/phenomena/index.js    phenomenon presets: design, empirical result, citation, check, predict prompt, per-model notes,
                               optional reference lines (such as ΔP) for the chart
+content/phenomena/evidence.js one entry per phenomenon: the strength-of-evidence judgement (a fixed vocabulary, STRENGTH), its basis,
+                              the key papers with what each supports, the original designs in the site's notation, and how the preset
+                              relates to them; written from the papers in TrainingPapers/Phenomena/ (gitignored), 'unwritten' until then
 content/streams.js            stream presets for the streamed-trial page: the papers' contingency matrices as designs
 content/primer/               primer content: worked fixed points, check questions, notation map
 content/warmup/               warm-up check questions (each with a hint)
@@ -82,6 +88,13 @@ LICENSE, LICENSE-CONTENT      MIT for the code (js/, css/, tools/, tests/); CC B
 5. `decks/<id>.html`: an overview deck. Add glossary entries for new terms and primer sections for new notation.
 6. Tests: hand-worked single trials, analytic results, published results, and the check that every displayed equation evaluates to the number the model used (see `tests/mackintosh.test.js`). Add the page to the attention or model checks in `tools/check_site.py`.
 
+## Adding a phenomenon
+
+1. Add the preset to `content/phenomena/index.js` with a `models` entry for every model, and its expected results to `tests/phenomena.test.js`.
+2. Add an entry to `content/phenomena/evidence.js`. Until the papers are read it is `unwritten()`; a written entry has a `strength` from `STRENGTH`, its `basis`, `references` (authors, year, title, source, doi, and the sentence each supports), `designs` in the site's notation, and `preset` (how the preset relates to the designs and what it leaves out). Write it from the papers in `TrainingPapers/Phenomena/`, never from memory.
+3. Copy a page in `phenomena/` and change the title, description, and id. If a glossary entry is the finding, give it `phenomenon: '<id>'`; the glossary then links to the page.
+4. Run `node tools/matrix.mjs`. `tests/phenomena-pages.test.js` checks the page, the entry, and the reference format; the phenomena browser checks count the cards.
+
 ## Scaffolding for every unit
 
 The audience runs from students new to the area who find maths stressful to students comfortable with equations. Every unit offers more than one way in.
@@ -90,7 +103,7 @@ The audience runs from students new to the area who find maths stressful to stud
 - Every technical term used anywhere goes in `content/glossary.js`. Link the first use on a page to `glossary.html#<id>`.
 - On model pages, mark anything beyond the essentials with the class `advanced`; Essentials view hides it.
 - Check questions have exactly one right answer, an explanation for every option, and, on the warm-up, a hint. Wrong answers are never scolded.
-- Every page uses the same navigation, in three `nav-group`s: Getting started (Start here, Maths warm-up, Reading the equations), Models (All models, Compare), and More (Streamed trials, Tutorials, Glossary). The models themselves are listed on `models.html`, one card per model in order of publication, so the header does not grow with the model count. The page you are on carries `aria-current="page"` (tutorials mark Tutorials; model pages mark All models). `tests/content.test.js` checks both.
+- Every page uses the same navigation, in three `nav-group`s: Getting started (Start here, Maths warm-up, Reading the equations), Models (All models, Phenomena, Compare), and More (Streamed trials, Tutorials, Glossary). The models themselves are listed on `models.html`, one card per model in order of publication, and the findings on `phenomena.html`, so the header does not grow with either count. The page you are on carries `aria-current="page"` (tutorials mark Tutorials; model pages mark All models; phenomenon pages mark Phenomena). `tests/content.test.js` checks both.
 - A tutorial is prose with live pieces: `data-mini` charts (any model, with `data-options`, `data-params`, `data-ref`, and `data-seed`), `data-widget` primer widgets, `data-check` questions, `data-verdicts` strips that run one phenomenon through every model, and `<figure data-figure="<model id>">` for a model's idea-in-a-picture figure (from its equation spec, via `content/equations/index.js` and `js/ui/figure.js`). Decks take the same figures; every model's deck shows its own on its big-idea slide, and `tests/figure.test.js` checks that. List each tutorial in the landing page's tutorial section.
 - Every page and deck loads `js/site-status.js` right after `js/load-guard.js` (or on its own, if it runs no module), carries one `dev-strip` (after the header; first in the body on decks) linking to `about.html#status`, and ends with the same `site-footer`: the credit (Matthew J. C. Crump, Brooklyn College of CUNY) and both licences. `tests/content.test.js` and the browser checks enforce it. To take the site out of development, set `IN_DEVELOPMENT` to `false`; nothing else changes.
 - `tests/content.test.js` fails on any broken link between pages, sections, or glossary entries.

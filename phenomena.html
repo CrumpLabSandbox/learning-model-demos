@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Streamed Trials · Learning Model Demos</title>
-  <meta name="description" content="Be the participant in a contingency judgement experiment: watch a stream of cues and outcomes, rate the relationship, then see the 2 × 2 table, ΔP, and what every learning model made of the same frames.">
+  <title>Phenomena · Learning Model Demos</title>
+  <meta name="description" content="Every learning phenomenon on the site, on its own terms: what the finding is, how strong the evidence is, and how it was measured.">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/load-guard.js"></script>
   <script src="js/site-status.js"></script>
@@ -20,11 +20,11 @@
       </div>
       <div class="nav-group" role="group" aria-label="Models">
         <a href="models.html">All models</a>
-        <a href="phenomena.html">Phenomena</a>
+        <a href="phenomena.html" aria-current="page">Phenomena</a>
         <a href="compare.html">Compare</a>
       </div>
       <div class="nav-group" role="group" aria-label="More">
-        <a href="stream.html" aria-current="page">Streamed trials</a>
+        <a href="stream.html">Streamed trials</a>
         <a href="index.html#tutorials">Tutorials</a>
         <a href="glossary.html">Glossary</a>
       </div>
@@ -33,22 +33,19 @@
   <div class="dev-strip" role="note"><strong>In development.</strong> This site is still being built and checked, so pages and results may change. <a href="about.html#status">What this means</a></div>
   <main class="page">
     <div class="prose">
-      <h1>Streamed trials: be the participant</h1>
-      <p class="lede">In a <a href="glossary.html#contingency-judgement">contingency judgement</a> experiment, people watch a cue and an outcome come and go, then say how strongly the two are related. Here you can do the task yourself, the way it was run in the <a href="glossary.html#streamed-trial">streamed-trial</a> studies: a whole block of frames in a few seconds, then one judgement. Afterwards you see the answer, and what every model on this site made of the very same frames.</p>
-      <p class="small muted">Each frame shows a square (the cue) or not, and a circle (the outcome) or not. Some streams add a triangle as a second cue. New here? The <a href="decks/contingency.html">overview slides</a> explain the task first, and the <a href="tutorials/judging-contingency.html">tutorial</a> connects it to the models. <span class="warn-inline">The stream flashes; the default speed is gentle, and the options let you choose.</span></p>
+      <h1>Phenomena</h1>
+      <p class="lede">The findings the models are built to explain, on their own terms. Each card says what the finding is in one line and how well established it is. Its page gives the evidence, the papers behind it, and how the experiments that measured it were actually run, with no theory in the way. A finding without solid evidence is not worth modelling, and these pages say so where it applies.</p>
+      <p class="small muted">The findings are in the order of the <a href="models.html#phenomena">table</a> that runs every one through every model. To see what the models make of a finding, open it on the <a href="compare.html">comparison page</a>.</p>
     </div>
-    <div id="stream"></div>
-    <div class="prose small muted" style="margin-top:1.5rem">
-      <p>The procedure follows Crump, Hannah, Allan &amp; Hord (2007), <em>Quarterly Journal of Experimental Psychology, 60</em>, 753–761, and Hannah, Crump, Allan &amp; Siegel (2009), <em>Canadian Journal of Experimental Psychology, 63</em>, 103–112. Their frames lasted 100 ms with 100 ms black gaps; the cell counts in the preset streams are theirs.</p>
-    </div>
+    <div id="phenomena"></div>
   </main>
   <footer class="site-footer">
     <p>Developed by <a href="https://www.crumplab.com">Matthew J. C. Crump</a>, Brooklyn College of CUNY.</p>
     <p>Text, slides, and figures: <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://github.com/CrumpLabSandbox/learning-model-demos/blob/main/LICENSE">MIT License</a>. <a href="about.html#reuse">Reusing this site</a> · <a href="https://github.com/CrumpLabSandbox/learning-model-demos">Source on GitHub</a></p>
   </footer>
   <script type="module">
-    import { mountStream } from './js/ui/stream.js';
-    mountStream(document.getElementById('stream'));
+    import { mountPhenomena } from './js/ui/phenomena.js';
+    mountPhenomena(document.getElementById('phenomena'));
   </script>
 </body>
 </html>

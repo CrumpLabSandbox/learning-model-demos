@@ -101,7 +101,7 @@ export function mountCompare(root) {
   function renderAbout(preset) {
     $('cmp-about').innerHTML = preset
       ? `<h2>${esc(preset.title)}</h2><div class="design-text">${esc(preset.design)}</div>` +
-        `<p><span class="label">What happens:</span> ${esc(preset.empirical)} <span class="muted">${esc(preset.citation)}</span></p>` +
+        `<p><span class="label">What happens:</span> ${esc(preset.empirical)} <span class="muted">${esc(preset.citation)}</span> <a class="small" href="phenomena/${preset.id}.html">About this finding</a></p>` +
         `<p class="small"><span class="label">Counts as shown when:</span> ${esc(preset.criterion)}</p>`
       : `<h2>Your design</h2><div class="design-text">${esc(currentDesignText())}</div>`;
   }

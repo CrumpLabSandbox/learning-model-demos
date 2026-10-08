@@ -36,7 +36,7 @@ OUT = ROOT / "_site"
 BASE = "/learning-model-demos/"
 
 # What gets deployed. Everything else (tests, tools, plan, notes) stays out.
-SITE_DIRS = ["css", "fonts", "js", "content", "decks", "models", "tutorials"]
+SITE_DIRS = ["css", "fonts", "js", "content", "decks", "models", "tutorials", "phenomena"]
 SITE_ROOT_GLOBS = ["*.html", ".nojekyll"]
 
 # Relative module specifiers in JavaScript: import ... from './x.js',

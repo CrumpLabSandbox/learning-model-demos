@@ -846,7 +846,7 @@ export function mountModelPage({
           `<article class="card${p.id === state.presetId ? ' active' : ''}">` +
           `<h3>${esc(p.title)} ${badge}</h3>` +
           `<div class="design-text">${esc(p.design)}</div>` +
-          `<p><span class="label">What happens:</span> ${esc(p.empirical)} <span class="muted">${esc(p.citation)}</span></p>` +
+          `<p><span class="label">What happens:</span> ${esc(p.empirical)} <span class="muted">${esc(p.citation)}</span> <a class="small" href="../phenomena/${p.id}.html">About this finding</a></p>` +
           `<p><span class="label">Counts as shown when:</span> ${esc(p.criterion)} <span class="muted">${esc(res.measure)}</span></p>` +
           (m.why ? `<p><span class="label">Why:</span> ${subscripts(m.why)}</p>` : '') +
           (m.tryThis ? `<p><span class="label">Try this:</span> ${subscripts(m.tryThis)}</p>` : '') +

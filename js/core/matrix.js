@@ -27,7 +27,7 @@ export function matrixHTML(rows, models, { base = '' } = {}) {
   const body = rows
     .map(
       (r) =>
-        `<tr><th class="left" scope="row">${escape(r.title)}</th>` +
+        `<tr><th class="left" scope="row"><a href="${base}phenomena/${r.id}.html" title="About this finding">${escape(r.title)}</a></th>` +
         models
           .map((m) => {
             const res = r.results[m.id];
