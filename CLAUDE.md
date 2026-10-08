@@ -19,7 +19,7 @@ python3 tools/site_tool.py build       # build the deployable site into _site/
 python3 tools/site_tool.py serve       # build and serve at http://localhost:8000/learning-model-demos/
 python3 tools/site_tool.py serve --source   # serve the source folders instead, no build
 python3 tools/site_tool.py check       # build, serve, and run the browser checks (tools/check_site.py)
-node tools/matrix.mjs                  # rewrite the phenomenon table on the landing page after changing a model or phenomenon
+node tools/matrix.mjs                  # rewrite the phenomenon table on the models page after changing a model or phenomenon
 ```
 
 The browser checks need `pip install -r requirements-dev.txt` (Playwright). They load every page under the same `/learning-model-demos/` prefix GitHub Pages uses, fail on any console error, failed request, unstamped asset, or sideways scrolling on a phone, and exercise the decks, model page, predict-first, primer, warm-up, and glossary. Screenshots go to `_check/<browser>/` and a summary to `_check/report.md`. Run the checks and look at the screenshots before pushing any change to pages, styles, or scripts. Add a check to `tools/check_site.py` for every new interactive feature.
@@ -35,8 +35,8 @@ Every page that runs a module loads `js/load-guard.js` first, and its mount func
 ## Layout
 
 ```
-index.html                    landing page: entry points, every unit, the phenomenon table, tutorials, and the build version
-models.html                   every model as a card, in course order, with its one-line idea, what it explains, and links (js/ui/models.js)
+index.html                    landing page: entry points, every unit, tutorials, and the build version
+models.html                   every model as a card, in order of publication, with its one-line idea, what it explains, and links (js/ui/models.js), and the phenomenon table
 compare.html                  one design through several models, as small multiples (js/ui/compare.js)
 stream.html                   streamed trials: watch a stream of cue-outcome frames, judge it, see ΔP and every model's value (js/ui/stream.js)
 tutorials/<name>.html         guided tutorials across models (js/ui/tutorial.js; checks in content/tutorials/checks.js)
@@ -67,7 +67,7 @@ content/glossary.js           every technical term: plain definition, example, l
 tests/                        node:test files
 tools/site_tool.py            build, serve under the GitHub Pages prefix, and check (Python)
 tools/check_site.py           browser checks with Playwright, run by site_tool.py check
-tools/matrix.mjs              writes the phenomenon table into index.html
+tools/matrix.mjs              writes the phenomenon table into models.html
 css/site.css                  one stylesheet; colour tokens on :root with dark-mode overrides
 fonts/                        self-hosted woff2 files (Latin and Latin Extended) and their OFL licences
 LICENSE, LICENSE-CONTENT      MIT for the code (js/, css/, tools/, tests/); CC BY 4.0 for everything else

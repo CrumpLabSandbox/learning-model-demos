@@ -427,6 +427,13 @@ Notes from building it:
 - Two shared checks were written with strength models in mind and have been generalised. Acquisition now asks that the curve end above half of λ and level off (the last step smaller than the biggest), which an S-shaped learner can meet; the preset runs 60 trials rather than 30, which the network needs to level off. Conditioned inhibition now uses the summation test (AX below half of A, with X alone predicting little or less than nothing), which is how an inhibitor is measured and which a logistic unit, unable to go below zero, can meet. Every model's results on both are unchanged except the network's, which now shows both.
 - Averaging over networks can hide a failure: without the hidden layer, each network solves negative patterning by giving up on one element, a different one in different networks, and the mean over sixteen looks like a solution. The build-stage text says so, and the test pins single networks.
 
+### Coherence pass after the growth to seven models
+
+- [x] The phenomenon table moved from the landing page to the models page, where the models are; the landing page points to it. `tools/matrix.mjs` writes it there.
+- [x] The big-picture deck's timeline lists all seven models by year, without the "Available now" labels. The About page names what each of the seven was checked against.
+- [x] "Why blocking happens, five ways" became seven ways, with sections for Pearce (generalisation from A to AB, then dilution to B) and Delamater (the shared error, with a hidden layer in between). The Rescorla-Wagner failures tutorial names all three models that solve negative patterning.
+- [x] The landing page's "comfortable with equations" card links to the models page.
+
 ### Visual refresh: graph paper
 
 - [x] Colour kept for data: the interface (links, buttons, current page, step numbers, focus) is drawn in ink (`--ui`), so the only blue on a model page is cue A

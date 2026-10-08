@@ -578,9 +578,12 @@ class Checker:
             page.close()
 
         page = self.open(ctx, "index.html")
-        rows = page.query_selector_all(".matrix tbody tr")
-        self.check("landing: the phenomenon table covers every phenomenon and model", len(rows) == 21 and all(len(r.query_selector_all("td")) == 7 for r in rows))
         self.check("landing: five tutorials", len(page.query_selector_all("#tutorials .entry-card")) == 5)
+        self.check("landing: points at the phenomenon table on the models page", page.query_selector('#phenomena a[href="models.html#phenomena"]') is not None and not page.query_selector(".matrix"))
+        page.close()
+        page = self.open(ctx, "models.html#phenomena")
+        rows = page.query_selector_all(".matrix tbody tr")
+        self.check("models page: the phenomenon table covers every phenomenon and model", len(rows) == 21 and all(len(r.query_selector_all("td")) == 7 for r in rows))
         page.close()
         ctx.close()
 
