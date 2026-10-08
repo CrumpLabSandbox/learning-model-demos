@@ -11,6 +11,7 @@ import { mountWidgets } from './primer.js';
 import { mountMinis } from './minichart.js';
 import { mountWarmupWidgets } from './warmup.js';
 import { installHighlighting } from './highlight.js';
+import { mountFigures } from './figure.js';
 
 export function mountDeck(deck) {
   const slides = [...deck.querySelectorAll('.slide')];
@@ -51,6 +52,7 @@ export function mountDeck(deck) {
 
   mountWidgets(deck);
   mountWarmupWidgets(deck);
+  mountFigures(deck);
   installHighlighting(deck);
   // Charts need a visible slide to measure, so draw each slide's charts the
   // first time it is shown.

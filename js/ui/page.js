@@ -19,6 +19,7 @@ import {
 } from './equation.js';
 import { createChart, cueColor, stateSource } from './chart.js';
 import { renderArithmetic } from './arithmetic.js';
+import { figureHTML } from './figure.js';
 import { createTable, tableCSV } from './table.js';
 import { installHighlighting } from './highlight.js';
 import { compareSketch, verdict } from '../core/sketch.js';
@@ -83,6 +84,7 @@ export function mountModelPage({
   glossaryUrl = '../glossary.html',
 }) {
   const state = {
+    arithTab: 'formulas',
     presetId: defaultPreset,
     designText: '',
     design: null,
@@ -626,7 +628,44 @@ export function mountModelPage({
     return state.t > 0 ? state.run.trials[state.t - 1] : null;
   }
 
+  // The model in one place: every equation of the current version, in
+  // symbols, in the Formulas tab of the panel beside the equations. Hovering
+  // a symbol lights it up everywhere else, and each equation links to its
+  // full reading.
+  function renderFormulaCard() {
+    const cue = state.focusCue ?? state.run.cues[0];
+    const ctx = { spec, cue, present: [cue], rec: null, general: true };
+    const eqs = spec.equations(state.options);
+    const rows = eqs
+      .map((eq, i) => {
+        const title = esc(eq.title).replace(/\$/g, `<span class="sym-cue">${esc(cue)}</span>`);
+        return `<li class="formula-row"><a class="formula-title small" href="#eq-panel" data-formula="${eq.id}">${i + 1}. ${title}</a><div class="formula-math">${equationSymbols(eq, ctx)}</div></li>`;
+      })
+      .join('');
+    const roleKey = ['experimenter', 'modeller', 'computed'].map((r) => `<span class="role-badge role-${r}">${esc(spec.roles[r].short)}</span>`).join(' ');
+    $('formulas').innerHTML =
+      `<p class="small muted formula-lead">${eqs.length === 1 ? 'The one equation' : `All ${eqs.length} equations`} of this version of the model, in the order they run on a trial. ${spec.cueless ? '' : `Written for cue <span class="sym-cue">${esc(cue)}</span>.`}</p>` +
+      `<ol class="formula-list">${rows}</ol>` +
+      `<p class="small muted formula-key">Colours say who sets each symbol: ${roleKey}. Hover a symbol to see it everywhere on the page. Click an equation for its full reading, in words and with this trial's numbers, in the <a href="#eq-panel">Equations</a> panel. <a href="#build">Build the equation</a> adds the terms one at a time.</p>`;
+  }
+
+  // The panel beside the equations has two tabs: the formulas, and the
+  // arithmetic of the selected trial drawn on number lines.
+  function setArithTab(tab) {
+    state.arithTab = tab;
+    for (const b of root.querySelectorAll('[data-arith-tab]')) b.setAttribute('aria-pressed', String(b.dataset.arithTab === tab));
+    $('arith-title').textContent = tab === 'formulas' ? 'The model in one place' : 'The arithmetic';
+    $('formulas').hidden = tab !== 'formulas';
+    $('arith').hidden = tab !== 'arithmetic';
+    renderArith();
+  }
+  root.querySelector('[data-arith-tab]').parentElement.addEventListener('click', (ev) => {
+    const tab = ev.target.closest('[data-arith-tab]')?.dataset.arithTab;
+    if (tab && tab !== state.arithTab) setArithTab(tab);
+  });
+
   function renderEquations() {
+    renderFormulaCard();
     for (const b of root.querySelectorAll('[data-reading]')) b.setAttribute('aria-pressed', String(state.readings.includes(b.dataset.reading)));
     const rec = currentRecord();
     const cue = state.focusCue;
@@ -739,6 +778,7 @@ export function mountModelPage({
   }
 
   function renderArith() {
+    if (state.arithTab !== 'arithmetic') return;
     const rec = currentRecord();
     renderArithmetic($('arith'), {
       width: $('arith').clientWidth,
@@ -984,8 +1024,20 @@ function subscripts(text) {
   return esc(text).replace(/([A-Za-z\u0391-\u03c9]+)_([A-Z])/g, '$1<sub>$2</sub>');
 }
 
+// The idea card at the top right: the model's figure, if its spec gives one,
+// a line on the idea, and a button to the overview deck.
+function ideaCard(model, spec, overviewUrl) {
+  const fig = spec.figure;
+  return `<aside class="panel idea-card" id="idea-card" aria-label="The idea in a picture">
+  <div class="panel-head"><h2>The idea</h2><span class="small muted">in a picture</span></div>
+  ${fig ? `<figure class="model-figure">${figureHTML(spec, { captionClass: 'small' })}</figure>` : ''}
+  ${overviewUrl ? `<a class="btn primary big" href="${overviewUrl}">Overview slides<span class="btn-sub">What ${esc(model.name)} is about, in plain words, before any equations</span></a>` : ''}
+</aside>`;
+}
+
 function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
   return `
+<div class="intro-grid">
 <div class="page-intro">
   <h1>${esc(model.name)} <span class="muted">(${model.year})</span></h1>
   ${model.status === 'preview' ? `<p class="callout preview-note"><strong>Preview.</strong> This model's equations are checked by automated tests, but it has not yet been checked against the simulations published in the original papers. Use it to explore, and treat exact numbers with care until that check is done.</p>` : ''}
@@ -1013,6 +1065,8 @@ function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
     </ol>
     <p>Not sure what Δ, Σ, or the Greek letters mean? Start with <a href="${primerUrl}">Reading the equations</a>.</p>
   </details>
+</div>
+${ideaCard(model, spec, overviewUrl)}
 </div>
 <div class="layout">
   <aside class="sidebar" aria-label="Design and parameters">
@@ -1107,8 +1161,15 @@ function layout(model, spec, { primerUrl, overviewUrl, glossaryUrl }) {
         <div id="code" style="margin-top:.6rem"></div>
       </section>
       <section class="panel" id="arith-panel">
-        <h2>The arithmetic</h2>
-        <div class="arith" id="arith"></div>
+        <div class="panel-head">
+          <h2 id="arith-title">The model in one place</h2>
+          <div class="readings" role="group" aria-label="Formulas or arithmetic">
+            <button class="btn" data-arith-tab="formulas" aria-pressed="true">Formulas</button>
+            <button class="btn" data-arith-tab="arithmetic" aria-pressed="false">Arithmetic</button>
+          </div>
+        </div>
+        <div class="formula-card" id="formulas"></div>
+        <div class="arith" id="arith" hidden></div>
       </section>
     </div>
     <section class="panel spoiler">

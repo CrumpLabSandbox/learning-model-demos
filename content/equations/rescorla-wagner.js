@@ -201,3 +201,29 @@ export const stages = [
 export const intro = `
 <p>Rescorla-Wagner says that learning is driven by surprise. On every trial the cues present make a prediction together. The gap between what happened and what was predicted, the prediction error, decides how much each cue changes. When the outcome is fully predicted there is no surprise and nothing is learned.</p>
 <p class="small muted">Step through the trials and watch the three equations below do the work. Hover any symbol, slider, line, or column to see where it appears everywhere else on the page.</p>`;
+
+// The idea in a picture, for the card at the top of the model page.
+export const figure = {
+  svg: `<svg viewBox="0 0 320 180" role="img" aria-label="Cues A and B each send their strength V into one prediction, ΣV. The prediction is compared with the outcome λ, and the error, λ minus ΣV, goes back to change every cue present.">
+<defs><marker id="rw-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="f-head"/></marker>
+<marker id="rw-head-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="f-head-comp"/></marker></defs>
+<circle cx="40" cy="50" r="17" class="f-node"/><text x="40" y="54" text-anchor="middle" font-weight="600">A</text>
+<circle cx="40" cy="120" r="17" class="f-node"/><text x="40" y="124" text-anchor="middle" font-weight="600">B</text>
+<path d="M58 54 L128 78" class="f-line" marker-end="url(#rw-head)"/>
+<path d="M58 116 L128 92" class="f-line" marker-end="url(#rw-head)"/>
+<text x="84" y="56" class="f-sym f-comp">V<tspan font-size="9" dy="3">A</tspan></text>
+<text x="84" y="118" class="f-sym f-comp">V<tspan font-size="9" dy="3">B</tspan></text>
+<rect x="130" y="63" width="70" height="44" rx="8" class="f-box"/>
+<text x="165" y="81" text-anchor="middle" class="f-sym f-comp">ΣV</text>
+<text x="165" y="98" text-anchor="middle" class="f-small">prediction</text>
+<rect x="240" y="63" width="66" height="44" rx="8" class="f-box"/>
+<text x="273" y="81" text-anchor="middle" class="f-sym f-exp">λ</text>
+<text x="273" y="98" text-anchor="middle" class="f-small">outcome</text>
+<path d="M203 85 L237 85" class="f-dash"/>
+<text x="220" y="50" text-anchor="middle" class="f-sym f-comp">λ − ΣV</text>
+<text x="220" y="62" text-anchor="middle" class="f-small">the error</text>
+<path d="M220 108 L220 150 L40 150 L40 139" class="f-dash" marker-end="url(#rw-head-c)"/>
+<text x="130" y="166" text-anchor="middle" class="f-sym f-comp">ΔV = αβ (λ − ΣV)</text>
+</svg>`,
+  caption: 'Every cue present adds its strength into one prediction. The gap between the outcome and the prediction is the error, and each cue present changes by its share of that error.',
+};

@@ -26,9 +26,14 @@
     </section>
     <section class="slide" data-title="Three layers">
       <h2>Three layers</h2>
-      <p><strong>Input units</strong> are features: one for each cue, one shared by the cues of a modality, one for the context.</p>
-      <p><strong><a href="../glossary.html#hidden-layer">Hidden units</a></strong> stand between. Each modality has a pathway of its own, and a multimodal pathway takes every input. They start out meaning nothing.</p>
-      <p><strong>Outcome units</strong>, one per US. What they say is the prediction.</p>
+      <div class="two-col">
+        <div>
+          <p><strong>Input units</strong> are features: one for each cue, one shared by the cues of a modality, one for the context.</p>
+          <p><strong><a href="../glossary.html#hidden-layer">Hidden units</a></strong> stand between. Each modality has a pathway of its own, and a multimodal pathway takes every input. They start out meaning nothing.</p>
+          <p><strong>Outcome units</strong>, one per US. What they say is the prediction.</p>
+        </div>
+        <figure data-figure="delamater"></figure>
+      </div>
       <aside class="notes">Figure 4 in the paper: two hidden units per modality pathway and four multimodal, with the stimuli coded as a distinct feature plus a shared modality feature (A1 = a + b, A2 = b + c). The site's Modalities line in a design does this coding.</aside>
     </section>
     <section class="slide" data-title="Learning works backwards from the mistake">

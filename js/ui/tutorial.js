@@ -9,6 +9,7 @@ import { mountMinis } from './minichart.js';
 import { mountWidgets } from './primer.js';
 import { renderCheck } from './widget-kit.js';
 import { installHighlighting } from './highlight.js';
+import { mountFigures } from './figure.js';
 import { checks } from '../../content/tutorials/checks.js';
 import { phenomena } from '../../content/phenomena/index.js';
 import { evaluatePhenomenon } from '../core/phenomena.js';

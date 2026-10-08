@@ -83,7 +83,14 @@ function numberMathML(spec, key, cue, value, wrapNegative) {
   return `<mrow ${attrs(key, def, cue)}>${body}</mrow>`;
 }
 
-// mode: 'symbols' or 'numbers'
+// The general form of a sum over cues, Σ over an index, for a context with
+// `general` set (the formula card): no particular trial, so no particular cues.
+function sigma(index, term, ctx, mode) {
+  return `<mrow><munder><mo>Σ</mo><mrow><mtext class="sum-index">${esc(index)}</mtext></mrow></munder>${nodeMathML(term, ctx, mode, true)}</mrow>`;
+}
+
+// mode: 'symbols' or 'numbers'. ctx.general renders sums over cues in their
+// general form instead of expanded over the cues present on a trial.
 function nodeMathML(node, ctx, mode, first = true) {
   const { spec, cue, rec } = ctx;
   if (!node.op) {
@@ -103,13 +110,16 @@ function nodeMathML(node, ctx, mode, first = true) {
     case 'add':
       return join(node.args, '+');
     case 'sumPresent':
+      if (ctx.general) return sigma('i present', { sym: node.of, cue: 'i' }, ctx, mode);
       return join(
         ctx.present.map((c) => ({ sym: node.of, cue: c })),
         '+',
       );
     case 'sumEach':
+      if (ctx.general) return sigma('i', node.each('i'), ctx, mode);
       return join(((node.over && ctx.rec && node.over(ctx.rec)) || ctx.present).map((c) => node.each(c)), '+');
     case 'sumOthers': {
+      if (ctx.general) return sigma(`i ≠ ${ctx.cue}`, { sym: node.of, cue: 'i' }, ctx, mode);
       const others = ctx.present.filter((c) => c !== ctx.cue);
       if (!others.length) return mode === 'symbols' ? `<mn>0</mn><mtext class="case-cond"> (no other cues)</mtext>` : '<mn>0</mn>';
       return join(

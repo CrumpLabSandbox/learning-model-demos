@@ -436,3 +436,28 @@ export const intro = `
 <li>Every stimulus starts inactive, and the context is on all the time.</li>
 <li>The default numbers are this site's, chosen so that one set of values shows the classic effects and V levels off near 1. The papers' own values (p<sub>1,US</sub> 0.6, p<sub>1,CS</sub> 0.3, p<sub>d1</sub> 0.1, p<sub>d2</sub> 0.02, L<sup>+</sup> 0.1, L<sup>−</sup> 0.02, r<sub>1</sub> 1, r<sub>2</sub> 0.01, C<sub>1</sub> 2, C<sub>2</sub> 10) are used in the tests that reproduce their figures. The papers set L<sup>+</sup> = 5 L<sup>−</sup> so that a static context gains nothing; here L<sup>−</sup> is smaller, because the context on this page comes and goes with each trial.</li>
 </ul></details>`;
+
+// The idea in a picture, for the card at the top of the model page.
+export const figure = {
+  svg: `<svg viewBox="0 0 320 180" role="img" aria-label="A stimulus node cycles through three states: inactive, then A1 when the stimulus comes on, then A2 as it decays, then inactive again. Below, a timeline shows the CS and the US each in A1, with the moments when both are in A1 shaded: that is when V grows.">
+<defs><marker id="sop-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="f-head"/></marker></defs>
+<circle cx="50" cy="48" r="18" class="f-node"/><text x="50" y="52" text-anchor="middle" font-weight="600">I</text><text x="50" y="80" text-anchor="middle" class="f-small">inactive</text>
+<circle cx="160" cy="28" r="18" class="f-node"/><text x="160" y="32" text-anchor="middle" font-weight="600">A1</text><text x="196" y="22" text-anchor="start" class="f-small">active</text>
+<circle cx="270" cy="48" r="18" class="f-node"/><text x="270" y="52" text-anchor="middle" font-weight="600">A2</text><text x="270" y="80" text-anchor="middle" class="f-small">fading</text>
+<path d="M67 42 L140 31" class="f-line" marker-end="url(#sop-head)"/>
+<path d="M180 31 L253 42" class="f-line" marker-end="url(#sop-head)"/>
+<path d="M251 56 L71 56" class="f-line" stroke-dasharray="3 3" marker-end="url(#sop-head)"/>
+<text x="100" y="20" text-anchor="middle" class="f-small">stimulus on</text>
+<text x="248" y="20" text-anchor="middle" class="f-small">decays</text>
+<text x="160" y="80" text-anchor="middle" class="f-small">decays</text>
+<text x="30" y="108" class="f-small">CS</text>
+<text x="30" y="134" class="f-small">US</text>
+<rect x="60" y="98" width="90" height="14" rx="3" class="f-box"/><text x="105" y="109" text-anchor="middle" class="f-small">A1</text>
+<rect x="150" y="98" width="120" height="14" rx="3" class="f-box" opacity="0.6"/><text x="210" y="109" text-anchor="middle" class="f-small">A2</text>
+<rect x="124" y="124" width="40" height="14" rx="3" class="f-box"/><text x="144" y="135" text-anchor="middle" class="f-small">A1</text>
+<rect x="124" y="94" width="26" height="48" class="f-shade"/>
+<text x="137" y="160" text-anchor="middle" class="f-sym f-comp">both in A1: V grows</text>
+<text x="285" y="135" text-anchor="end" class="f-small">moments →</text>
+</svg>`,
+  caption: 'Every stimulus has a memory node that moves moment by moment from inactive to A1, fades into A2, and returns to rest. Learning happens when the CS and the US are in A1 at the same time, so timing inside the trial matters.',
+};

@@ -312,3 +312,27 @@ export const stages = [
 export const intro = `
 <p>Mackintosh's model says that <strong>attention</strong> changes with experience. Learners pay more attention to cues that predict the outcome well and less to cues that do not, and a cue that gets more attention is learned about faster. Each cue learns from its own error, so cues compete only through attention.</p>
 <p class="small muted">The 1975 paper says which way attention moves (its Equations 4 and 5), and adds that the change could be proportional to how much better or worse the cue predicts than the others. It gives no step size. This page uses that proportional rule, and offers the direction rules alone, with a fixed step, under Assumptions. The two differ on a tie: the direction rule lowers attention, the proportional rule leaves it alone. They make different predictions, which is part of what this page is for.</p>`;
+
+// The idea in a picture, for the card at the top of the model page.
+export const figure = {
+  svg: `<svg viewBox="0 0 320 180" role="img" aria-label="Cues A and B each predict the outcome with their own strength and have their own attention α. A predicts better, so its attention bar is tall and rising; B's is short and falling.">
+<defs><marker id="mk-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="f-head"/></marker></defs>
+<circle cx="40" cy="50" r="17" class="f-node"/><text x="40" y="54" text-anchor="middle" font-weight="600">A</text>
+<circle cx="40" cy="125" r="17" class="f-node"/><text x="40" y="129" text-anchor="middle" font-weight="600">B</text>
+<rect x="72" y="26" width="14" height="48" rx="3" class="f-bar-mod"/>
+<rect x="72" y="113" width="14" height="24" rx="3" class="f-bar-mod"/>
+<text x="79" y="20" text-anchor="middle" class="f-sym f-mod">α<tspan font-size="9" dy="3">A</tspan></text>
+<text x="79" y="150" text-anchor="middle" class="f-sym f-mod">α<tspan font-size="9" dy="3">B</tspan></text>
+<path d="M92 50 L236 78" class="f-line" stroke-width="3" marker-end="url(#mk-head)"/>
+<path d="M92 125 L236 96" class="f-line" stroke-dasharray="3 3" marker-end="url(#mk-head)"/>
+<text x="150" y="52" class="f-sym f-comp">V<tspan font-size="9" dy="3">A</tspan></text>
+<text x="150" y="126" class="f-sym f-comp">V<tspan font-size="9" dy="3">B</tspan></text>
+<rect x="240" y="65" width="66" height="44" rx="8" class="f-box"/>
+<text x="273" y="83" text-anchor="middle" class="f-sym f-exp">λ</text>
+<text x="273" y="100" text-anchor="middle" class="f-small">outcome</text>
+<text x="164" y="30" text-anchor="middle" class="f-small">A predicts best: α rises ↑</text>
+<text x="164" y="152" text-anchor="middle" class="f-small">B predicts worse: α falls ↓</text>
+<text x="160" y="172" text-anchor="middle" class="f-small">each cue learns from its own error, λ − V</text>
+</svg>`,
+  caption: 'Each cue has its own attention, α. After a trial, attention rises for the cue that predicted the outcome best and falls for the others. A cue learns from its own error, so a well-attended cue learns fast.',
+};
