@@ -20,6 +20,7 @@
       </div>
       <div class="nav-group" role="group" aria-label="Models">
         <a href="../models.html">All models</a>
+        <a href="../phenomena.html">Phenomena</a>
         <a href="../compare.html">Compare</a>
       </div>
       <div class="nav-group" role="group" aria-label="More">
@@ -40,7 +41,7 @@
       <h2>The task, and the four numbers behind it</h2>
       <p>In a <a href="../glossary.html#contingency-judgement">contingency judgement</a> experiment a person watches a cue and an outcome come and go, then rates how strongly they are related, from −100 to +100. Everything the person could use is in four counts: how often the cue and the outcome came together (a), the cue alone (b), the outcome alone (c), and neither (d). This is the <a href="../glossary.html#contingency-table">2 × 2 table</a>, and the standard measure of the relationship is <a href="../glossary.html#delta-p">ΔP</a>: the chance of the outcome with the cue, minus the chance of the outcome without it.</p>
       <div class="widget" data-widget="contingency"></div>
-      <p>Try the second preset. The cue and the outcome come together on 6 frames, but ΔP is 0: the outcome is just as likely without the cue. Pairings are not <a href="../glossary.html#contingency">contingency</a>. That distinction is the whole subject of this tutorial.</p>
+      <p>Try the second preset. The cue and the outcome come together on 6 frames, but ΔP is 0: the outcome is just as likely without the cue. Pairings are not <a href="../glossary.html#contingency">contingency</a>. That distinction is the whole subject of this tutorial (<a href="../phenomena/contingency.html">the finding on its own terms</a>).</p>
       <div data-check="dpZero"></div>
       <p>In the <a href="../glossary.html#streamed-trial">streamed-trial</a> procedure (Crump, Hannah, Allan &amp; Hord, 2007) a whole block of 60 frames flashes by in about 12 seconds, then one rating is taken. <a href="../stream.html">Try it yourself</a> before reading on: a stream or two is enough to feel what the task is like. Here is how a stream looks to this site's models. Each frame is a trial, and a context cue Z stands for the stream itself, so an outcome with no cue is <code>+</code> and a frame with nothing on it is <code>-</code>:</p>
       <div class="design-text">Positive: 17 A+, 13 A-, 3 +, 27 -, random
@@ -56,7 +57,7 @@ Context: Z</div>
       <div data-verdicts="contingency"></div>
 
       <h2><span class="step-no-big">2</span>Outcome density: the same ΔP, rated differently</h2>
-      <p>Take two streams with no contingency at all. In one the outcome is rare (it comes on 20% of frames), in the other common (80%). People rate the common one higher: about −30 for the rare stream and about +6 for the common one, though both have ΔP = 0. This is the <a href="../glossary.html#outcome-density">outcome density effect</a>, and it is one of the oldest findings in the area.</p>
+      <p>Take two streams with no contingency at all. In one the outcome is rare (it comes on 20% of frames), in the other common (80%). People rate the common one higher: about −30 for the rare stream and about +6 for the common one, though both have ΔP = 0. This is the <a href="../glossary.html#outcome-density">outcome density effect</a>, and it is one of the oldest findings in the area (<a href="../phenomena/outcome-density.html">the evidence</a>).</p>
       <div class="two-figs">
         <figure data-mini data-model="rescorla-wagner" data-design="Low density: 6 A+, 24 A-, 6 +, 24 -, random|High density: 24 B+, 6 B-, 24 +, 6 -, random|Context: Z" data-lines="A,B" data-ref="0=ΔP 0" data-caption="Rescorla-Wagner: A (rare outcome) and B (common outcome) both head for ΔP = 0. The context soaks up the base rate."></figure>
         <figure data-mini data-model="minerva-al" data-design="Low density: 6 A+, 24 A-, 6 +, 24 -, random|High density: 24 B+, 6 B-, 24 +, 6 -, random|Context: Z" data-lines="A,B" data-ref="0=ΔP 0" data-caption="MINERVA-AL: B retrieves the outcome strongly, because the context brings it back and B's probe includes the context."></figure>
@@ -73,7 +74,7 @@ Context: Z</div>
       <p>This matters for reading the verdicts above. A learning model describes what the person takes in from the frames, the <em>input</em>. A rating is that, plus a decision about how to report it, the <em>output</em>. A model that shows the outcome density effect is putting in the input something the data place in the output. A model that does not show it is not thereby wrong: it may be describing the input correctly and leaving the decision to something else.</p>
 
       <h2><span class="step-no-big">3</span>Cue interaction inside one stream</h2>
-      <p>Hannah, Crump, Allan and Siegel (2009) put two cues in a stream, a square and a triangle. The target had ΔP = 0.5 with the outcome in every stream. Its companion either predicted the outcome perfectly (ΔP = 1) or predicted nothing (ΔP = 0). People rated the target about −16 with a perfect companion and about +25 with a useless one. This is <a href="../glossary.html#one-phase-blocking">one-phase blocking</a>: no pretraining phase, just two cues in one block.</p>
+      <p>Hannah, Crump, Allan and Siegel (2009) put two cues in a stream, a square and a triangle. The target had ΔP = 0.5 with the outcome in every stream. Its companion either predicted the outcome perfectly (ΔP = 1) or predicted nothing (ΔP = 0). People rated the target about −16 with a perfect companion and about +25 with a useless one. This is <a href="../glossary.html#one-phase-blocking">one-phase blocking</a>: no pretraining phase, just two cues in one block (<a href="../phenomena/one-phase-blocking.html">the evidence</a>).</p>
       <div class="design-text">Companion predicts: 18 AB+, 6 A+, 6 B-, 18 -, random
 Companion useless: 9 CD+, 9 D+, 3 C+, 3 +, 3 CD-, 3 D-, 9 C-, 9 -, random
 Context: Z</div>
@@ -83,7 +84,7 @@ Context: Z</div>
       <p>And yet Siegel, Allan, Hannah and Crump (2009) ran the signal detection version of this experiment too. People told the target's contingencies apart just as well with either companion. The companion moved the criterion. Once again the models place in learning an effect that the yes-or-no data place in the decision.</p>
 
       <h2><span class="step-no-big">4</span>Two phases, probabilistic outcomes, both orders</h2>
-      <p>The classic blocking design trains the companion alone first. Shanks (1985) ran it with people and probabilistic outcomes, and Hannah and colleagues repeated it with streams. First the companion A alone is followed by the outcome on 3 frames in 4. Then B is added to A, and a comparison cue D is added to a new companion C. Each compound is followed by the outcome on 3 frames in 4 and each companion alone on 1 in 4, so B and D both have ΔP = 0.5 in the compound phase. (E is the control's own first-phase companion, which never appears again, as in the paper.)</p>
+      <p>The classic blocking design trains the companion alone first. Shanks (1985) ran it with people and probabilistic outcomes, and Hannah and colleagues repeated it with streams. First the companion A alone is followed by the outcome on 3 frames in 4. Then B is added to A, and a comparison cue D is added to a new companion C. Each compound is followed by the outcome on 3 frames in 4 and each companion alone on 1 in 4, so B and D both have ΔP = 0.5 in the compound phase. (E is the control's own first-phase companion, which never appears again, as in the paper.) The finding has <a href="../phenomena/probabilistic-blocking.html">a page of its own</a>.</p>
       <figure data-mini data-model="rescorla-wagner" data-design="Single cue: 24 A+, 8 A-, 24 E+, 8 E-, random|Compound: 12 AB+, 4 AB-, 4 A+, 12 A-, 12 CD+, 4 CD-, 4 C+, 12 C-, random|Context: Z" data-lines="A,B,D" data-ref="0.5=ΔP 0.5 for B and D@2" data-caption="Rescorla-Wagner, forward order. B starts the compound phase behind D, but A's strength falls on the A-alone frames, the error returns, and B catches up."></figure>
       <p>People rated B lower than D, and more so the more often A had been followed by the outcome in the first phase. With probabilistic outcomes the models predict less than they do for the deterministic design:</p>
       <div data-verdicts="probabilistic-blocking"></div>

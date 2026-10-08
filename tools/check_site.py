@@ -101,7 +101,7 @@ class Checker:
     # -- every page ----------------------------------------------------------
     def pages(self, browser) -> None:
         pages = sorted(p.relative_to(ROOT).as_posix() for p in ROOT.glob("*.html")) + sorted(
-            f"{d}/{p.name}" for d in ("decks", "models", "tutorials") for p in (ROOT / d).glob("*.html")
+            f"{d}/{p.name}" for d in ("decks", "models", "tutorials", "phenomena") for p in (ROOT / d).glob("*.html")
         )
         for size_name, size in (("desktop", DESKTOP), ("phone", PHONE)):
             ctx = browser.new_context(viewport=size)
@@ -650,6 +650,45 @@ class Checker:
         ctx.close()
 
     # -- primer, warm-up, glossary, landing -----------------------------------
+    # -- phenomena pages -------------------------------------------------------
+    def phenomena_pages(self, browser) -> None:
+        ctx = browser.new_context(viewport=DESKTOP)
+        page = self.open(ctx, "phenomena.html")
+        cards = page.query_selector_all(".phen-card")
+        self.check("phenomena: one card per finding, each with a strength badge", len(cards) == 21 and len(page.query_selector_all(".phen-card .badge.strength")) == 21)
+        self.check("phenomena: the header marks Phenomena as current", page.text_content(".site-header nav a[aria-current]") == "Phenomena")
+        href = page.get_attribute(".phen-card h3 a", "href")
+        self.check("phenomena: the first card links to the first finding's page", href is not None and href.endswith("phenomena/acquisition.html"))
+        page.close()
+        page = self.open(ctx, "phenomena/extinction.html", wait=900)
+        self.check("phenomenon page: the five sections in order", [s.get_attribute("id") for s in page.query_selector_all(".phen-page section")] == ["finding", "evidence", "designs", "preset", "models"])
+        self.check("phenomenon page: carries the preset and its criterion", "Extinction: 30 A-" in page.text_content("#finding .design-text") and "Counts as shown when" in page.text_content("#preset"))
+        verdicts = page.eval_on_selector_all("#models .model-verdict", "ls => ls.map(l => [l.dataset.modelVerdict, l.classList.contains('yes')])")
+        self.check("phenomenon page: a computed verdict for every model", len(verdicts) == 7 and dict(verdicts).get("rescorla-wagner") is True and dict(verdicts).get("delamater") is False, f"{verdicts}")
+        self.check("phenomenon page: an unwritten evidence section says so", "has not been written up" in page.text_content("#evidence") and page.query_selector(".badge.strength-unwritten") is not None)
+        self.check("phenomenon page: links to the glossary entry and the table", page.query_selector('a[href="../glossary.html#extinction"]') is not None and page.query_selector('a[href="../models.html#phenomena"]') is not None)
+        self.check("phenomenon page: the header marks Phenomena as current", page.text_content(".site-header nav a[aria-current]") == "Phenomena")
+        self.clean(page, "phenomenon page")
+        page.close()
+        page = self.open(ctx, "phenomena/blocking.html", wait=900)
+        self.check("phenomenon page: a written entry shows its judgement, papers, and the paper's numbers", page.text_content(".badge.strength") == "Established" and len(page.query_selector_all("#evidence .ref-list li")) >= 1 and ".45" in page.text_content("#designs .results-table") and "Kamin" in page.text_content("#evidence"))
+        self.check("phenomenon page: the designs are in the site's notation", "Pretraining: 16 A+" in page.text_content("#designs .design-text"))
+        self.clean(page, "phenomenon page (written)")
+        page.close()
+        page = self.open(ctx, "phenomena/latent-inhibition.html", wait=900)
+        self.check("phenomenon page: a qualified judgement shows its badge, both tables, and the caution", page.text_content(".badge.strength") == "Qualified" and len(page.query_selector_all("#designs .results-table")) == 2 and "25.8" in page.text_content("#designs") and page.query_selector("#evidence .callout") is not None)
+        page.close()
+        page = self.open(ctx, "models.html#phenomena")
+        self.check("models: the table's row headers link to the findings", page.get_attribute(".matrix tbody th a", "href") == "phenomena/acquisition.html")
+        page.close()
+        page = self.open(ctx, "models/rescorla-wagner.html#view=everything")
+        self.check("model: each phenomenon card links to its finding's page", len(page.query_selector_all('#cards a[href^="../phenomena/"]')) == 21)
+        page.close()
+        page = self.open(ctx, "glossary.html#blocking")
+        self.check("glossary: a finding's entry links to its page", page.query_selector('#blocking a[href="phenomena/blocking.html"]') is not None)
+        page.close()
+        ctx.close()
+
     def learning_pages(self, browser) -> None:
         ctx = browser.new_context(viewport=DESKTOP)
         page = self.open(ctx, "primer.html")
@@ -747,7 +786,7 @@ def run_checks(directory: Path, browsers: list[str]) -> bool:
                 print(f"\n== {name} ({'built site' if built else 'source'}, {base}) ==")
                 browser = getattr(pw, name).launch()
                 c = Checker(base, name, built)
-                for section in (c.pages, c.dev_toggle, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.configural_model, c.network_model, c.comparison, c.streamed_trials, c.learning_pages):
+                for section in (c.pages, c.dev_toggle, c.decks, c.model, c.attention_models, c.real_time_model, c.memory_model, c.configural_model, c.network_model, c.comparison, c.streamed_trials, c.phenomena_pages, c.learning_pages):
                     print(f"- {section.__name__}")
                     c.run(section.__name__, section, browser)
                 browser.close()

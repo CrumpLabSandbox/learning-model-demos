@@ -965,6 +965,27 @@ body.deck-page > .site-footer { width: 100%; padding-bottom: 5rem; }
 .config-table .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .config-table tr.current td { background: var(--hl); }
 .symbol-guide .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+/* The phenomena page and the phenomenon pages. */
+.badge.strength { font-weight: 600; }
+.badge.strength-robust { color: var(--good); }
+.badge.strength-established, .badge.strength-qualified { color: var(--ink-2); }
+.badge.strength-disputed { color: var(--bad); }
+.badge.strength-unwritten { color: var(--muted); border-style: dashed; }
+.phen-page .design-text { font-family: var(--mono); font-size: 0.85rem; white-space: pre-wrap; background: var(--surface-2); padding: 0.45rem 0.6rem; border-radius: 6px; margin: 0.4rem 0 0.6rem; }
+.phen-page .label { font-weight: 600; color: var(--ink-2); }
+.phen-page h3 { font-size: 1.05rem; margin: 1rem 0 0.3rem; }
+.phen-page .notice { margin: 0.4rem 0; }
+.ref-list { padding-left: 1.3rem; display: grid; gap: 0.5rem; }
+.phen-design { border-left: 3px solid var(--border); padding-left: 0.9rem; margin: 0.8rem 0; }
+.phen-design p { margin: 0.25rem 0; }
+.results-table { margin: 0.5rem 0; font-size: 0.9rem; }
+.results-table caption { caption-side: bottom; text-align: left; padding-top: 0.3rem; }
+.results-table th[scope='row'] { text-align: left; font-weight: 600; }
+.model-verdicts { list-style: none; padding: 0; margin: 0.5rem 0 0; display: grid; gap: 0.6rem; }
+.model-verdict { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.55rem 0.8rem; background: var(--surface); }
+.model-verdict p { margin: 0.2rem 0 0; }
+.model-verdict-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.5rem; }
+.phen-nav { margin-top: 2rem; }
 .model-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 1rem; margin-top: 1rem; }
 .model-card h3 a { text-decoration: none; color: inherit; }
 .model-card h3 a:hover { text-decoration: underline; }

@@ -20,7 +20,7 @@ import { MODELS } from '../js/core/registry.js';
 
 const root = new URL('..', import.meta.url).pathname;
 const inDir = (d) => readdirSync(join(root, d)).filter((f) => f.endsWith('.html')).map((f) => `${d}/${f}`);
-const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'compare.html', 'stream.html', 'models.html', 'about.html', ...inDir('models'), ...inDir('decks'), ...inDir('tutorials')];
+const pages = ['index.html', 'primer.html', 'warm-up.html', 'glossary.html', 'compare.html', 'stream.html', 'models.html', 'about.html', ...inDir('models'), ...inDir('decks'), ...inDir('tutorials'), ...inDir('phenomena')];
 const read = (p) => readFileSync(join(root, p), 'utf8');
 const ids = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
 
@@ -135,8 +135,8 @@ test('the navigation marks the page you are on, and only that page', () => {
     const nav = html.match(/<nav aria-label="Pages">([\s\S]*?)<\/nav>/)[1];
     const targets = [...nav.matchAll(/<a href="([^"]+)"/g)].map((m) => normalize(join(dirname(page), m[1])));
     const current = [...nav.matchAll(/<a href="([^"]+)" aria-current="page">/g)].map((m) => normalize(join(dirname(page), m[1])));
-    // Tutorials mark Tutorials, model pages mark All models, a page with its own link marks it, and others (the landing and About pages) mark nothing.
-    const want = page.startsWith('tutorials/') ? ['index.html#tutorials'] : page.startsWith('models/') ? ['models.html'] : targets.includes(page) ? [page] : [];
+    // Tutorials mark Tutorials, model pages mark All models, phenomenon pages mark Phenomena, a page with its own link marks it, and others (the landing and About pages) mark nothing.
+    const want = page.startsWith('tutorials/') ? ['index.html#tutorials'] : page.startsWith('models/') ? ['models.html'] : page.startsWith('phenomena/') ? ['phenomena.html'] : targets.includes(page) ? [page] : [];
     assert.deepEqual(current, want, page);
   }
 });
