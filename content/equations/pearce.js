@@ -423,3 +423,28 @@ export const intro = `
 <li>A configuration comes into being the first time it is presented. A probe never trained has E = I = 0, so its V is what generalises to it.</li>
 <li>The default learning rate, 0.25, is the paper's.</li>
 </ul></details>`;
+
+// The idea in a picture, for the card at the top of the model page.
+export const figure = {
+  svg: `<svg viewBox="0 0 320 180" role="img" aria-label="Three configuration units, A, B, and AB, each with its own strength. The compound AB predicts the outcome, and lends half of what it learned to A and half to B, because each shares half its elements with AB.">
+<defs><marker id="pc-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="f-head"/></marker>
+<marker id="pc-head-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="f-head-comp"/></marker></defs>
+<circle cx="60" cy="50" r="20" class="f-node"/><text x="60" y="54" text-anchor="middle" font-weight="600">A</text>
+<circle cx="60" cy="130" r="20" class="f-node"/><text x="60" y="134" text-anchor="middle" font-weight="600">B</text>
+<circle cx="170" cy="90" r="24" class="f-node"/><text x="170" y="94" text-anchor="middle" font-weight="600">AB</text>
+<text x="170" y="40" text-anchor="middle" class="f-small">this trial's pattern</text>
+<text x="170" y="52" text-anchor="middle" class="f-small">is one unit</text>
+<path d="M196 86 L236 86" class="f-line" marker-end="url(#pc-head)"/>
+<text x="216" y="78" text-anchor="middle" class="f-sym f-comp">E<tspan font-size="9" dy="3">AB</tspan></text>
+<rect x="240" y="64" width="66" height="44" rx="8" class="f-box"/>
+<text x="273" y="82" text-anchor="middle" class="f-sym f-exp">λ</text>
+<text x="273" y="99" text-anchor="middle" class="f-small">outcome</text>
+<path d="M150 74 L82 56" class="f-dash" marker-end="url(#pc-head-c)"/>
+<path d="M150 106 L82 124" class="f-dash" marker-end="url(#pc-head-c)"/>
+<text x="118" y="84" text-anchor="middle" class="f-sym f-comp">S = ½</text>
+<text x="118" y="104" text-anchor="middle" class="f-sym f-comp">S = ½</text>
+<text x="60" y="20" text-anchor="middle" class="f-small">shares half its cues</text>
+<text x="60" y="166" text-anchor="middle" class="f-small">gets half the strength</text>
+</svg>`,
+  caption: 'The whole pattern of cues on a trial learns as one unit, with its own strength. It lends strength to other patterns in proportion to their similarity: A shares half its elements with AB, so A gets half of what AB learned.',
+};

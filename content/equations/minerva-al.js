@@ -393,3 +393,32 @@ export const stages = [
 export const intro = `
 <p>MINERVA-AL has <strong>no associative strength</strong> at all. Every trial is stored in memory as its own <strong>trace</strong>. When cues appear, every trace answers at once, in proportion to how similar it is to what is present, and the answers add up to an <strong>echo</strong>: what the learner expects. Learning is just remembering, and expecting is just recalling.</p>
 <p class="small muted">The model is random: which features get stored varies from learner to learner. So the page runs many simulated learners and plots their average, with the shaded band showing the spread. The memory view follows learner 1.</p>`;
+
+// The idea in a picture, for the card at the top of the model page.
+export const figure = {
+  svg: `<svg viewBox="0 0 320 180" role="img" aria-label="A probe vector for this trial's cues at the top, a memory of traces, one row per past trial, in the middle, and the echo they return at the bottom. The probe activates the traces like it, and their sum, the echo, is what the model expects.">
+<defs><marker id="mv-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="f-head"/></marker></defs>
+${(() => {
+  const cell = (x, y, on) => `<rect x="${x}" y="${y}" width="14" height="14" rx="2" class="${on ? 'f-on' : 'f-off'}"/>`;
+  const row = (y, bits) => bits.map((b, i) => cell(100 + i * 16, y, b)).join('');
+  const probe = [1, 1, 0, 0, 1, 0, 0, 0];
+  const traces = [[1, 1, 0, 0, 1, 0, 1, 1], [0, 0, 1, 1, 1, 0, 0, 0], [1, 1, 0, 0, 1, 0, 1, 1], [1, 0, 0, 0, 1, 0, 1, 0]];
+  const echo = [1, 1, 0, 0, 1, 0, 1, 1];
+  return row(18, probe) + traces.map((t, i) => row(62 + i * 18, t)).join('') + row(152, echo);
+})()}
+<text x="90" y="24" text-anchor="end" class="f-small">probe:</text>
+<text x="90" y="36" text-anchor="end" class="f-small">this trial's cues</text>
+<text x="90" y="82" text-anchor="end" class="f-small">memory:</text>
+<text x="90" y="94" text-anchor="end" class="f-small">one trace per trial</text>
+<text x="90" y="157" text-anchor="end" class="f-small">echo:</text>
+<text x="90" y="169" text-anchor="end" class="f-small">what it expects</text>
+<text x="236" y="70" class="f-small">activated by</text>
+<text x="236" y="82" class="f-small">its similarity</text>
+<path d="M170 36 L170 58" class="f-line" marker-end="url(#mv-head)"/>
+<path d="M170 134 L170 148" class="f-line" marker-end="url(#mv-head)"/>
+<text x="236" y="104" class="f-sym f-comp">A<tspan font-size="9" dy="3">i</tspan> = S<tspan font-size="9" dy="3">i</tspan><tspan font-size="9" dy="-10">3</tspan></text>
+<text x="236" y="126" class="f-small">outcome read</text>
+<text x="236" y="138" class="f-small">from the echo</text>
+</svg>`,
+  caption: 'There are no associations. Every trial is stored as a trace. A probe made of the cues on this trial activates the traces that resemble it, and the echo they return, summed, is what the model expects, outcome included.',
+};

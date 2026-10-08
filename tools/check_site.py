@@ -24,6 +24,7 @@ from site_tool import BASE, ROOT, serve_in_background  # tools/ is on sys.path
 OUT = ROOT / "_check"
 DESKTOP = {"width": 1366, "height": 860}
 PHONE = {"width": 390, "height": 780}
+MODEL_DECKS = {"rescorla-wagner", "mackintosh", "pearce-hall", "sop", "pearce", "delamater", "minerva-al"}
 # Whether the site is marked as in development (js/site-status.js).
 IN_DEVELOPMENT = "IN_DEVELOPMENT = true" in (ROOT / "js/site-status.js").read_text()
 
@@ -148,6 +149,7 @@ class Checker:
             self.check(f"{deck}: shows exactly one slide of {count}", visible == 1, f"{visible} visible")
             self.check(f"{deck}: has slide controls", page.is_visible(".deck-bar") and page.text_content(".deck-count") == f"1 / {count}")
             empty_widgets = 0
+            empty_figures = 0
             charts_expected = 0
             charts_drawn = 0
             for i in range(1, count):
@@ -157,10 +159,13 @@ class Checker:
                     page.click('[data-go="next"]')
                 page.wait_for_timeout(120)
                 empty_widgets += page.eval_on_selector_all(".slide.current .widget", "ws => ws.filter(w => w.innerHTML.length < 50).length")
+                empty_figures += page.eval_on_selector_all(".slide.current [data-figure]", "fs => fs.filter(f => !f.querySelector('svg[role=img]') || !f.querySelector('figcaption')).length")
                 charts_expected += page.eval_on_selector_all(".slide.current [data-mini]", "s => s.length")
                 charts_drawn += page.eval_on_selector_all(".slide.current [data-mini] svg.mini :is(path.mini-line, polyline.tl-line)", "s => s.length > 0 ? 1 : 0")
             self.check(f"{deck}: keys and Next button reach the last slide", page.text_content(".deck-count") == f"{count} / {count}" and page.url.endswith(f"#{count}"))
             self.check(f"{deck}: every widget renders", empty_widgets == 0, f"{empty_widgets} empty")
+            if deck[:-5] in MODEL_DECKS:
+                self.check(f"{deck}: shows the model's figure", page.query_selector(f"[data-figure='{deck[:-5]}'] svg") is not None and empty_figures == 0, f"{empty_figures} empty")
             self.check(f"{deck}: every model chart draws", charts_drawn >= min(charts_expected, 1) if charts_expected else True, f"{charts_drawn} of {charts_expected}")
             page.click('[data-go="prev"]')
             self.check(f"{deck}: Previous button goes back", page.text_content(".deck-count") == f"{count - 1} / {count}")
@@ -222,6 +227,13 @@ class Checker:
         self.check("model: clicking a table row selects it", label() == "Trial 21 of 60")
         page.hover('#eq-list .reading.symbols [data-sym="beta"]')
         self.check("model: hovering β lights its slider", len(page.query_selector_all(".slider.linked")) >= 1)
+        self.check("model: the idea card has a figure and the deck button", page.query_selector("#idea-card figure svg[role='img']") is not None and "Overview slides" in page.text_content("#idea-card a.btn.primary"))
+        self.check("model: the formulas tab shows every equation first", page.is_visible("#formulas") and page.is_hidden("#arith") and len(page.query_selector_all("#formulas .formula-row")) == 3)
+        page.hover('#formulas [data-sym="beta"]')
+        self.check("model: hovering β in the formulas lights its slider", len(page.query_selector_all(".slider.linked")) >= 1)
+        page.click('[data-arith-tab="arithmetic"]')
+        self.check("model: the arithmetic tab draws the number line", page.is_visible("#arith svg") and page.is_hidden("#formulas") and page.text_content("#arith-title") == "The arithmetic")
+        page.click('[data-arith-tab="formulas"]')
         page.click('[data-focus="C"]')
         self.check("model: an absent cue explains itself", "C is not on this trial" in page.text_content("#eq-list"))
         page.click('[data-focus="B"]')

@@ -393,3 +393,24 @@ export const intro = `
 <li>A cue's salience is its input activation when present (1 by default); a modality's shared feature takes the highest salience of its present cues. A bigger outcome, A+(2), raises that outcome's target.</li>
 <li>Momentum carries over from one trial to the next whatever the trial type.</li>
 </ul></details>`;
+
+// The idea in a picture, for the card at the top of the model page.
+export const figure = {
+  svg: `<svg viewBox="0 0 320 180" role="img" aria-label="A three-layer network: input units for the cue features on the left, hidden units in the middle, and two outcome units on the right. Every input connects to every hidden unit and every hidden unit to every outcome. The error at the outcomes travels back to change all the weights.">
+<defs><marker id="dl-head-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="f-head-comp"/></marker></defs>
+${[40, 72, 104, 136].map((y) => [52, 84, 116, 148].map((h) => `<line x1="50" y1="${y}" x2="160" y2="${h}" class="f-thin"/>`).join('')).join('')}
+${[52, 84, 116, 148].map((h) => [84, 116].map((o) => `<line x1="160" y1="${h}" x2="270" y2="${o}" class="f-thin"/>`).join('')).join('')}
+${[['a', 40], ['b', 72], ['c', 104], ['ctx', 136]].map(([l, y]) => `<circle cx="50" cy="${y}" r="12" class="f-node"/><text x="50" y="${y + 4}" text-anchor="middle" class="f-small" fill="var(--ink)">${l}</text>`).join('')}
+${[52, 84, 116, 148].map((y) => `<circle cx="160" cy="${y}" r="12" class="f-node"/>`).join('')}
+${[['US1', 84], ['US2', 116]].map(([l, y]) => `<circle cx="270" cy="${y}" r="15" class="f-node"/><text x="270" y="${y + 4}" text-anchor="middle" class="f-small" fill="var(--ink)">${l}</text>`).join('')}
+<text x="50" y="20" text-anchor="middle" class="f-small">inputs: features</text>
+<text x="160" y="28" text-anchor="middle" class="f-small">hidden units</text>
+<text x="160" y="40" text-anchor="middle" class="f-small">learn what the cues are</text>
+<text x="270" y="60" text-anchor="middle" class="f-small">outcomes</text>
+<path d="M255 140 L175 168" class="f-dash" marker-end="url(#dl-head-c)"/>
+<path d="M145 168 L65 160" class="f-dash" marker-end="url(#dl-head-c)"/>
+<text x="230" y="170" text-anchor="start" class="f-sym f-comp">δ</text>
+<text x="160" y="178" text-anchor="middle" class="f-small">the error travels back and changes every weight</text>
+</svg>`,
+  caption: 'Cues reach the outcomes through a hidden layer that learns its own way of representing them. The error at an outcome unit travels backwards to change every weight, so a compound can come to mean something its elements do not.',
+};

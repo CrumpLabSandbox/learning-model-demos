@@ -325,3 +325,24 @@ export const stages = [
 export const intro = `
 <p>The Pearce-Hall model says that learners pay attention to cues whose consequences are still <strong>uncertain</strong>. After a surprise, attention to the cues present goes up; once the outcome is predicted well, attention fades. The surprise does not drive learning directly, as in Rescorla-Wagner: it drives attention, and attention drives learning.</p>
 <p class="small muted">Each cue has two strengths: excitatory V (the outcome will happen) and inhibitory V̄ (it will not). Its prediction is the difference. This page uses the running average of attention from Pearce, Kaye, and Hall (1982); set γ to 1 for the 1980 model, in which attention is simply how surprising the last trial was. One choice made here: the 1980 equations would add excitation on every reinforced trial, even one that was over-predicted, and inhibition at the same time; this page applies whichever the sign of the error calls for, so that learning settles at λ.</p>`;
+
+// The idea in a picture, for the card at the top of the model page.
+export const figure = {
+  svg: `<svg viewBox="0 0 320 180" role="img" aria-label="Over trials, surprise falls as the outcome becomes predicted and attention α follows it down. When the outcome changes, surprise jumps and attention rises again.">
+<line x1="34" y1="140" x2="306" y2="140" class="f-axis"/>
+<line x1="34" y1="30" x2="34" y2="140" class="f-axis"/>
+<path d="M36 42 C70 60 100 110 150 128" class="f-curve-comp"/>
+<path d="M36 70 C70 80 110 125 150 134" class="f-curve-mod"/>
+<line x1="160" y1="30" x2="160" y2="140" class="f-axis" stroke-dasharray="3 3"/>
+<path d="M162 44 C200 60 240 112 304 128" class="f-curve-comp"/>
+<path d="M162 120 C172 92 186 80 200 84 C236 92 280 122 304 132" class="f-curve-mod"/>
+<text x="150" y="44" text-anchor="end" class="f-sym f-comp">|λ − ΣV|<tspan class="f-small" font-style="normal"> surprise</tspan></text>
+<text x="150" y="62" text-anchor="end" class="f-sym f-mod">α<tspan class="f-small" font-style="normal"> attention, following it</tspan></text>
+<text x="166" y="38" class="f-small">outcome changes:</text>
+<text x="304" y="56" text-anchor="end" class="f-small">surprise is back,</text>
+<text x="304" y="68" text-anchor="end" class="f-small">attention returns</text>
+<text x="170" y="156" text-anchor="middle" class="f-small">trials →</text>
+<text x="170" y="172" text-anchor="middle" class="f-small">a cue learns at a rate set by its attention: ΔV = S α λ</text>
+</svg>`,
+  caption: 'Attention follows surprise. While the outcome is unexpected, α stays high and the cue learns fast. Once the outcome is predicted, α falls and the cue is slow to learn anything new, until a surprise brings attention back.',
+};
