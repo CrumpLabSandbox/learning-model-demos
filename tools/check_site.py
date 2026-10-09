@@ -676,7 +676,7 @@ class Checker:
         self.clean(page, "phenomenon page (written)")
         page.close()
         page = self.open(ctx, "phenomena/conditioned-inhibition.html", wait=900)
-        self.check("phenomenon page: conditioned inhibition shows both of Rescorla's tests", page.text_content(".badge.strength") == "Established" and len(page.query_selector_all("#designs .results-table")) == 2 and "Light + tone" in page.text_content("#designs") and "144 +" in page.text_content("#designs .design-text"))
+        self.check("phenomenon page: conditioned inhibition shows both of Rescorla's tests", page.text_content(".badge.strength") == "Established" and len(page.query_selector_all("#designs .results-table")) == 2 and "Light + tone" in page.text_content("#designs") and "144 +" in " ".join(page.eval_on_selector_all("#designs .design-text", "es => es.map(e => e.textContent)")))
         page.close()
         page = self.open(ctx, "phenomena/latent-inhibition.html", wait=900)
         self.check("phenomenon page: a qualified judgement shows its badge, both tables, and the caution", page.text_content(".badge.strength") == "Qualified" and len(page.query_selector_all("#designs .results-table")) == 2 and "25.8" in page.text_content("#designs") and page.query_selector("#evidence .callout") is not None)
