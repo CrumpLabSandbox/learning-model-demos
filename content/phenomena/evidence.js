@@ -317,7 +317,87 @@ export const evidence = {
     notes:
       'Treat the one-line version on the cards with care. In this paper the effect is modest (6 to 8 trials on a mean of about 20 to 30), one animal in each experiment carries much of it, and it is absent for one of the two cues. The paper is the origin of the name, not the strongest demonstration of the effect.',
   },
-  'backward-blocking': unwritten(),
+  'backward-blocking': {
+    strength: 'established',
+    basis:
+      'One paper so far, Shanks (1985): three experiments with about a hundred Cambridge students in one task, a video game in which the student fires shells at tanks that are also crossing a minefield, and then rates how effective the shells were from 0 to 100. The shell is the cue in question, the minefield the alternative cause. Backward blocking appeared in all three experiments: judgements of the shell fell when a period of watching the minefield destroy tanks on its own came after the firing period, as much as when it came before (Experiment 1, p < .025 for blocking, no effect of order); it was graded by how good the minefield was, exactly as forward blocking is (Experiment 2, p < .01, no effect of order); and it survived a control that matched how much time and distraction came between firing and rating (Experiment 3, p < .01). The effect is in people judging causes. Shanks cites one rat study (Kaufman & Bolles, 1981) as a possible animal analogue and calls that evidence not substantial. The judgement rises to robust when other laboratories and tasks are added.',
+    finding:
+      'Blocking works backwards. If a cue B is trained in a compound with A, and A is then trained on its own, B comes out weaker than a cue whose partner was not trained afterwards, even though B is never presented again. The order of the two phases does not matter for people judging what causes what: training the partner first (forward blocking) and training it afterwards (backward blocking) cut the judgement of B by about the same amount, and both cuts grow with how strongly the partner predicts the outcome. This means a cue\'s value can change while the cue is absent, which the standard trial-level models cannot do: they change only the cues present on a trial.',
+    references: [
+      {
+        authors: 'Shanks, D. R.',
+        year: 1985,
+        title: 'Forward and backward blocking in human contingency judgement',
+        source: 'Quarterly Journal of Experimental Psychology, 37B, 1–21',
+        doi: '10.1080/14640748508402082',
+        supports: 'Experiment 1: blocking of the same size in the forward and backward orders, with a delay control for the backward order, at a zero and at a positive contingency. Experiment 2: both orders graded by the alternative cause\'s probability of the outcome. Experiment 3: backward blocking with forgetting matched across conditions. Also the argument that the result rules out the Rescorla-Wagner model, and the attention models, as accounts of human contingency judgement.',
+      },
+    ],
+    designs: [
+      {
+        study: 'Shanks (1985), Experiment 1: forward and backward, with a delay control (pp. 5–10)',
+        design: 'Firing: 14 B+, 4 B-, 9 +, 3 -, random\nObservation: 22 +, 8 -, random\nContext: A',
+        cues: 'B is the student\'s own shell: a trial carries B when the student fired and hit (about 18 of the 30 firing trials). A is the minefield, which every tank crosses, so it is written as the context. + is a tank blowing up. The lines above are condition BB (backward blocking) for Group Non-contingent, where a tank blew up on 75% of trials whether hit or not; in the observation period the student could only watch, and the minefield destroyed 75% of tanks by itself. Group Contingent had destruction on 75% of hit trials and 50% of the rest, a ΔP of 0.25.',
+        measured:
+          'A rating of the effectiveness of the shells from 0 (never caused a tank to explode) to 100 (always did), given after each set of trials. Fifty-nine students, each getting all four conditions in a random order; 39 in Group Non-contingent and 20 in Group Contingent.',
+        controls:
+          'FC, the firing period alone, is the ordinary control. FB puts the observation period before firing: forward blocking, as in Kamin. BC is the control for the backward order: the firing period followed by a blank wait of 1.75 minutes, as long as an observation period, so that BB differs from BC only in what happened during the wait.',
+        results: {
+          caption: 'Mean judgement of the shells\' effectiveness, read from Figure 2 (Shanks, 1985, p. 10) to about 1 point.',
+          columns: ['Group', 'FC (firing only)', 'FB (watch, then fire)', 'BC (fire, then wait)', 'BB (fire, then watch)'],
+          rows: [
+            ['Contingent (ΔP = 0.25)', '52', '46', '53', '49'],
+            ['Non-contingent (ΔP = 0)', '49', '46', '44', '39'],
+          ],
+        },
+        notes:
+          'Blocking lowered judgements (F(1, 56) = 6.07, p < .025) and the order did not matter (F < 1 for order and for the interaction), in both groups. The actual ΔP was the same in all four conditions, so the difference is not in what the students saw of the shells. Note the Non-contingent group: shells that did nothing were rated above 40 out of 100, the outcome density bias, and blocking pulled that down.',
+      },
+      {
+        study: 'Shanks (1985), Experiment 2: backward blocking is graded by the alternative cause (pp. 11–14)',
+        design: 'Firing: 14 B+, 5 B-, 3 +, 8 -, random\nObservation: 22 +, 8 -, random\nContext: A',
+        cues: 'The same game. In every firing period a hit destroyed the tank with probability 0.75 and a miss or no shot with probability 0.25, a ΔP of 0.5. The observation period\'s minefield destroyed 75% of tanks (the lines above, condition B-0.75) or 25% (B-0.25: Observation: 8 +, 22 -). F-0.75 and F-0.25 had the observation period first.',
+        measured: 'The same 0 to 100 rating after each of the four sets. Twenty-one students, 18 kept, each getting all four conditions in a random order.',
+        controls: 'B-0.25 and F-0.25, where the minefield was as weak in the observation period as in the firing period, so the observation period taught nothing new about it.',
+        results: {
+          caption: 'Mean judgement, and the ΔP the student actually saw in the firing period × 100, read from Figure 3 (Shanks, 1985, p. 13) to about 1 point.',
+          columns: ['Condition', 'Observation P(outcome)', 'Judgement', 'Actual ΔP × 100'],
+          rows: [
+            ['F-0.25 (watch, then fire)', '0.25', '50', '34'],
+            ['F-0.75', '0.75', '35', '43'],
+            ['B-0.25 (fire, then watch)', '0.25', '53', '41'],
+            ['B-0.75', '0.75', '42', '38'],
+          ],
+        },
+        notes:
+          'A strong minefield in the observation period lowered the judgement (F(1, 17) = 9.4, p < .01) whether it came before or after the firing (no order effect, F = 1.04; no interaction, F < 1). The actual ΔP in the firing periods did not differ across conditions. So backward blocking shares forward blocking\'s signature: the better the partner, the bigger the cut.',
+      },
+      {
+        study: 'Shanks (1985), Experiment 3: not forgetting (pp. 14–19)',
+        design: 'Firing: 18 B+, 6 B-, 2 +, 4 -, random\nObservation: 22 +, 8 -, random\nContext: A',
+        cues: 'Two games at once, tanks with shells and a minefield, and jets with missiles and defending planes, in alternating blocks of 30 trials. For one game the observation period\'s alternative cause destroyed 75% of targets, for the other 25%, balanced across students. Both games always had the same firing ΔP of 0.5. The lines above are the 0.75 game of Group Backward.',
+        measured: 'Ratings of the shells and of the missiles, 0 to 100, after each set. Twenty-two students, 17 kept: 10 in Group Forward (observation periods first) and 12 in Group Backward (observation periods last).',
+        controls:
+          'The 0.25 game is the control, and the point of the design: in Group Backward both games\' observation periods came between the firing periods and the ratings, so whatever forgetting the wait caused was the same for the blocked and the control weapon. A difference between them can only be the strength of the alternative cause.',
+        results: {
+          caption: 'Mean judgement, and the actual firing-period ΔP × 100, read from Figure 4 (Shanks, 1985, p. 18) to about 1 point.',
+          columns: ['Group', 'Observation P(outcome)', 'Judgement', 'Actual ΔP × 100'],
+          rows: [
+            ['Forward', '0.25', '64', '46'],
+            ['Forward', '0.75', '37', '44'],
+            ['Backward', '0.25', '52', '32'],
+            ['Backward', '0.75', '36', '38'],
+          ],
+        },
+        notes:
+          'The strong alternative cause lowered the judgement of its own game\'s weapon (F(1, 13) = 9.35, p < .01), with no difference between the forward and backward groups (F < 1) and no interaction. Backward blocking is specific to the game whose alternative cause was strong, so it is not forgetting, and not a general effect of watching.',
+      },
+    ],
+    preset:
+      'The preset keeps the logic and strips the task: AB and CD are both reinforced, then A alone, and the question is whether B ends below D. Shanks\'s cue B was the student\'s own action, present only on the trials where they fired and hit, and his outcomes were probabilistic, 75% rather than every trial; the minefield was present on every trial, which is why the designs above write it as the context. The preset\'s control is a second compound, CD, in the same run, where Shanks\'s control for the backward order was a blank wait as long as the observation period; the models have no forgetting, so the wait would change nothing in them and the second compound is the cleaner comparison. The preset leaves out the measure (a rating out of 100 against a strength V), the graded effect of the partner\'s strength (Experiment 2), and the forward order, which is the ordinary blocking preset. The probabilistic blocking preset carries Shanks\'s probabilities, in the forward order, with the streamed-trial replications.',
+    notes:
+      'The result is about people judging causes; whether animals show it is left open by this paper, and the site\'s one-line description says so. A model that changes only the cues present on a trial cannot show backward blocking under any parameters, so for Rescorla-Wagner, Mackintosh, Pearce-Hall, SOP, Pearce, and Delamater the ✗ in the table is a statement about the model\'s form, not its settings. MINERVA-AL shows it because what an absent cue brings back can change.',
+  },
   'negative-patterning': unwritten(),
   'trial-spacing': unwritten(),
   'cs-us-interval': unwritten(),
