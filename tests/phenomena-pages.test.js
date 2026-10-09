@@ -92,6 +92,20 @@ test('conditioned inhibition comes from Rescorla (1969), with the summation figu
   for (let i = 1; i < lifts.length; i++) assert.ok(lifts[i] > lifts[i - 1], `lift grows: ${lifts}`);
 });
 
+test('backward blocking comes from Shanks (1985), with the three experiments\' judgements', () => {
+  const ev = evidence['backward-blocking'];
+  assert.equal(ev.strength, 'established');
+  assert.ok(ev.references.some((r) => r.authors.startsWith('Shanks') && r.year === 1985 && r.doi));
+  assert.equal(ev.designs.length, 3);
+  // Experiment 1: the backward-blocking condition is below its delay control in both groups.
+  for (const row of ev.designs[0].results.rows) assert.ok(Number(row[4]) < Number(row[3]), `${row[0]}: BB below BC`);
+  // Experiments 2 and 3: a strong alternative cause lowers the judgement in both orders.
+  for (const d of ev.designs.slice(1)) {
+    const j = d.results.rows.map((r) => Number(r[2]));
+    assert.ok(j[1] < j[0] && j[3] < j[2], `${d.study}: 0.75 below 0.25 in both orders (${j})`);
+  }
+});
+
 test('glossary entries that name a finding name one that exists', () => {
   let n = 0;
   for (const g of glossary) {
