@@ -179,7 +179,72 @@ export const evidence = {
       'The preset follows the bigger-shock experiment, with the control in the same design: A and C are pretrained, then AB is reinforced with a doubled outcome and CD with the ordinary one, and the question is whether B escapes the block that D suffers. Kamin raised the shock fourfold, from 1 mA to 4 mA, with separate groups of rats; the preset doubles the outcome value instead and runs 20 trials a phase. The preset leaves out Group 3-U, the strong outcome throughout; a student can write it (set the outcome to 2 in both phases) and see that for every model a constant outcome blocks just as well, which is Kamin\'s point. It also leaves out the extra-shock version and the measure.',
   },
   overshadowing: unwritten(),
-  'conditioned-inhibition': unwritten(),
+  'conditioned-inhibition': {
+    strength: 'established',
+    basis:
+      'One paper so far, Rescorla (1969): two experiments, 80 male rats in all, in one preparation, conditioned suppression of bar-pressing (the CER) with a tone, a flashing light, and a brief shock. The two experiments use the two different measures of inhibition, retardation and summation, and both come out the same way: a tone that signalled a shock-free period became an inhibitor, and the more shock there was at other times, the stronger the inhibitor (p < .01 in each experiment). The paper cites Hammond\'s differential-CER results and Pavlov\'s procedure as agreeing; they are not in the folder. The judgement rises to robust when other laboratories and preparations are added.',
+    finding:
+      'A cue that signals that the outcome will not happen, when it otherwise would, becomes a conditioned inhibitor: it works against the outcome. Pavlov made inhibitors by reinforcing a cue alone and never reinforcing it in a compound with another cue, which is the site\'s preset. Rescorla (1969) made them with a negative contingency, a tone during and after which shocks that fell freely at other times were simply left out, and showed two things: the inhibitor is detectable by two independent tests, and it is graded, stronger the more shock the tone was protecting the animal from. Rescorla argues that an inhibitor should pass both tests: slower to turn into a signal for the outcome (retardation), and able to cut the response to a cue that does predict it (summation), because either test alone can be passed by a cue that is merely ignored or merely distracting.',
+    references: [
+      {
+        authors: 'Rescorla, R. A.',
+        year: 1969,
+        title: 'Conditioned inhibition of fear resulting from negative CS-US contingencies',
+        source: 'Journal of Comparative and Physiological Psychology, 67, 504–509',
+        supports: 'Experiment 1, the retardation test: tones with a negative contingency to shock were slower to become fear signals, in proportion to the contingency, against random-shock and new-tone controls. Experiment 2, the summation test: the same tones cut the suppression to a trained light, again in proportion. Also the argument that an inhibitor should pass both tests.',
+      },
+    ],
+    designs: [
+      {
+        study: 'Rescorla (1969), Experiment 1: the retardation test (pp. 505–507)',
+        design: 'Inhibition: 60 X-, 72 +, 170 -, random\nAcquisition: 12 X+, 12 X-, random\nContext: Z',
+        cues: 'X was a 750 Hz tone of 2 minutes; the outcome a 0.5 second, 1 mA shock through the floor. In the notation, + on its own is a shock with no tone, - a 2-minute stretch with neither, and Z the chamber. The lines above are Group 0-4: five 2-hour sessions with 12 tones each and shocks at a rate of 0.4 per 2 minutes, except that every shock due during a tone or in the 2 minutes after it was left out.',
+        measured:
+          'How fast the tone then became a fear signal, in six daily sessions of four tones with two of the four ending in shock. The suppression ratio is A / (A + B), responses during the tone against the 2 minutes before it; .50 means no fear, and it falls toward 0 as the tone comes to predict shock. Forty-eight rats, eight to a group.',
+        controls:
+          'Groups 4-4 and 1-1 had the same tones and the same shock rates with the shocks falling at random, during the tone as often as anywhere, the "truly random" control. Groups 0-4 light and 0-1 light had the negative contingency arranged for a flashing light instead, so the tone was new to them when acquisition began. Group 0-1 is the same as 0-4 with a quarter of the shocks (0.1 per 2 minutes; in the notation 60 X-, 18 +, 222 -).',
+        results: {
+          caption: 'Median suppression ratio to the tone on each acquisition day, read from Figure 1 (Rescorla, 1969, p. 506) to about .02.',
+          columns: ['Group', 'Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6'],
+          rows: [
+            ['0-4 (tone safe, 0.4 shocks per 2 min)', '.53', '.50', '.43', '.36', '.20', '.10'],
+            ['0-1 (tone safe, 0.1 per 2 min)', '.51', '.43', '.26', '.12', '.09', '.03'],
+            ['4-4 (random, 0.4)', '.38', '.09', '.09', '.02', '.02', '.02'],
+            ['1-1 (random, 0.1)', '.49', '.20', '.22', '.11', '.07', '.02'],
+            ['0-4 light (tone new)', '.48', '.14', '.09', '.06', '.00', '.02'],
+            ['0-1 light (tone new)', '.46', '.26', '.04', '.04', '.02', '.02'],
+          ],
+        },
+        notes:
+          'Group 0-4 was the slowest, reliably behind 4-4 and 0-4 light (p < .01) and behind 0-1 (p < .02); 0-1 was behind 0-1 light (p < .01) but behind 1-1 only on day 2. The four control groups did not differ. Rescorla notes that the comparison with the light groups could be latent inhibition, since those rats had never heard the tone, so the decisive comparison is 0-4 against 0-1: the same tones, more shock in their absence, more inhibition.',
+      },
+      {
+        study: 'Rescorla (1969), Experiment 2: the summation test (pp. 507–508)',
+        design: 'Inhibition: 60 X-, 144 +, 96 -, random\nLight: 6 A+, 6 A-, random\nTest: A, AX\nContext: Z',
+        cues: 'X the same 2-minute tone, A a flashing houselight (twice a second), the shock as before. The lines above are Group 0-8, shocks at 0.8 per 2 minutes except during and after the tone; Groups 0-4 and 0-1 had 0.4 and 0.1, and Group 0-0 had no shock at all. Thirty-two rats, eight to a group.',
+        measured:
+          'After the tone phase, three days of four light trials with two ending in shock made the light a fear signal for every group. Then two test sessions with no shocks, two light-alone and two light-plus-tone trials each: the mean suppression ratio to the light alone against the light with the tone added.',
+        controls:
+          'Group 0-0, which had the tones with no shock anywhere, so the tone had nothing to be safe from. The light alone is each group\'s own baseline, and it was equally and strongly suppressed in all four groups.',
+        results: {
+          caption: 'Mean suppression ratio on the two test days, read from Figure 2 (Rescorla, 1969, p. 508) to about .01.',
+          columns: ['Group', 'Light alone', 'Light + tone'],
+          rows: [
+            ['0-0 (no shock)', '.02', '.05'],
+            ['0-1', '.10', '.18'],
+            ['0-4', '.07', '.22'],
+            ['0-8', '.07', '.26'],
+          ],
+        },
+        notes:
+          'Adding the tone lifted suppression in every group that had shock, and the lift grew with the shock rate the tone had been safe from (Kruskal-Wallis H = 13.59, p < .01). The tone from Group 0-0 did almost nothing, so the effect is not a novel stimulus distracting the rat; it is what the tone had come to mean.',
+      },
+    ],
+    preset:
+      'The preset is Pavlov\'s procedure, A+ with AX-, which Rescorla treats as a special case of a negative contingency: shock is less likely after X than at any other time in the session, with the difference that in the preset every shock is signalled by A. The site tests X with the summation half of Rescorla\'s standard only: AX must come out well below A, and X alone must predict little or less than nothing. It does not run the retardation test. A student can: after the training line, add "Retardation: 20 X+, 20 B+" and compare how fast X and a new cue B climb. The preset also leaves out the graded result, that more shock in X\'s absence makes a stronger inhibitor; the contingency presets on the streamed-trial page are the place to see that. And it leaves out the measure: Rescorla\'s inhibitor lifts a suppression ratio from about .07 to .22, while the models give X a strength below zero, a number no animal shows directly.',
+    notes:
+      'Rescorla\'s warning applies to the site\'s badge. A cue can pass the summation test by distracting the animal and fail it by being ignored, and a model can pass it with a negative strength that it would also carry into a retardation test, or not. Which models would pass both tests is not something the table reports; the Rescorla-Wagner page\'s card and the Pearce-Hall model\'s separate inhibitory strength are the places to look.',
+  },
   'latent-inhibition': {
     strength: 'qualified',
     basis:

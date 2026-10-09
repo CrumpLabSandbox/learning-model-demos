@@ -81,6 +81,17 @@ test('latent inhibition comes from Lubow and Moore (1959), with their two tables
   }
 });
 
+test('conditioned inhibition comes from Rescorla (1969), with the summation figures', () => {
+  const ev = evidence['conditioned-inhibition'];
+  assert.equal(ev.strength, 'established');
+  assert.ok(ev.references.some((r) => r.authors.startsWith('Rescorla') && r.year === 1969));
+  const summation = ev.designs[1].results.rows.map((r) => r.slice(1));
+  assert.deepEqual(summation, [['.02', '.05'], ['.10', '.18'], ['.07', '.22'], ['.07', '.26']]);
+  // The lift from adding the tone grows with the shock rate the tone was safe from.
+  const lifts = summation.map(([a, ax]) => Number(ax) - Number(a));
+  for (let i = 1; i < lifts.length; i++) assert.ok(lifts[i] > lifts[i - 1], `lift grows: ${lifts}`);
+});
+
 test('glossary entries that name a finding name one that exists', () => {
   let n = 0;
   for (const g of glossary) {
